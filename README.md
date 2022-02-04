@@ -6,6 +6,11 @@ More documentation to come.
 This repository is an attempt to decouple input file format dependency of the original toolkit `Supera` ([repository](https://github.com/DeepLearnPhysics/Supera)) and currently under development.
 
 Milestones
-[x] Working cmake build with python binding
-[x] Migrate [SuperaMCParticleClusterData](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaMCParticleClusterData.h)
-[ ] Migrate [SuperaMCParticleCluster](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaMCParticleCluster.h)
+
+- [x] Working cmake build with python binding
+
+- [x] Migrate [SuperaMCParticleClusterData](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaMCParticleClusterData.h)
+
+- [ ] Migrate [SuperaBBoxInteraction](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaBBoxInteraction.h)
+
+- [ ] Migrate [SuperaMCParticleCluster](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaMCParticleCluster.h)
