@@ -6,8 +6,13 @@
 
 namespace supera {
 
-  const double kINVALID_DOUBLE = std::numeric_limits< double >::max();
-  const size_t kINVALID_SIZE   = std::numeric_limits< size_t >::max();
+  typedef size_t VoxelID_t;
+  typedef size_t InstanceID_t;
+
+  const double kINVALID_DOUBLE  = std::numeric_limits< double >::max();
+  const float  kINVALID_FLOAT   = std::numeric_limits< float  >::max();
+  const size_t kINVALID_SIZE    = std::numeric_limits< size_t >::max();
+  const size_t kINVALID_VOXELID = std::numeric_limits<size_t>::max();
 
   enum ProcessType {
     kTrack,
@@ -24,6 +29,17 @@ namespace supera {
     kOtherShower,   // anything else (low E)
     kOtherShowerHE, // anything else (high E)
     kInvalidProcess
+  };
+
+  /// Object appearance type in LArTPC, used for semantic type classification
+  enum SemanticType_t {
+    kShapeShower,    ///< Shower
+    kShapeTrack,     ///< Track
+    kShapeMichel,    ///< Michel
+    kShapeDelta,     ///< Delta ray
+    kShapeLEScatter, ///< low energy scattering (e.g. low-E compton)
+    kShapeGhost,     ///< ghost 3d point
+    kShapeUnknown    ///< LArbys
   };
 }
 
