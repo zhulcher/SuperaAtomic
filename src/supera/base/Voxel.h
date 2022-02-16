@@ -13,7 +13,8 @@
 #ifndef SUPERA_VOXEL_H
 #define SUPERA_VOXEL_H
 
-#include "SuperaTypes.h"
+#include "SuperaType.h"
+#include <vector>
 namespace supera {
 
   /**
@@ -83,7 +84,7 @@ namespace supera {
     float  _value; ///< Pixel Value
   };
 
-  static const larcv::Voxel kINVALID_VOXEL(kINVALID_VOXELID,0.);
+  static const supera::Voxel kINVALID_VOXEL(kINVALID_VOXELID,0.);
 
   /**
      \class VoxelSet
@@ -92,7 +93,7 @@ namespace supera {
   class VoxelSet {
   public:
     /// Default ctor
-  VoxelSet() : _id(larcv::kINVALID_INSTANCEID) {}
+  VoxelSet() : _id(supera::kINVALID_INSTANCEID) {}
     /// Default dtor
     virtual ~VoxelSet() {}
 
@@ -102,7 +103,7 @@ namespace supera {
     /// InstanceID_t getter
     inline InstanceID_t id() const { return _id; }
     /// Access as a raw vector
-    inline const std::vector<larcv::Voxel>& as_vector() const { return _voxel_v; }
+    inline const std::vector<supera::Voxel>& as_vector() const { return _voxel_v; }
     /// Returns a const reference to a voxel with specified id. if not present, invalid voxel is returned.
     const Voxel& find(VoxelID_t id) const;
     /// Returns the index of specified voxel id in the storage array
@@ -170,7 +171,7 @@ namespace supera {
     /// Instance ID
     InstanceID_t _id;
     /// Ordered sparse vector of voxels
-    std::vector<larcv::Voxel> _voxel_v;
+    std::vector<supera::Voxel> _voxel_v;
   };
 
   /**
@@ -190,9 +191,9 @@ namespace supera {
     /// Get # of VoxelSet
     inline size_t size() const { return _voxel_vv.size(); }
     /// Access specific VoxelSet
-    const larcv::VoxelSet& voxel_set(InstanceID_t id) const;
+    const supera::VoxelSet& voxel_set(InstanceID_t id) const;
     /// Access all VoxelSet as a vector
-    inline const std::vector<larcv::VoxelSet>& as_vector() const
+    inline const std::vector<supera::VoxelSet>& as_vector() const
     { return _voxel_vv; }
     float sum() const;
     /// Mean of contained voxel values
@@ -220,21 +221,21 @@ namespace supera {
     inline void resize(const size_t num)
     { _voxel_vv.resize(num); for(size_t i=0; i<num; ++i) _voxel_vv[i].id(i); }
     /// Access non-const reference of a specific VoxelSet
-    larcv::VoxelSet& writeable_voxel_set(const InstanceID_t id);
+    supera::VoxelSet& writeable_voxel_set(const InstanceID_t id);
     /// Move an arrray of VoxelSet. Each element's InstanceID_t gets updated
-    void emplace(std::vector<larcv::VoxelSet>&& voxel_vv);
+    void emplace(std::vector<supera::VoxelSet>&& voxel_vv);
     /// Set an array of VoxelSet. Each element's InstanceID_t gets updated
-    void insert(const std::vector<larcv::VoxelSet>& voxel_vv);
+    void insert(const std::vector<supera::VoxelSet>& voxel_vv);
     /// Move a VoxelSet into a collection. The InstanceID_t is respected.
-    void emplace(larcv::VoxelSet&& voxel_v);
+    void emplace(supera::VoxelSet&& voxel_v);
     /// Set a VoxelSet into a collection. The InstanceID_t is respected.
-    void insert(const larcv::VoxelSet& voxel_v);
+    void insert(const supera::VoxelSet& voxel_v);
     /// Mover
-    void move(larcv::VoxelSetArray&& orig)
+    void move(supera::VoxelSetArray&& orig)
     { _voxel_vv = std::move(orig._voxel_vv); }
 
   private:
-    std::vector<larcv::VoxelSet> _voxel_vv;
+    std::vector<supera::VoxelSet> _voxel_vv;
   };
 
 }

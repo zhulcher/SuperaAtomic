@@ -9,10 +9,13 @@ namespace supera {
   typedef size_t VoxelID_t;
   typedef size_t InstanceID_t;
 
-  const double kINVALID_DOUBLE  = std::numeric_limits< double >::max();
-  const float  kINVALID_FLOAT   = std::numeric_limits< float  >::max();
-  const size_t kINVALID_SIZE    = std::numeric_limits< size_t >::max();
-  const size_t kINVALID_VOXELID = std::numeric_limits<size_t>::max();
+  const double       kINVALID_DOUBLE  = std::numeric_limits< double >::max();
+  const float        kINVALID_FLOAT   = std::numeric_limits< float  >::max();
+  const unsigned int kINVALID_UINT    = std::numeric_limits<unsigned int>::max();
+  const size_t       kINVALID_SIZE    = std::numeric_limits< size_t >::max();
+
+  const VoxelID_t    kINVALID_VOXELID    = std::numeric_limits<size_t>::max();
+  const InstanceID_t kINVALID_INSTANCEID = std::numeric_limits<size_t>::max();
 
   enum ProcessType {
     kTrack,

@@ -22,12 +22,12 @@ namespace supera {
   void VoxelSet::clear_invalid(bool clear_invalid_float, bool clear_nan, bool clear_inf)
   {
     if(!clear_invalid_float && !clear_nan && !clear_inf) return;
-    std::vector<larcv::Voxel> vox_v;
+    std::vector<supera::Voxel> vox_v;
     vox_v.reserve(_voxel_v.size());
     for(auto const& vox : _voxel_v) {
       if (clear_inf && std::isinf(vox.value())) continue;
       if (clear_nan && std::isnan(vox.value())) continue;
-      if (clear_invalid_float && vox.value() == larcv::kINVALID_FLOAT) continue;
+      if (clear_invalid_float && vox.value() == supera::kINVALID_FLOAT) continue;
       vox_v.push_back(vox);
     }
     _voxel_v = std::move(vox_v);
@@ -45,7 +45,7 @@ namespace supera {
 
   void VoxelSet::threshold(float min, float max)
   {
-    std::vector<larcv::Voxel> vox_v;
+    std::vector<supera::Voxel> vox_v;
     vox_v.reserve(_voxel_v.size());
     for(auto const& vox : _voxel_v) {
       if(vox.value() < min || vox.value() > max) continue;
@@ -56,7 +56,7 @@ namespace supera {
 
   void VoxelSet::threshold_min(float min)
   {
-    std::vector<larcv::Voxel> vox_v;
+    std::vector<supera::Voxel> vox_v;
     vox_v.reserve(_voxel_v.size());
     for(auto const& vox : _voxel_v) {
       if(vox.value() < min) continue;
@@ -67,7 +67,7 @@ namespace supera {
 
   void VoxelSet::threshold_max(float max)
   {
-    std::vector<larcv::Voxel> vox_v;
+    std::vector<supera::Voxel> vox_v;
     vox_v.reserve(_voxel_v.size());
     for(auto const& vox : _voxel_v) {
       if(vox.value() > max) continue;
@@ -203,7 +203,7 @@ namespace supera {
     return val;
   }
 
-  const larcv::VoxelSet& VoxelSetArray::voxel_set(InstanceID_t id) const
+  const supera::VoxelSet& VoxelSetArray::voxel_set(InstanceID_t id) const
   {
     if(id >= _voxel_vv.size()) {
       std::cerr << "VoxelSetArray has no VoxelSet with InstanceID_t " << id << std::endl;
@@ -212,23 +212,23 @@ namespace supera {
     return _voxel_vv[id];
   }
 
-  void VoxelSetArray::emplace(std::vector<larcv::VoxelSet>&& voxel_vv)
+  void VoxelSetArray::emplace(std::vector<supera::VoxelSet>&& voxel_vv)
   {
     _voxel_vv = std::move(voxel_vv);
     for(size_t id=0; id<_voxel_vv.size(); ++id)
       _voxel_vv[id].id(id);
   }
 
-  inline void VoxelSetArray::insert(const std::vector<larcv::VoxelSet>& voxel_vv)
+  inline void VoxelSetArray::insert(const std::vector<supera::VoxelSet>& voxel_vv)
   {
     _voxel_vv = voxel_vv;
     for(size_t id=0; id<_voxel_vv.size(); ++id)
       _voxel_vv[id].id(id);
   }
 
-  void VoxelSetArray::emplace(larcv::VoxelSet&& voxel_v)
+  void VoxelSetArray::emplace(supera::VoxelSet&& voxel_v)
   {
-    if(voxel_v.id() == larcv::kINVALID_INSTANCEID) {
+    if(voxel_v.id() == supera::kINVALID_INSTANCEID) {
       _voxel_vv.emplace_back(std::move(voxel_v));
       _voxel_vv.back().id(_voxel_vv.size()-1);
       return;
@@ -242,9 +242,9 @@ namespace supera {
     _voxel_vv[voxel_v.id()] = std::move(voxel_v);
   }
 
-  void VoxelSetArray::insert(const larcv::VoxelSet& voxel_v)
+  void VoxelSetArray::insert(const supera::VoxelSet& voxel_v)
   {
-    if(voxel_v.id() == larcv::kINVALID_INSTANCEID) {
+    if(voxel_v.id() == supera::kINVALID_INSTANCEID) {
       _voxel_vv.push_back(voxel_v);
       _voxel_vv.back().id(_voxel_vv.size()-1);
       return;
@@ -258,7 +258,7 @@ namespace supera {
     _voxel_vv.at(voxel_v.id()) = voxel_v;
   }
 
-  larcv::VoxelSet& VoxelSetArray::writeable_voxel_set(const InstanceID_t id)
+  supera::VoxelSet& VoxelSetArray::writeable_voxel_set(const InstanceID_t id)
   {
     if(id >= _voxel_vv.size()) {
       std::cerr << "VoxelSetArray has no VoxelSet with InstanceID_t " << id << std::endl;

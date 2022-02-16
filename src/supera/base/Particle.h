@@ -14,9 +14,10 @@
 #define __PARTICLE_H__
 
 #include <iostream>
+#include <vector>
 #include "Point.h"
-#include "SuperaTypes.h"
-namespace larcv {
+#include "SuperaType.h"
+namespace supera {
 
   /**
      \class Particle
@@ -27,9 +28,9 @@ namespace larcv {
   public:
 
     /// Default constructor
-    Particle(larcv::ShapeType_t shape=larcv::kShapeUnknown)
-      : id         (kINVALID_INDEX)
-      , shape      (shape)
+    Particle(supera::SemanticType_t shape=supera::kShapeUnknown)
+      : id               (kINVALID_INSTANCEID)
+      , shape            (shape)
       , trackid          (kINVALID_UINT)
       , pdg              (0)
       , px               (0.)
@@ -60,10 +61,10 @@ namespace larcv {
   public:
 
     InstanceID_t id; ///< "ID" of this particle in ParticleSet collection
-    SemanticType_t semantic;       ///< shows if it is (e+/e-/gamma) or other particle types
+    SemanticType_t shape;     ///< shows if it is (e+/e-/gamma) or other particle types
     unsigned int trackid;     ///< Geant4 track id
     int          pdg;         ///< PDG code
-    double       px,_py,_pz;  ///< (x,y,z) component of particle's initial momentum
+    double       px,py,pz;  ///< (x,y,z) component of particle's initial momentum
     Vertex       vtx;         ///< (x,y,z,t) of particle's vertex information
     Vertex       end_pt;      ///< (x,y,z,t) at which particle disappeared from G4WorldVolume
     Vertex       first_step;  ///< (x,y,z,t) of the first energy deposition point in the detector
@@ -84,7 +85,7 @@ namespace larcv {
 
     std::string  parent_process; ///< string identifier of the parent particle's creation process from Geant4
     InstanceID_t parent_id;      ///< "ID" of the parent particle in ParticleSet collection
-    std::vector<larcv::InstanceID_t> _children_id; ///< "ID" of the children particles in ParticleSet collection
+    std::vector<supera::InstanceID_t> children_id; ///< "ID" of the children particles in ParticleSet collection
     InstanceID_t group_id;       ///< "ID" to group multiple particles together (for clustering purpose)
     InstanceID_t interaction_id; ///< "ID" to group multiple particles per interaction
   };

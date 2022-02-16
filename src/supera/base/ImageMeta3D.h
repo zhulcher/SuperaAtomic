@@ -13,6 +13,7 @@
 #ifndef __IMAGEMETA3D_H__
 #define __IMAGEMETA3D_H__
 
+#include "SuperaType.h"
 #include "BBox.h"
 #include <array>
 
