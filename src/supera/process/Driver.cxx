@@ -38,19 +38,21 @@ namespace supera {
         }
     }
 
-    void Driver::GenerateLabel(const EventInput& data)
+    void Driver::GenerateImageMeta(const EventInput& data)
     {
-
         if(!_algo_bbox) 
             throw meatloaf("BBoxAlgorithm is not configured yet!");
 
+        _meta  = _algo_bbox->Generate(data);
+    }
+
+
+    void Driver::GenerateLabel(const EventInput& data)
+    {
         if(!_algo_label) 
             throw meatloaf("LabelAlgorithm is not configured yet!");
 
-        _meta  = _algo_bbox->Generate(data);
-
         _label = _algo_label->Generate(data, _meta);
-
     }
 
 
