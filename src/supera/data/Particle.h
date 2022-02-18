@@ -15,8 +15,9 @@
 
 #include <iostream>
 #include <vector>
-#include "Point.h"
-#include "SuperaType.h"
+#include "supera/base/Point.h"
+#include "supera/base/SuperaType.h"
+#include "supera/base/Voxel.h"
 namespace supera {
 
   /**
@@ -89,6 +90,37 @@ namespace supera {
     InstanceID_t group_id;       ///< "ID" to group multiple particles together (for clustering purpose)
     InstanceID_t interaction_id; ///< "ID" to group multiple particles per interaction
   };
+
+
+  class ParticleInput {
+  public:
+    supera::Particle part;         ///< a particle information 
+    std::vector<EDep> pcloud;      ///< 3D energy deposition information (raw info)
+  };
+
+  typedef std::vector<ParticleInput> EventInput;
+
+  class ParticleLabel {
+  public:
+    ParticleLabel(size_t num_planes=0);
+    void AddEDep(const EDep& pt);
+    void SizeCheck() const;
+    size_t Size() const;
+    void Merge(ParticleLabel& child,bool verbose=false);
+    supera::SemanticType_t shape() const;
+
+    supera::Particle part;         ///< a particle information 
+    bool valid;                    ///< a state flag whether this particle should be ignored or not
+    bool add_to_parent;            ///< a state flag whether this particle should be merged into its parent
+    ProcessType type;              ///< type of this particle for ML reco chain
+    std::vector<size_t> trackid_v; ///< track ID of descendent particles
+    supera::VoxelSet energy;       ///< 3D voxels (energy deposition)
+    supera::VoxelSet dedx;         ///< 3D voxels (dE/dX)
+    EDep first_pt;                 ///< first energy deposition point (not voxel)
+    EDep last_pt;                  ///< last energy deposition point (not voxel)
+  };
+
+  typedef std::vector<ParticleLabel> EventOutput;
 
 }
 #endif

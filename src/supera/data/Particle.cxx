@@ -1,24 +1,24 @@
-#include "ParticleGroup.h"
+#include "Particle.h"
 #include <iostream>
 
 namespace supera {
 
 
-  ParticleGroup::ParticleGroup(size_t num_planes)
+  ParticleLabel::ParticleLabel(size_t num_planes)
   : valid(false)
   , add_to_parent(false)
   , type(supera::kInvalidProcess)
   {}
   //{ vs2d_v.resize(num_planes); }
 
-  void ParticleGroup::AddEDep(const EDep& pt)
+  void ParticleLabel::AddEDep(const EDep& pt)
   { 
     if(pt.x == supera::kINVALID_DOUBLE) return; 
     if(pt.t < first_pt.t) first_pt = pt; 
-    if(pt.t > last_pt.t) last_pt = pt; 
+    if(pt.t > last_pt.t) last_pt = pt;
   }
 
-  void ParticleGroup::SizeCheck() const
+  void ParticleLabel::SizeCheck() const
   {
 
     if(dedx.size() && energy.size() != dedx.size()) {
@@ -29,9 +29,9 @@ namespace supera {
   }
 
 
-  size_t ParticleGroup::Size() const
+  size_t ParticleLabel::Size() const
   { 
-    
+
     size_t res=energy.size();
     /*
     for(auto const& vs2d : vs2d_v) res += vs2d.size();
@@ -40,8 +40,8 @@ namespace supera {
     return 0;
   }
 
-  void ParticleGroup::Merge(ParticleGroup& child,bool verbose) {
-    
+  void ParticleLabel::Merge(ParticleLabel& child,bool verbose) {
+
     for(auto const& vox : child.energy.as_vector())
       this->energy.emplace(vox.id(),vox.value(),true);
 
@@ -80,7 +80,7 @@ namespace supera {
 
   // semantic classification (supera::SemanticType_t)
   
-  supera::SemanticType_t ParticleGroup::shape() const
+  supera::SemanticType_t ParticleLabel::shape() const
   {
 
     // identify delta ray

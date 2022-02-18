@@ -1,9 +1,8 @@
 #ifndef __IMAGEMETA3D_CXX__
 #define __IMAGEMETA3D_CXX__
 
-#include "SuperaType.h"
 #include "ImageMeta3D.h"
-#include "meatloaf.h"
+#include "supera/base/meatloaf.h"
 #include <algorithm>
 #include <sstream>
 

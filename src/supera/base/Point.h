@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <cmath>
-
+#include "SuperaType.h"
 namespace supera{
 
   /**
@@ -62,6 +62,14 @@ namespace supera{
     inline Point3D direction(const Point3D& pt) const
     { Point3D res(pt.x - x, pt.y - y, pt.z - z); res /= distance(pt); return res; }
 
+  };
+
+  class EDep : public Point3D {
+  public:
+    EDep() : Point3D()
+    { t = e = dedx = supera::kINVALID_DOUBLE; }
+
+    double t,e,dedx; ///< time, energy, dE/dX in respective order
   };
 
   class Vertex {

@@ -13,8 +13,8 @@
 #ifndef __IMAGEMETA3D_H__
 #define __IMAGEMETA3D_H__
 
-#include "SuperaType.h"
-#include "BBox.h"
+#include "supera/base/SuperaType.h"
+#include "supera/base/BBox.h"
 #include <array>
 
 namespace supera {
