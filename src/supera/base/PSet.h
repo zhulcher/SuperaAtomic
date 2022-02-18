@@ -1,4 +1,3 @@
-
 /*
  *
  * \ingroup base
@@ -20,6 +19,14 @@
 
 namespace supera {
 
+    /**
+        \class PSet
+        The name stands for Parameter Set. PSet is used to hand-over a set of configuration parameters
+        to algorithms. It has a publicly accessible string-string map, which holds key-value pair of 
+        configuration parameters. The template functions implement parsing of a string type values into
+        an appropriate type value. It supports basic numerical types, bool, string, and also std::vector
+        specializations for those types.
+    */
     class PSet {
     public:
 

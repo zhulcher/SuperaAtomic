@@ -3,7 +3,7 @@
  *
  * \ingroup base
  * 
- * \brief Class def header for a class Point
+ * \brief Class def header for classes that represent location information
  *
  * @author kazuhiro
  */
@@ -20,7 +20,7 @@ namespace supera{
 
   /**
      \class Point3D
-     Simple 3D point struct (unit of "x", "y" and "z" are not defined here and app specific)
+     Simple 3D point struct (unit of "x", "y" and "z" are not defined here and app specific).
   */
   class Point3D {
   public:
@@ -64,14 +64,27 @@ namespace supera{
 
   };
 
+
+  /**
+     \class EDep
+     EDep is a voxelized trajectory and not meant to represent a point.\n
+     The (x,y,z,t) should represent the mid-point of a voxelized segment (i.e. track portion within a pixel). \n
+     dE/dX [MeV/cm] should be the mean value of the segment, and energy [MeV] 
+     is the total energy deposit within the pixel.
+  */
   class EDep : public Point3D {
   public:
     EDep() : Point3D()
     { t = e = dedx = supera::kINVALID_DOUBLE; }
 
-    double t,e,dedx; ///< time, energy, dE/dX in respective order
+    double x,y,z,t,e,dedx; ///< x, y, z, time, energy, dE/dX in respective order
   };
 
+  /**
+     \class Vertex
+     Vertex is a 3+1D (x,y,z,time) point, often used to represent particle start/end \n
+     as well as a neutrino interaction vertex.
+  */
   class Vertex {
   public:
     /// Particle ID default constructor

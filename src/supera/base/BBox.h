@@ -5,6 +5,10 @@
 
 namespace supera {
 
+  /**
+     \class BBox3D
+     Axis-aligned 3D bounding box. This is used for several purposes including a definition of image boundaries.
+  */
   class BBox3D {
 
   public:

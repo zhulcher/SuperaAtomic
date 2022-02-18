@@ -4,6 +4,11 @@
 #include "LabelBase.h"
 
 namespace supera {
+
+	/**
+		\class LArTPCMLReco3D
+		An implementation of LabelAlgorithm for producing labels for lartpc_mlreco3d reconstruction chain
+	*/
 	class LArTPCMLReco3D : public LabelAlgorithm {
 	public:
 		LArTPCMLReco3D() : LabelAlgorithm() {}

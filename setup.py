@@ -19,8 +19,8 @@ setup(
     cmake_source_dir='src/',
     include_package_data=True,
     cmake_args=[
-        '-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON',
-        #'-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9',
+        #'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON',
+        '-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9',
         '-DWITHOUT_PYTHON={}'.format(pybind_value),
     ],
     author=['Corey Adams', 'Kazuhiro Terao', 'Taritree Wongjirad', 'Marco Del Tutto'],

@@ -4,7 +4,7 @@
  *
  * \ingroup base
  * 
- * \brief List of functions to type-cast std::string to an appropriate value type
+ * \brief Functions to type-cast std::string to an appropriate type value, used to parse PSet for configuring algorithms.
  *
  * @author Kazu
  */
@@ -42,22 +42,6 @@ namespace supera {
     template<> std::vector< unsigned int   > FromString< std::vector< unsigned int   > > (const std::string& value );
     template<> std::vector< unsigned long  > FromString< std::vector< unsigned long  > > (const std::string& value );
     template<> std::vector< bool           > FromString< std::vector< bool           > > (const std::string& value );
-    /*
-    template <class T> std::string ToString(const T& value)
-    { return std::to_string(value); }
-    /// Parse larcv::PSet configuration file content
-    template<> std::string ToString<std::string>(const std::string& value);
-    /// Parse larcv::PSet configuration file content
-    template <class T> std::string VecToString(const std::vector<T>& value)
-    {
-      std::string res="[";
-      for(auto const& v : value)
-       res += ToString(v) + ",";
-      res = res.substr(0,res.size()-1);
-      res += "]";
-      return res;
-   }
-    */
  }
 }
 
