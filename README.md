@@ -3,7 +3,7 @@
 C++ software to generate true labels for `lartpc_mlreco3d` ([repository](https://github.com/DeepLearnPhysics/lartpc_mlreco3d)), a full data reconstruction chain of modular machine learning (ML) algorithms for 3D particle images. The repository provides Python binding via [`pybind11`](https://pybind11.readthedocs.io/en/stable/), which can be optionally turned off. This software does not implement a process executable to run Supera. An implementation to run this software with [EDepSim](https://github.com/ClarkMcGrew/edep-sim) framework and to produce [larcv](https://github.com/DeepLearnPhysics/larcv3), please see [edep2supera](https://github.com/DeepLearnPhysics/edep2supera).
 
 ## How to build
-1. Use this docker image (or any other container image derived from it) to get the _most_ of required softwares. Only additional item you would need is [scikit-build](https://scikit-build.readthedocs.io/en/latest/skbuild.html) which you can install with `pip`. 
+1. Use [this docker image](https://hub.docker.com/layers/deeplearnphysics/larcv2/ub20.04-cuda11.3-cudnn8-pytorch1.10.0-larndsim/images/sha256-b9a67dfabf5190dbd67745cf739f9aeb6a357a6f4580df4702210bdfafa0221b?context=explore) (or any other container image derived from it) to get the _most_ of required softwares. Only additional item you would need is [scikit-build](https://scikit-build.readthedocs.io/en/latest/skbuild.html) which you can install with `pip`. 
   - If you know how to use `cmake` for building a software, you can actually skip `scikit-build` and run `cmake` from `src` directory.
 2. Clone this repository (below) or fork-and-clone.
 ```
