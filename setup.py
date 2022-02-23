@@ -37,7 +37,7 @@ setup(
     install_requires=[
         'numpy',
         'scikit-build',
-        'larcv',
+        #'larcv',
     ],
     long_description=long_description,
     long_description_content_type='text/markdown',

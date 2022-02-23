@@ -7,6 +7,10 @@
 #include "supera/data/Particle.h"
 namespace supera {
 
+	/**
+		\class BBoxAlgorithm
+		The base class definition for algorithms that are responsible for defining image meta data.
+	*/
 	class BBoxAlgorithm {
 	public:
 		BBoxAlgorithm() {}

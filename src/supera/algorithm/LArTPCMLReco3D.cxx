@@ -1,5 +1,7 @@
-#ifndef __LARTPCMLRECO3D_H__
-#define __LARTPCMLRECO3D_H__
+#ifndef __LARTPCMLRECO3D_CXX__
+#define __LARTPCMLRECO3D_CXX__
+
+#include "LArTPCMLReco3D.h"
 
 namespace supera {
 
