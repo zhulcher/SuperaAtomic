@@ -11,6 +11,6 @@ Milestones
 
 - [x] Migrate [SuperaMCParticleClusterData](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaMCParticleClusterData.h)
 
-- [ ] Migrate [SuperaBBoxInteraction](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaBBoxInteraction.h)
+- [x] Migrate [SuperaBBoxInteraction](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaBBoxInteraction.h)
 
 - [ ] Migrate [SuperaMCParticleCluster](https://github.com/DeepLearnPhysics/Supera/blob/icarus/SuperaMCParticleCluster.h)
