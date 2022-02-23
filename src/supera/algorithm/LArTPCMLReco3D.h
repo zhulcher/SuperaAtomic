@@ -11,9 +11,9 @@ namespace supera {
 	*/
 	class LArTPCMLReco3D : public LabelAlgorithm {
 	public:
-		LArTPCMLReco3D() : LabelAlgorithm() {}
-		void Configure(const PSet& p) {}
-		EventOutput Generate(const EventInput& data, const ImageMeta3D& meta) {return EventOutput();};
+		LArTPCMLReco3D();
+		void Configure(const PSet& p);
+		EventOutput Generate(const EventInput& data, const ImageMeta3D& meta);
 	};
 }
 

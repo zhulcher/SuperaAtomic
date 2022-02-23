@@ -5,6 +5,11 @@
 #include "supera/data/Particle.h"
 #include "supera/data/ImageMeta3D.h"
 namespace supera {
+
+	/**
+		\class LabelAlgorithm
+		The base class definition for algorithms that are responsible for creating output tensor information.
+	*/
 	class LabelAlgorithm {
 	public:
 		LabelAlgorithm() {}
