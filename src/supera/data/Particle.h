@@ -94,8 +94,13 @@ namespace supera {
 
   class ParticleInput {
   public:
+
+    ParticleInput() : valid(true), type(supera::kInvalidProcess) {}
+
     supera::Particle part;         ///< a particle information 
     std::vector<EDep> pcloud;      ///< 3D energy deposition information (raw info)
+    bool valid;
+    supera::ProcessType type;
   };
 
   typedef std::vector<ParticleInput> EventInput;

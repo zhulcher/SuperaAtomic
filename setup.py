@@ -33,7 +33,8 @@ setup(
     },
     url='https://github.com/DeepLearnPhysics/SuperaAtomic',
     scripts=[],
-    packages=['supera','src/pybind11'],
+    packages=['supera'],
+    package_dir={'': 'python'},
     install_requires=[
         'numpy',
         'scikit-build',
