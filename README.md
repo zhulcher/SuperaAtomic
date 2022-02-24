@@ -18,6 +18,12 @@ C++ software to generate true labels for `lartpc_mlreco3d` ([repository](https:/
 > python3 setup.py install --user
 ```
 
+## How to contribute
+1. Fork this repository to your personal github account.
+2. Clone the repository to your local machine. Follow the build/install instruction above and make sure you can set up.
+3. Create your branch to contain your own development.  Code code code.
+4. When it's ready to be shared, make sure a unit test passes. Then request to merge by sending a pull request.
+
 ## Status
 
 More documentation to come.
