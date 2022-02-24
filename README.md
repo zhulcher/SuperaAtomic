@@ -18,11 +18,18 @@ C++ software to generate true labels for `lartpc_mlreco3d` ([repository](https:/
 > python3 setup.py install --user
 ```
 
+## Software validation (unit test)
+Simply try:
+```
+pytest test
+```
+at the top-level directory. Note you do need to specify `test` to avoid running `pytest` on `pybind11` (which is under `src` directory and automatically searched by `pytest` unless you specify `test` directory target).
+
 ## How to contribute
 1. Fork this repository to your personal github account.
 2. Clone the repository to your local machine. Follow the build/install instruction above and make sure you can set up.
 3. Create your branch to contain your own development.  Code code code.
-4. When it's ready to be shared, make sure a unit test passes. Then request to merge by sending a pull request.
+4. When it's ready to be shared, make sure the unit test passes. Then request to merge by sending a pull request.
 
 ## Status
 
