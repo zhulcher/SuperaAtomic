@@ -45,7 +45,7 @@ namespace supera {
     EventOutput LArTPCMLReco3D::Generate(const EventInput& data, const ImageMeta3D& meta)
     {
 
-        _mcpl.Update(data);
+        _mcpl.InferParentage(data);
 
         auto const& trackid2index = _mcpl.TrackIdToIndex();
 

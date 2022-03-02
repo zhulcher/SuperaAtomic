@@ -6,16 +6,25 @@
 
 namespace supera {
 
-  typedef size_t VoxelID_t;
-  typedef size_t InstanceID_t;
 
-  const double       kINVALID_DOUBLE  = std::numeric_limits< double >::max();
-  const float        kINVALID_FLOAT   = std::numeric_limits< float  >::max();
-  const unsigned int kINVALID_UINT    = std::numeric_limits<unsigned int>::max();
-  const size_t       kINVALID_SIZE    = std::numeric_limits< size_t >::max();
+  typedef long PdgCode_t;
+  typedef unsigned long Index_t;
+  typedef unsigned long TrackID_t;
+  typedef unsigned long VoxelID_t;
+  typedef unsigned long InstanceID_t;
 
-  const VoxelID_t    kINVALID_VOXELID    = std::numeric_limits<size_t>::max();
-  const InstanceID_t kINVALID_INSTANCEID = std::numeric_limits<size_t>::max();
+  const double        kINVALID_DOUBLE  = std::numeric_limits< double >::max();
+  const float         kINVALID_FLOAT   = std::numeric_limits< float  >::max();
+  const unsigned int  kINVALID_UINT    = std::numeric_limits<unsigned int>::max();
+  const unsigned long kINVALID_ULONG   = std::numeric_limits<unsigned long>::max();
+  const long          kINVALID_LONG    = std::numeric_limits<long>::max();
+  const size_t        kINVALID_SIZE    = std::numeric_limits< size_t >::max();
+
+  const PdgCode_t kINVALID_PDG     = kINVALID_LONG;
+  const Index_t   kINVALID_INDEX   = kINVALID_ULONG;
+  const TrackID_t kINVALID_TRACKID = kINVALID_ULONG;
+  const VoxelID_t    kINVALID_VOXELID    = kINVALID_ULONG;
+  const InstanceID_t kINVALID_INSTANCEID = kINVALID_ULONG;
 
   enum ProcessType {
     kTrack,

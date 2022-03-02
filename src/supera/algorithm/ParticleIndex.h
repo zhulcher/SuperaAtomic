@@ -30,25 +30,27 @@ namespace supera {
     /// Default destructor
     ~ParticleIndex(){}
 
-    void Update(const EventInput& larmcp_v);
+    void InferParentage(const EventInput& larmcp_v);
+    void SetParentInfo(EventInput& larmcp_v);
 
-    const std::vector<int>& PdgCode()        const { return _pdgcode_v;        }
-    const std::vector<int>& ParentIndex()    const { return _parent_index_v;   }
-    const std::vector<int>& ParentTrackId()  const { return _parent_trackid_v; }
-    const std::vector<int>& ParentPdgCode()  const { return _parent_pdg_v;     }
-    const std::vector<int>& TrackIdToIndex() const { return _trackid2index;    }
-    const std::vector<int>& AncestorIndex()  const { return _ancestor_index_v; }
-    const std::vector<int>& AncestorTrackId()  const { return _ancestor_trackid_v; }
+    const std::vector< PdgCode_t >& PdgCode()          const { return _pdgcode_v;          }
+    const std::vector< Index_t   >& ParentIndex()      const { return _parent_index_v;     }
+    const std::vector< TrackID_t >& ParentTrackId()    const { return _parent_trackid_v;   }
+    const std::vector< PdgCode_t >& ParentPdgCode()    const { return _parent_pdg_v;       }
+    const std::vector< Index_t   >& TrackIdToIndex()   const { return _trackid2index;      }
+    const std::vector< Index_t   >& AncestorIndex()    const { return _ancestor_index_v;   }
+    const std::vector< TrackID_t >& AncestorTrackId()  const { return _ancestor_trackid_v; }
 
   private:
-    std::vector<int> _trackid_v;          ///< Track ID, index = std::vector<simb::MCParticle> index
-    std::vector<int> _pdgcode_v;          ///< PDG code, index = std::vector<simb::MCParticle> index
-    std::vector<int> _parent_index_v;     ///< Parent index, index = std::vector<simb::MCParticle> index
-    std::vector<int> _parent_trackid_v;   ///< Parent track ID, index = std::vector<simb::MCParticle> index
-    std::vector<int> _parent_pdg_v;       ///< Parent PDG, index = std::vector<simb::MCParticle> index
-    std::vector<int> _ancestor_index_v;   ///< Ancestor index, index = std::vector<simb::MCParticle> index
-    std::vector<int> _ancestor_trackid_v; ///< Ancestor track ID, index = std::vector<simb::MCParticle> index
-    std::vector<int> _trackid2index;      ///< TrackID => std::vector<simb::MCParticle> index converter
+    std::vector< TrackID_t > _trackid_v;          ///< Track ID, index = std::vector<supera::ParticleInput> index
+    std::vector< PdgCode_t > _pdgcode_v;          ///< PDG code, index = std::vector<supera::ParticleInput> index
+    std::vector< Index_t   > _parent_index_v;     ///< Parent index, index = std::vector<supera::ParticleInput> index
+    std::vector< TrackID_t > _parent_trackid_v;   ///< Parent track ID, index = std::vector<supera::ParticleInput> index
+    std::vector< PdgCode_t > _parent_pdg_v;       ///< Parent PDG, index = std::vector<supera::ParticleInput> index
+    std::vector< Index_t   > _ancestor_index_v;   ///< Ancestor index, index = std::vector<supera::ParticleInput> index
+    std::vector< TrackID_t > _ancestor_trackid_v; ///< Ancestor track ID, index = std::vector<supera::ParticleInput> index
+    std::vector< PdgCode_t > _ancestor_pdg_v;     ///< Ancestor PDG, index = std::vector<supera::ParticleInput> index
+    std::vector< Index_t   > _trackid2index;      ///< TrackID => std::vector<supera::ParticleInput> index converter
   };
 }
 

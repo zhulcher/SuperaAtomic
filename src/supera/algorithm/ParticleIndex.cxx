@@ -5,7 +5,7 @@
 
 namespace supera{ 
 
-  void ParticleIndex::Update(const EventInput& larmcp_v)
+  void ParticleIndex::InferParentage(const EventInput& larmcp_v)
   {
     _trackid_v.resize(larmcp_v.size());
     _pdgcode_v.resize(larmcp_v.size());
@@ -14,12 +14,16 @@ namespace supera{
     _parent_pdg_v.resize(larmcp_v.size());
     _ancestor_trackid_v.resize(larmcp_v.size());
     _ancestor_index_v.resize(larmcp_v.size());
+    _ancestor_pdg_v.resize(larmcp_v.size());
 
-    for(size_t i=0; i<larmcp_v.size(); ++i)
-      _trackid_v[i] = _pdgcode_v[i] = _parent_index_v[i] = _parent_trackid_v[i] = _parent_pdg_v[i] = _ancestor_trackid_v[i] = _ancestor_index_v[i] = -1;
+    for(size_t i=0; i<larmcp_v.size(); ++i) {
+      _pdgcode_v[i] = _parent_pdg_v[i] = _ancestor_pdg_v[i] = supera::kINVALID_PDG;
+      _parent_index_v[i] = _ancestor_index_v[i] = supera::kINVALID_INDEX;
+      _trackid_v[i] = _parent_trackid_v[i] = _ancestor_trackid_v[i] = supera::kINVALID_TRACKID;
+    }
 
     _trackid2index.resize(std::max(_trackid2index.size(),larmcp_v.size()));
-    for(auto& v : _trackid2index) v = -1;
+    for(auto& v : _trackid2index) v = supera::kINVALID_INDEX;
 
     for(size_t index=0; index<larmcp_v.size(); ++index) {
       auto const& mcpart = larmcp_v[index].part;
@@ -32,21 +36,26 @@ namespace supera{
     // Parent/Ancestor info
     for(size_t index=0; index<larmcp_v.size(); ++index) {
       auto const& mcpart = larmcp_v[index].part;
-      int mother_id      = mcpart.parent_trackid;
-      int mother_index   = -1;
+      unsigned long mother_id      = mcpart.parent_trackid;
+      unsigned long mother_index   = supera::kINVALID_INDEX;
+      
+      // If mother ID is zero, interpret it as a primary particle
       if(mother_id == 0) mother_id = abs(mcpart.trackid);
+
+      // Otherwise search if a mother particle is available
       if(mother_id < ((int)(_trackid2index.size()))) {
         mother_index = _trackid2index[mother_id];
-        if(mother_index >= 0) {
+        if(mother_index != supera::kINVALID_INDEX) {
           _parent_pdg_v[index] = larmcp_v[mother_index].part.pdg;
           _parent_index_v[index] = mother_index;
         }
       }
 
-      int subject_track_id = abs(mcpart.trackid);
-      int parent_track_id  = abs(mcpart.parent_trackid);
-      int ancestor_index = -1;
-      int ancestor_track_id = -1;
+      unsigned long subject_track_id = mcpart.trackid;
+      unsigned long parent_track_id  = mcpart.parent_trackid;
+      unsigned long ancestor_index = supera::kINVALID_INDEX;
+      unsigned long ancestor_track_id = supera::kINVALID_TRACKID;
+      long ancestor_pdg = supera::kINVALID_PDG;
       while(1) {
         if((size_t)(parent_track_id) >= _trackid2index.size())
           break;
@@ -56,7 +65,7 @@ namespace supera{
           break;
         }
         auto const& parent_index = _trackid2index[parent_track_id];
-        if(parent_index < 0)
+        if(parent_index == supera::kINVALID_INDEX)
           break;
         auto const& parent = larmcp_v[parent_index];
         subject_track_id = abs(parent.part.trackid);
@@ -64,6 +73,21 @@ namespace supera{
       }
       _ancestor_index_v[index] = ancestor_index;
       _ancestor_trackid_v[index] = ancestor_track_id;
+      if(ancestor_index < larmcp_v.size()) 
+        _ancestor_pdg_v[index] = larmcp_v[ancestor_index].part.pdg;
+    }
+  }
+
+  void ParticleIndex::SetParentInfo(EventInput& larmcp_v)
+  {
+    this->InferParentage(larmcp_v);
+
+    for(unsigned int idx=0; idx<larmcp_v.size(); ++idx) {
+      auto& part = larmcp_v[idx].part;
+      part.parent_pdg       = _parent_pdg_v       [idx];
+      part.parent_trackid   = _parent_trackid_v   [idx];
+      part.ancestor_pdg     = _ancestor_pdg_v     [idx];
+      part.ancestor_trackid = _ancestor_trackid_v [idx];
     }
   }
 }
