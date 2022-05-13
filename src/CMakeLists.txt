@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 # general configuration for compilation:
 set(CMAKE_CXX_STANDARD 14)
@@ -20,25 +20,25 @@ if(NOT WITHOUT_PYTHON)
     #########
     # Python
     #########
-    find_package(PythonLibs REQUIRED)
+    find_package(Python COMPONENTS Interpreter Development)
     message("    Adding Python")
-    message("    INCLUDE: ", ${PYTHON_INCLUDE_DIRS})
-    include_directories(${PYTHON_INCLUDE_DIRS})
+    message("    INCLUDE: ", ${Python_INCLUDE_DIRS})
+    include_directories(${Python_INCLUDE_DIRS})
 
-    if(NOT PYTHON_EXECUTABLE)
-    send( FATAL_ERROR "PYTHON_EXECUTABLE not found. Cannot build Supera...")
+    if(NOT Python_EXECUTABLE)
+    message( FATAL_ERROR "Python_EXECUTABLE not found. Cannot build Supera...")
     endif()
 
     ########
     # Numpy
     ########
     execute_process(
-        COMMAND "${PYTHON_EXECUTABLE}" -c
+        COMMAND "${Python_EXECUTABLE}" -c
         "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
         OUTPUT_VARIABLE __numpy_path)
 
     execute_process(
-        COMMAND "${PYTHON_EXECUTABLE}" -c
+        COMMAND "${Python_EXECUTABLE}" -c
         "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass\n"
         OUTPUT_VARIABLE __numpy_version)
 
@@ -83,11 +83,11 @@ include_directories(${HDF5_INCLUDE_DIR})
 # Add larcv
 ####################################
 #execute_process(COMMAND 
-#    "${PYTHON_EXECUTABLE}" -c "import larcv;print(larcv.get_lib_dir(),end='');"
+#    "${Python_EXECUTABLE}" -c "import larcv;print(larcv.get_lib_dir(),end='');"
 #    OUTPUT_VARIABLE
 #    LARCV_LIB_DIR)
 #execute_process(COMMAND 
-#    "${PYTHON_EXECUTABLE}" -c "import larcv;print(larcv.get_includes(),end='');"
+#    "${Python_EXECUTABLE}" -c "import larcv;print(larcv.get_includes(),end='');"
 #    OUTPUT_VARIABLE
 #    LARCV_INCLUDE_DIR)
 #
