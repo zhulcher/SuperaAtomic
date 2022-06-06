@@ -10,6 +10,8 @@ namespace supera {
     , _debug(0)
     {}
 
+    // --------------------------------------------------------------------
+
     void LArTPCMLReco3D::Configure(const PSet& cfg)
     {
         _semantic_priority.resize((size_t)(supera::kShapeUnknown));
@@ -41,6 +43,8 @@ namespace supera {
             max_coords.at(0),max_coords.at(1),max_coords.at(2));
 
     }
+
+    // --------------------------------------------------------------------
 
     EventOutput LArTPCMLReco3D::Generate(const EventInput& data, const ImageMeta3D& meta)
     {
