@@ -19,6 +19,9 @@ namespace supera {
         // Create a set of labels from the inputs
         std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
 
+        // internal label merging methods
+        void MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const;
+
 		size_t _debug;
 		std::vector<size_t> _semantic_priority;
         size_t _touch_threshold;

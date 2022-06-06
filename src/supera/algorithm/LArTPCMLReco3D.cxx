@@ -121,65 +121,69 @@ namespace supera {
 
         return labels;
     }  // LArTPCMLReco3D::InitializeLabels()
-/*
-    void SuperaMCParticleCluster::MergeShowerIonizations(const EventInput& part_grp_v)
+
+    // ------------------------------------------------------
+    void LArTPCMLReco3D::MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const
     {
         // Loop over particles of a type kIonization (=touching to its parent physically by definition)
         // If a parent is found, merge to the parent
         int merge_ctr = 0;
         int invalid_ctr = 0;
-        do {
+        do
+        {
             merge_ctr = 0;
-            for(auto& grp : part_grp_v) {
-                if(!grp.part.valid) continue;
-                if(grp.part.type != supera::kIonization) continue;
+            for (auto &label : labels)
+            {
+                if (!label.valid) continue;
+                if (label.type != supera::kIonization) continue;
                 // merge to a valid "parent"
                 bool parent_found = false;
-                int parent_index = grp.part.parent_trackid;
-                int parent_index_before = grp.part.trackid;
-                while(1) {
-                    if(parent_index <0) {
-                        if(_debug>1) {
-                            std::cout << "Invalid parent track id " << parent_index
-                            << " Could not find a parent for " << grp.part.trackid << " PDG " << grp.part.pdg
-                            << " " << grp.part.process << " E = " << grp.part.energy_init
-                            << " (" << grp.part.energy_deposit << ") MeV" << std::endl;
-                            auto const& parent = part_grp_v[parent_index_before].part;
-                            std::cout << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
-                            << " " << parent.process
-                            << std::endl;
-                        }
-                        parent_found=false;
+                unsigned int parent_index = label.part.parent_trackid;
+                unsigned int parent_index_before = label.part.trackid;
+                while (true)
+                {
+                    //std::cout<< "Inspecting: " << label.part.track_id() << " => " << parent_index << std::endl;
+                    if (parent_index == supera::kINVALID_UINT)
+                    {
+                        LOG.ERROR() << "Invalid parent track id " << parent_index
+                                  << " Could not find a parent for " << label.part.trackid << " PDG " << label.part.pdg
+                                  << " " << label.part.process << " E = " << label.part.energy_init
+                                  << " (" << label.part.energy_deposit << ") MeV";
+                        auto const &parent = labels[parent_index_before].part;
+                        std::cout << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
+                                      << " " << parent.process;
+                        parent_found = false;
                         invalid_ctr++;
                         break;
                     }
-                    auto const& parent = part_grp_v[parent_index].part;
+                    auto const &parent = labels[parent_index];
                     parent_found = parent.valid;
-                    if(parent_found) break;
-                    else{
-                        int ancestor_index = parent.part.parent_trackid;
-                        if(ancestor_index == parent_index) {
-                          std::cout << "Particle " << parent_index << " is root and invalid particle..." << std::endl
-                          << "PDG " << parent.part.pdg << " " << parent.part.process << std::endl;
-                          break;
-                      }
-                      parent_index_before = parent_index;
-                      parent_index = ancestor_index;
-                  }
-              }
+                    if (parent_found) break;
+                    else
+                    {
+                        unsigned int ancestor_index = parent.part.parent_trackid;
+                        if (ancestor_index == parent_index)
+                        {
+                            LOG.INFO() << "Particle " << parent_index << " is root and invalid particle...\n"
+                                         << "PDG " << parent.part.pdg << " " << parent.part.process;
+                            break;
+                        }
+                        parent_index_before = parent_index;
+                        parent_index = ancestor_index;
+                    }
+                }
                 // if parent is found, merge
-              if(parent_found) {
-                auto& parent = part_grp_v[parent_index];
-                parent.Merge(grp);
-                merge_ctr++;
-            }
+                if (parent_found)
+                {
+                    auto &parent = labels[parent_index];
+                    parent.Merge(label);
+                    merge_ctr++;
+                }
+            } // for (grp)
+            LOG.INFO() << "Ionization merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
+        } while (merge_ctr > 0);
+    } // SuperaMCParticleCluster::MergeShowerIonizations()
 
-        }
-        if(_debug>0){
-            std::cout << "Ionization merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr << std::endl;
-        }
-        }while(merge_ctr>0);
-    }
-    */
-}
+
+ }
 #endif
