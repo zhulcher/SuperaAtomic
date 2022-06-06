@@ -22,7 +22,7 @@ namespace supera {
 
   /**
      \class Particle
-     \brief Particle/Interaction-wise truth information data
+     \brief Particle/Interaction-wise truth information data.  Corresponds to a GEANT4 track.
   */
   class Particle{
 
@@ -79,7 +79,7 @@ namespace supera {
     PdgCode_t  parent_pdg;     ///< PDG code of the parent particle
     Vertex     parent_vtx;     ///< (x,y,z,t) of parent's vertex information
 
-    TrackID_t   ancestor_trackid; ///< Geant4 track id of the ancestor particle
+    TrackID_t   ancestor_trackid; ///< Geant4 track id of the ancestor particle (*primary* particle that sits at the top of the hierarchy containing this particle)
     PdgCode_t   ancestor_pdg;     ///< PDG code of the ancestor particle
     Vertex      ancestor_vtx;     ///< (x,y,z,t) of ancestor's vertex information
     std::string ancestor_process; ///< string identifier of the ancestor particle's creation process from Geant4

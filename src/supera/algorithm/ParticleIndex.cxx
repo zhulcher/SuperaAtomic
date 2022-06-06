@@ -25,15 +25,23 @@ namespace supera{
     _trackid2index.resize(std::max(_trackid2index.size(),larmcp_v.size()));
     for(auto& v : _trackid2index) v = supera::kINVALID_INDEX;
 
+    // fill in the ParticleIndex's working structures.
+
+    // first: create the mapping between GEANT4 trackid <-> index in the particle array
+    // (FYI: the larmcp objects correspond each to one GEANT4 particle
+    //       + any associated energy deposits)
     for(size_t index=0; index<larmcp_v.size(); ++index) {
-      auto const& mcpart = larmcp_v[index].part;
+      auto const& mcpart = larmcp_v[index].part;  // pull off the GEANT4 track information component
       _trackid_v[index] = abs(mcpart.trackid);
       _pdgcode_v[index] = abs(mcpart.pdg);
       _parent_trackid_v[index] = mcpart.parent_trackid;
-      if(mcpart.trackid >= ((int)(_trackid2index.size()))) _trackid2index.resize(mcpart.trackid+1,-1);
+      if(mcpart.trackid >= ((int)(_trackid2index.size()))) _trackid2index.resize(mcpart.trackid+1, supera::kINVALID_INDEX);
       _trackid2index[mcpart.trackid] = index;
     }
-    // Parent/Ancestor info
+    // now fill in the mapping between the index in the particle array <-> Parent/Ancestor info.
+    // (note that for our purposes here, 'ancestor' is the *primary* particle that sits
+    //  at the top of the hierarchy containing this particle.  if this particle is itself primary,
+    //  it's its own ancestor.)
     for(size_t index=0; index<larmcp_v.size(); ++index) {
       auto const& mcpart = larmcp_v[index].part;
       unsigned long mother_id      = mcpart.parent_trackid;
@@ -56,7 +64,7 @@ namespace supera{
       unsigned long ancestor_index = supera::kINVALID_INDEX;
       unsigned long ancestor_track_id = supera::kINVALID_TRACKID;
       long ancestor_pdg = supera::kINVALID_PDG;
-      while(1) {
+      while(true) {
         if((size_t)(parent_track_id) >= _trackid2index.size())
           break;
         if(parent_track_id == 0 || parent_track_id == subject_track_id) {

@@ -19,6 +19,7 @@ namespace supera {
   
   /**
      \class ParticleIndex
+     \brief Workhorse class encapsulating the logic for tying together a list of GEANT4 particles and their genealogy information
   */
   class ParticleIndex{
     
@@ -30,7 +31,7 @@ namespace supera {
     /// Default destructor
     ~ParticleIndex(){}
 
-    void InferParentage(const EventInput& larmcp_v);
+    void InferParentage(const EventInput& larmcp_v);   ///< Fill in the ParticleIndex working structures with information about particle parents
     void SetParentInfo(EventInput& larmcp_v);
 
     const std::vector< PdgCode_t >& PdgCode()          const { return _pdgcode_v;          }
