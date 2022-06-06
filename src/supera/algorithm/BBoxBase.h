@@ -2,17 +2,19 @@
 #ifndef __BBOX_BASE_H__
 #define __BBOX_BASE_H__
 
+#include "supera/algorithm/Loggable.h"
 #include "supera/base/PSet.h"
 #include "supera/data/ImageMeta3D.h"
 #include "supera/data/Particle.h"
+
 namespace supera {
 
 	/**
 		\class BBoxAlgorithm
 		The base class definition for algorithms that are responsible for defining image meta data.
 	*/
-	class BBoxAlgorithm {
-	public:
+	class BBoxAlgorithm : public Loggable {
+      public:
 		BBoxAlgorithm() {}
 		virtual ~BBoxAlgorithm() {}
 		virtual void Configure(const PSet& p) = 0;
