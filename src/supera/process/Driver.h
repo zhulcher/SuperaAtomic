@@ -33,7 +33,7 @@ namespace supera {
 			const std::map<std::string,std::string>& params);
 
 		/////////////////////////////////////////////////
-		// Per-image (per-event) rocess control functions 
+		// Per-image (per-event) process control functions
 		/////////////////////////////////////////////////
 
 		/// 1st function to reset the state of an instance for processing a new event
