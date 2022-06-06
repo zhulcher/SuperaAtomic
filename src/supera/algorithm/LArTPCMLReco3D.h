@@ -16,6 +16,9 @@ namespace supera {
 		EventOutput Generate(const EventInput& data, const ImageMeta3D& meta) override;
 
 	private:
+        // Create a set of labels from the inputs
+        std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
+
 		size_t _debug;
 		std::vector<size_t> _semantic_priority;
         size_t _touch_threshold;

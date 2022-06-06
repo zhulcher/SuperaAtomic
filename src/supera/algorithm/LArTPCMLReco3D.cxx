@@ -57,6 +57,73 @@ namespace supera {
 
         return result;
     }
+
+    // --------------------------------------------------------------------
+
+    std::vector<supera::ParticleLabel> LArTPCMLReco3D::InitializeLabels(const std::vector<ParticleInput> & evtInput) const
+    {
+        // this default-constructs the whole lot of them, which fills their values with defaults/invalid values
+        std::vector<supera::ParticleLabel> labels(evtInput.size());
+
+        for (std::size_t idx = 0; idx < evtInput.size(); idx++)
+        {
+            auto & label = labels[idx];
+            label.part = evtInput[idx].part;
+
+            auto mother_index = _mcpl.ParentIndex()[idx];
+            if (mother_index >= 0 && label.part.parent_pdg == supera::kINVALID_PDG)
+                label.part.parent_pdg = _mcpl.ParentPdgCode()[idx];
+
+            label.valid = true;
+
+            auto pdg_code = label.part.pdg;
+            if (pdg_code == 22 || pdg_code == 11)
+            {
+                if (pdg_code == 22)
+                {
+                    // photon:
+                    // reset first, last, and end position, since the photon presumably has traveled
+                    // and they won't be useful.
+                    // (set them to a guaranteed
+                    label.type = supera::kPhoton;
+                    const supera::Vertex invalidVertex(supera::kINVALID_DOUBLE, supera::kINVALID_DOUBLE, supera::kINVALID_DOUBLE, supera::kINVALID_DOUBLE);
+                    label.part.first_step = invalidVertex;
+                    label.part.last_step = invalidVertex;
+                    label.part.end_pt = invalidVertex;
+                }
+                else if (pdg_code == 11)
+                {
+
+                    const std::string & prc = label.part.process;
+                    if (prc == "muIoni" || prc == "hIoni" || prc == "muPairProd")
+                        label.type = supera::kDelta;
+                    else if (prc == "muMinusCaptureAtRest" || prc == "muPlusCaptureAtRest" || prc == "Decay")
+                        label.type = supera::kDecay;
+                    else if (prc == "compt")
+                        label.type = supera::kCompton;
+                    else if (prc == "phot")
+                        label.type = supera::kPhotoElectron;
+                    else if (prc == "eIoni")
+                        label.type = supera::kIonization;
+                    else if (prc == "conv")
+                        label.type = supera::kConversion;
+                    else if (prc == "primary")
+                        label.type = supera::kPrimary;
+                    else
+                        label.type = supera::kOtherShower;
+                }
+            }
+            else
+            {
+                label.type = supera::kTrack;
+                if (label.part.pdg == 2112)
+                    label.type = supera::kNeutron;
+            }
+
+        }  // for (idx)
+
+        return labels;
+    }  // LArTPCMLReco3D::InitializeLabels()
 /*
     void SuperaMCParticleCluster::MergeShowerIonizations(const EventInput& part_grp_v)
     {
