@@ -16,7 +16,7 @@ namespace supera {
 		EventOutput Generate(const EventInput& data, const ImageMeta3D& meta) override;
 
 	private:
-        // Create a set of labels from the inputs
+        // internal label initialization
         std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
 
         // internal label merging methods

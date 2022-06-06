@@ -48,12 +48,62 @@ namespace supera {
 
     EventOutput LArTPCMLReco3D::Generate(const EventInput& data, const ImageMeta3D& meta)
     {
-
-        _mcpl.InferParentage(data);
-
-        auto const& trackid2index = _mcpl.TrackIdToIndex();
-
         EventOutput result;
+
+        // fill in the working structures that link the list of particles and its genealogy
+        _mcpl.InferParentage(data);
+        std::vector<supera::Index_t> const& trackid2index = _mcpl.TrackIdToIndex();
+
+        // Assign the initial labels for each particle.
+        // They will be grouped together in various ways in the subsequent steps.
+        std::vector<supera::ParticleLabel> labels = this->InitializeLabels(data);
+
+        // Now group the labels together in certain cases
+        // (e.g.: electromagnetic showers, neutron clusters, ...)
+        // There are lots of edge cases so the logic is spread out over many methods.
+        this->MergeShowerIonizations(labels);
+        this->MergeShowerTouchingLEScatter(meta, labels, particles);
+        this->ApplyEnergyThreshold(labels);
+        this->MergeShowerConversion(labels);
+        this->MergeShowerFamilyTouching(meta, labels);
+        this->MergeShowerTouching(meta, labels, particles);
+        this->MergeShowerDeltas(labels);
+        this->MergeShowerTouchingLEScatter(meta3d, labels, particles);
+
+        // output containers
+        std::vector<int> trackid2output(trackid2index.size(), -1);
+        std::vector<int> output2trackid;
+
+        // Assign output IDs and relationships
+        this->AssignParticleGroupIDs(trackid2index, output2trackid, labels, trackid2output);
+
+
+        // For shower orphans, we need to register the most base shower particle in the output (for group)
+        this->FixOrphanShowerGroups(particles, output2trackid, labels, trackid2output);
+
+
+        // For LEScatter orphans, we need to register the immediate valid (=to be stored) particle
+        this->FixOrphanNonShowerGroups(particles, output2trackid, labels, trackid2output);
+
+
+        // for shower particles with invalid parent ID, attempt a search
+        this->FixInvalidParentShowerGroups(particles, labels, trackid2output, output2trackid);
+
+
+        // Now sort out all parent IDs where it's simply not assigned
+        // (it's ok to have invalid parent id if parent track id is not stored)
+        this->FixUnassignedParentGroups(labels, trackid2output, output2trackid);
+
+        // Now loop over otuput particle list and check if any remaining group id needs to be assigned
+        // Use its parent to group...
+        this->FixUnassignedGroups(labels, output2trackid);
+
+        // Next handle LEScatter group id if not assigned yet
+        this->FixUnassignedLEScatterGroups(labels, output2trackid);
+
+        // Next loop over to find any particle for which first_step is not defined
+        this->FixFirstStepInfo(labels, meta3d, output2trackid);
+
 
         return result;
     }
