@@ -64,7 +64,7 @@ namespace supera {
         // (e.g.: electromagnetic showers, neutron clusters, ...)
         // There are lots of edge cases so the logic is spread out over many methods.
         this->MergeShowerIonizations(labels);
-        this->MergeShowerTouchingLEScatter(meta, labels, particles);
+        this->MergeShowerTouchingLEScatter(meta, labels);
         this->ApplyEnergyThreshold(labels);
         this->MergeShowerConversion(labels);
         this->MergeShowerFamilyTouching(meta, labels);
