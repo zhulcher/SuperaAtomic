@@ -239,6 +239,46 @@ namespace supera {
 
     // ------------------------------------------------------
 
+    void LArTPCMLReco3D::MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
+                                                      std::vector<supera::ParticleLabel>& labels)
+    {
+        size_t merge_ctr = 1;
+        while (merge_ctr)
+        {
+            merge_ctr = 0;
+            for (auto &label : labels)
+            {
+                if (!label.valid || label.energy.size() < 1 || label.shape() != supera::kShapeLEScatter) continue;
+
+                auto const &parents = this->ParentTrackIDs(label.part.trackid);
+
+                LOG.DEBUG() << "Inspecting LEScatter Track ID " << label.part.trackid
+                            << " PDG " << label.part.pdg
+                            << " " << label.part.process;
+                LOG.DEBUG() << "  ... parents:";
+                for(auto const& parent_trackid : parents)
+                    LOG.DEBUG() << "     "<< parent_trackid;
+
+                for (auto const &parent_trackid : parents)
+                {
+                    auto &parent = labels[parent_trackid];
+                    if (!parent.valid || parent.energy.size() < 1) continue;
+                    if (this->IsTouching(meta, label.energy, parent.energy))
+                    {
+                        LOG.DEBUG() << "Merging LEScatter track id = " << label.part.trackid
+                                    << " into touching parent shower group (id=" << parent.part.group_id << ")"
+                                    << " with track id = " << parent.part.trackid;
+                        parent.Merge(label);
+                        merge_ctr++;
+                        break;
+                    }
+                } // for (parent_trackid)
+            } // for (grp)
+        } // while (merge_ctr)
+    } // LArTPCMLReco3D::MergeShowerTouchingLEScatter()
+
+    // ------------------------------------------------------
+
     bool LArTPCMLReco3D::IsTouching(const ImageMeta3D& meta, const VoxelSet& vs1, const VoxelSet& vs2) const
     {
 
