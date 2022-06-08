@@ -111,6 +111,49 @@ namespace supera {
     }
 
     // --------------------------------------------------------------------
+    // --------------------------------------------------------------------
+
+    // ------------------------------------------------------
+    void LArTPCMLReco3D::ApplyEnergyThreshold(std::vector<supera::ParticleLabel>& labels) const
+    {
+        // Loop again and eliminate voxels that has energy below threshold
+        for (auto &label : labels)
+        {
+            supera::VoxelSet energies, dEdXs;
+            energies.reserve(label.energy.size());
+            dEdXs.reserve(label.dedx.size());
+            if (energies.size() != dEdXs.size())
+                throw meatloaf("Inconsistent energy (" + std::to_string(energies.size()) + ") & dE/dX (" + std::to_string(dEdXs.size()) + ") voxel counts in voxel set");
+
+            const auto energy_vec =  label.energy.as_vector();
+            const auto dedx_vec =  label.dedx.as_vector();
+            for (std::size_t idx = 0; idx < energy_vec.size(); idx++)
+            {
+                const auto & vox = energy_vec[idx];
+                if (vox.value() < _edep_threshold)
+                {
+                    LOG.DEBUG() << "  Dropping below-threshold voxel " << vox.id() << " with edep = " << vox.value();
+                    continue;
+                }
+                energies.emplace(vox.id(), vox.value(), true);
+                dEdXs.emplace(dedx_vec[idx].id(), dedx_vec[idx].value(), true);
+            }
+            label.energy = std::move(energies);
+            label.dedx = std::move(dEdXs);
+
+            // If compton, here decide whether it should be supera::kComptonHE (high energy)
+            if (label.type == supera::kCompton && label.energy.size() > _compton_size)
+            {
+                //std::cout<<"Track ID "<<grp.part.track_id()<<" high energy compton"<<std::endl;
+                label.type = supera::kComptonHE;
+            } else if (label.type == supera::kOtherShower && label.energy.size() > _compton_size)
+            {
+                //std::cout<<"Track ID "<<grp.part.track_id()<<" high energy compton"<<std::endl;
+                label.type = supera::kOtherShowerHE;
+            }
+        }
+    } // LArTPCMLReco3D::ApplyEnergyThreshold()
+
 
     std::vector<supera::ParticleLabel> LArTPCMLReco3D::InitializeLabels(const std::vector<ParticleInput> & evtInput) const
     {

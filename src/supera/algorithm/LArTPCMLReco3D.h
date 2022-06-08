@@ -28,6 +28,9 @@ namespace supera {
 
 
         // -----  utility methods -----
+        /// filter out any voxels voxels that have energy below the given threshold
+        void ApplyEnergyThreshold(std::vector<supera::ParticleLabel>& labels) const;
+
         /// Do the two given VoxelSets overlap at all?
         bool IsTouching(const ImageMeta3D& meta, const VoxelSet& vs1, const VoxelSet& vs2) const;
 
