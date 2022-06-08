@@ -131,7 +131,7 @@ namespace supera {
                 const auto & vox = energy_vec[idx];
                 if (vox.value() < _edep_threshold)
                 {
-                    LOG.DEBUG() << "  Dropping below-threshold voxel " << vox.id() << " with edep = " << vox.value();
+                    LOG.VERBOSE() << "  Dropping below-threshold voxel " << vox.id() << " with edep = " << vox.value();
                     continue;
                 }
                 energies.emplace(vox.id(), vox.value(), true);
@@ -237,15 +237,15 @@ namespace supera {
                 unsigned int parent_index_before = label.part.trackid;
                 while (true)
                 {
-                    LOG.DEBUG() << "Inspecting: " << label.part.trackid << " => " << parent_index;
+                    LOG.VERBOSE() << "Inspecting: " << label.part.trackid << " => " << parent_index;
                     if (parent_index == supera::kINVALID_UINT)
                     {
-                        LOG.DEBUG() << "Invalid parent track id " << parent_index
+                        LOG.VERBOSE() << "Invalid parent track id " << parent_index
                                       << " Could not find a parent for " << label.part.trackid << " PDG " << label.part.pdg
                                       << " " << label.part.process << " E = " << label.part.energy_init
                                       << " (" << label.part.energy_deposit << ") MeV";
                         auto const &parent = labels[parent_index_before].part;
-                        LOG.DEBUG() << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
+                        LOG.VERBOSE() << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
                                       << " " << parent.process;
                         parent_found = false;
                         invalid_ctr++;
@@ -297,7 +297,7 @@ namespace supera {
                 if (label.part.parent_trackid == supera::kINVALID_UINT) continue;  // primaries can't have parents
                 // search for a possible parent
                 int parent_trackid = -1;
-                LOG.DEBUG() << "   Found particle group with shape 'shower', PDG=" << label.part.pdg
+                LOG.VERBOSE() << "   Found particle group with shape 'shower', PDG=" << label.part.pdg
                               << "\n    track id=" << label.part.trackid
                               << ", and alleged parent track id=" << label.part.parent_trackid;
                 // a direct parent ?
@@ -329,7 +329,7 @@ namespace supera {
                 if (this->IsTouching(meta, label.energy, parent.energy)) {
                     // if parent is found, merge
                     parent.Merge(label);
-                    LOG.DEBUG() << "   Merged to group w/ track id=" << parent.part.trackid;
+                    LOG.VERBOSE() << "   Merged to group w/ track id=" << parent.part.trackid;
                     merge_ctr++;
                 }
             }
@@ -416,12 +416,12 @@ namespace supera {
 
                 auto const &parents = this->ParentTrackIDs(label.part.trackid);
 
-                LOG.DEBUG() << "Inspecting LEScatter Track ID " << label.part.trackid
+                LOG.VERBOSE() << "Inspecting LEScatter Track ID " << label.part.trackid
                             << " PDG " << label.part.pdg
                             << " " << label.part.process;
-                LOG.DEBUG() << "  ... parents:";
+                LOG.VERBOSE() << "  ... parents:";
                 for(auto const& parent_trackid : parents)
-                    LOG.DEBUG() << "     "<< parent_trackid;
+                    LOG.VERBOSE() << "     "<< parent_trackid;
 
                 for (auto const &parent_trackid : parents)
                 {
@@ -429,7 +429,7 @@ namespace supera {
                     if (!parent.valid || parent.energy.size() < 1) continue;
                     if (this->IsTouching(meta, label.energy, parent.energy))
                     {
-                        LOG.DEBUG() << "Merging LEScatter track id = " << label.part.trackid
+                        LOG.VERBOSE() << "Merging LEScatter track id = " << label.part.trackid
                                     << " into touching parent shower group (id=" << parent.part.group_id << ")"
                                     << " with track id = " << parent.part.trackid;
                         parent.Merge(label);
@@ -463,7 +463,7 @@ namespace supera {
                 touching = diffx <= 1 && diffy <= 1 && diffz <= 1;
                 if (touching)
                 {
-                    LOG.DEBUG()<<"Touching ("<<ix1<<","<<iy1<<","<<iz1<<") ("<<ix2<<","<<iy2<<","<<iz2<<")";
+                    LOG.VERBOSE()<<"Touching ("<<ix1<<","<<iy1<<","<<iz1<<") ("<<ix2<<","<<iy2<<","<<iz2<<")";
                     break;
                 }
             }
