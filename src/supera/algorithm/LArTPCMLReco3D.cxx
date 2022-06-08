@@ -64,13 +64,12 @@ namespace supera {
         // (e.g.: electromagnetic showers, neutron clusters, ...)
         // There are lots of edge cases so the logic is spread out over many methods.
         this->MergeShowerIonizations(labels);
-        this->MergeShowerTouchingLEScatter(meta, labels);
+        this->MergeShowerTouchingLEScatter(meta, labels);  //todo: this was *also* being run at the *end* of the 'MergeShower...()' bunch.  which is right?
         this->ApplyEnergyThreshold(labels);
         this->MergeShowerConversion(labels);
         this->MergeShowerFamilyTouching(meta, labels);
         this->MergeShowerTouching(meta, labels, particles);
         this->MergeShowerDeltas(labels);
-        this->MergeShowerTouchingLEScatter(meta3d, labels, particles);
 
         // output containers
         std::vector<int> trackid2output(trackid2index.size(), -1);
