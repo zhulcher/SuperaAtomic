@@ -219,7 +219,7 @@ namespace supera {
 
     // ------------------------------------------------------
 
-    void LArTPCMLReco3D::MergeShowerConversion(std::vector<supera::ParticleLabel>& labels)
+    void LArTPCMLReco3D::MergeShowerConversion(std::vector<supera::ParticleLabel>& labels) const
     {
         int merge_ctr = 0;
         int invalid_ctr = 0;
@@ -283,7 +283,7 @@ namespace supera {
     // ------------------------------------------------------
 
     void LArTPCMLReco3D::MergeShowerFamilyTouching(const supera::ImageMeta3D& meta,
-                                                   std::vector<supera::ParticleLabel>& labels)
+                                                   std::vector<supera::ParticleLabel>& labels) const
     {
         // Merge touching shower fragments
         // Direct parentage between kShapeShower => kShapeShower/kShapeDelta/kShapeMichel
@@ -404,7 +404,7 @@ namespace supera {
 
     // ------------------------------------------------------
     void LArTPCMLReco3D::MergeShowerTouching(const supera::ImageMeta3D& meta,
-                                             std::vector<supera::ParticleLabel>& labels)
+                                             std::vector<supera::ParticleLabel>& labels) const
     {
         // Go over all pair-wise combination of two shower instances
         // For each shower, find all consecutive parents of shower/michel/delta type (break if track found)
@@ -509,7 +509,7 @@ namespace supera {
     // ------------------------------------------------------
 
     void LArTPCMLReco3D::MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
-                                                      std::vector<supera::ParticleLabel>& labels)
+                                                      std::vector<supera::ParticleLabel>& labels) const
     {
         size_t merge_ctr = 1;
         while (merge_ctr)

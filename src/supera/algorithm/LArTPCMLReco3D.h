@@ -21,21 +21,21 @@ namespace supera {
 
         // ----- internal label merging methods -----
         /// Combine particles from e+/e- pair conversion into their parent particles
-        void MergeShowerConversion(std::vector<supera::ParticleLabel>& labels);
+        void MergeShowerConversion(std::vector<supera::ParticleLabel>& labels) const;
 
         /// Combine deltas/Michels/etc that derive from a 'EM shower' shape parent into their parent
         void MergeShowerFamilyTouching(const supera::ImageMeta3D& meta,
-                                       std::vector<supera::ParticleLabel>& labels);
+                                       std::vector<supera::ParticleLabel>& labels) const;
 
         /// Combine 'EM shower' type particles that are 'ionization' process with their parents (they are always touching)
         void MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const;
 
         /// Combine instances of two shower groups that share a common ancestor and are touching
-        void MergeShowerTouching(const supera::ImageMeta3D& meta, std::vector<supera::ParticleLabel>& labels);
+        void MergeShowerTouching(const supera::ImageMeta3D& meta, std::vector<supera::ParticleLabel>& labels) const;
 
         /// Combine 'LE scatter' type particles that are touching their parents with them
         void MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
-                                          std::vector<supera::ParticleLabel>& labels);
+                                          std::vector<supera::ParticleLabel>& labels) const;
 
 
         // -----  utility methods -----
