@@ -282,6 +282,64 @@ namespace supera {
 
     // ------------------------------------------------------
 
+    void LArTPCMLReco3D::MergeShowerFamilyTouching(const supera::ImageMeta3D& meta,
+                                                   std::vector<supera::ParticleLabel>& labels)
+    {
+        // Merge touching shower fragments
+        // Direct parentage between kShapeShower => kShapeShower/kShapeDelta/kShapeMichel
+        int merge_ctr = 0;
+        int invalid_ctr = 0;
+        do {
+            merge_ctr = 0;
+            for (auto& label : labels) {
+                if (!label.valid) continue;
+                if (label.shape() != supera::kShapeShower) continue;
+                if (label.part.parent_trackid == supera::kINVALID_UINT) continue;  // primaries can't have parents
+                // search for a possible parent
+                int parent_trackid = -1;
+                LOG.DEBUG() << "   Found particle group with shape 'shower', PDG=" << label.part.pdg
+                              << "\n    track id=" << label.part.trackid
+                              << ", and alleged parent track id=" << label.part.parent_trackid;
+                // a direct parent ?
+                if (labels[label.part.parent_trackid].valid)
+                    parent_trackid = static_cast<int>(label.part.parent_trackid);
+                else
+                {
+                    for (size_t shower_trackid = 0; shower_trackid < labels.size(); ++shower_trackid)
+                    {
+                        auto const &candidate_grp = labels[shower_trackid];
+                        if (shower_trackid == label.part.parent_trackid || !candidate_grp.valid)
+                            continue;
+                        for (auto const &trackid : candidate_grp.trackid_v)
+                        {
+                            if (trackid != label.part.parent_trackid)
+                                continue;
+                            parent_trackid = static_cast<int>(shower_trackid);
+                            break;
+                        }
+                        if (parent_trackid >= 0)
+                            break;
+                    }
+                }
+                if (parent_trackid < 0 || parent_trackid == (int)(label.part.trackid)) continue;
+                auto& parent = labels[parent_trackid];
+                //auto parent_type = part_grp_v[parent_trackid].type;
+                //if(parent_type == supera::kTrack || parent_type == supera::kNeutron) continue;
+                if (parent.shape() != supera::kShapeShower && parent.shape() != supera::kShapeDelta && parent.shape() != supera::kShapeMichel) continue;
+                if (this->IsTouching(meta, label.energy, parent.energy)) {
+                    // if parent is found, merge
+                    parent.Merge(label);
+                    LOG.DEBUG() << "   Merged to group w/ track id=" << parent.part.trackid;
+                    merge_ctr++;
+                }
+            }
+            LOG.INFO() << "Merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
+        } while (merge_ctr>0);
+    } // LArTPCMLReco3D::MergeShowerFamilyTouching()
+
+
+    // ------------------------------------------------------
+
     void LArTPCMLReco3D::MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const
     {
         // Loop over particles of a type kIonization (=touching to its parent physically by definition)

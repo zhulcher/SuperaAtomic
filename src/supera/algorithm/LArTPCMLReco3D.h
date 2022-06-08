@@ -23,6 +23,10 @@ namespace supera {
         /// Combine particles from e+/e- pair conversion into their parent particles
         void MergeShowerConversion(std::vector<supera::ParticleLabel>& labels);
 
+        /// Combine deltas/Michels/etc that derive from a 'EM shower' shape parent into their parent
+        void MergeShowerFamilyTouching(const supera::ImageMeta3D& meta,
+                                       std::vector<supera::ParticleLabel>& labels);
+
         /// Combine 'EM shower' type particles that are 'ionization' process with their parents (they are always touching)
         void MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const;
 
