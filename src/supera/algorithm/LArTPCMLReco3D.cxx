@@ -3,6 +3,8 @@
 
 #include "LArTPCMLReco3D.h"
 
+#include <set>
+
 namespace supera {
 
     LArTPCMLReco3D::LArTPCMLReco3D()
@@ -173,6 +175,7 @@ namespace supera {
     }  // LArTPCMLReco3D::InitializeLabels()
 
     // ------------------------------------------------------
+
     void LArTPCMLReco3D::MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const
     {
         // Loop over particles of a type kIonization (=touching to its parent physically by definition)
@@ -232,8 +235,76 @@ namespace supera {
             } // for (grp)
             LOG.INFO() << "Ionization merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
         } while (merge_ctr > 0);
-    } // SuperaMCParticleCluster::MergeShowerIonizations()
+    } // LArTPCMLReco3D::MergeShowerIonizations()
+
+    // ------------------------------------------------------
+
+    bool LArTPCMLReco3D::IsTouching(const ImageMeta3D& meta, const VoxelSet& vs1, const VoxelSet& vs2) const
+    {
+
+        bool touching = false;
+        size_t ix1, iy1, iz1;
+        size_t ix2, iy2, iz2;
+        size_t diffx, diffy, diffz;
+
+        for (auto const &vox1 : vs1.as_vector())
+        {
+            meta.id_to_xyz_index(vox1.id(), ix1, iy1, iz1);
+            for (auto const &vox2 : vs2.as_vector())
+            {
+                meta.id_to_xyz_index(vox2.id(), ix2, iy2, iz2);
+                if (ix1 > ix2) diffx = ix1 - ix2; else diffx = ix2 - ix1;
+                if (iy1 > iy2) diffy = iy1 - iy2; else diffy = iy2 - iy1;
+                if (iz1 > iz2) diffz = iz1 - iz2; else diffz = iz2 - iz1;
+                touching = diffx <= 1 && diffy <= 1 && diffz <= 1;
+                if (touching)
+                {
+                    LOG.DEBUG()<<"Touching ("<<ix1<<","<<iy1<<","<<iz1<<") ("<<ix2<<","<<iy2<<","<<iz2<<")";
+                    break;
+                }
+            }
+            if (touching) break;
+        }
+
+        return touching;
+    } // LArTPCMLReco3D::IsTouching()
+
+    // ------------------------------------------------------
+
+    std::vector<unsigned int> LArTPCMLReco3D::ParentTrackIDs(size_t trackid) const
+    {
+        auto const &trackid2index = _mcpl.TrackIdToIndex();
+        std::vector<unsigned int> result;
+
+        if (trackid >= trackid2index.size() || trackid2index[trackid] < 0)
+            return result;
+
+        unsigned int parent_trackid = _mcpl.ParentTrackId()[trackid2index[trackid]];
+        std::set<unsigned int> accessed;
+        while ((size_t) (parent_trackid) < trackid2index.size() && trackid2index[parent_trackid] >= 0)
+        {
+            if (accessed.find(parent_trackid) != accessed.end())
+            {
+                LOG.FATAL() << "LOOP-LOGIC-ERROR for ParentTrackIDs for track id " << trackid;
+                for (size_t parent_cand_idx = 0; parent_cand_idx < result.size(); ++parent_cand_idx)
+                {
+                    auto const &parent_cand_trackid = result[parent_cand_idx];
+                    LOG.FATAL() << "Parent " << parent_cand_idx
+                                << " Track ID " << parent_trackid
+                                << " PDG " << _mcpl.PdgCode()[trackid2index[parent_trackid]]
+                                << " Mother " << _mcpl.ParentTrackId()[trackid2index[parent_trackid]];
+                }
+                throw meatloaf();
+            }
+
+            result.push_back(parent_trackid);
+            accessed.insert(parent_trackid);
+            if (_mcpl.ParentTrackId()[trackid2index[parent_trackid]] == parent_trackid) break;
+            parent_trackid = _mcpl.ParentTrackId()[trackid2index[parent_trackid]];
+        }
+        return result;
+    }
 
 
- }
+}
 #endif

@@ -16,13 +16,23 @@ namespace supera {
 		EventOutput Generate(const EventInput& data, const ImageMeta3D& meta) override;
 
 	private:
-        // internal label initialization
+        // ----- internal label initialization -----
         std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
 
-        // internal label merging methods
+        // ----- internal label merging methods -----
         void MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const;
 
-		size_t _debug;
+
+        // -----  utility methods -----
+        /// Do the two given VoxelSets overlap at all?
+        bool IsTouching(const ImageMeta3D& meta, const VoxelSet& vs1, const VoxelSet& vs2) const;
+
+        /// Get a list of all the GEANT4 tracks that are in the ancestry chain of the given one.
+        /// Most recent ancestor at index 0.
+        std::vector<unsigned int> ParentTrackIDs(size_t trackid) const;
+
+
+        size_t _debug;
 		std::vector<size_t> _semantic_priority;
         size_t _touch_threshold;
         size_t _delta_size;
