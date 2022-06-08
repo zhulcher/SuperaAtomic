@@ -20,8 +20,12 @@ namespace supera {
         std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
 
         // ----- internal label merging methods -----
+        /// Combine particles from e+/e- pair conversion into their parent particles
+        void MergeShowerConversion(std::vector<supera::ParticleLabel>& labels);
+
         /// Combine 'EM shower' type particles that are 'ionization' process with their parents (they are always touching)
         void MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const;
+
         /// Combine 'LE scatter' type particles that are touching their parents with them
         void MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
                                           std::vector<supera::ParticleLabel>& labels);

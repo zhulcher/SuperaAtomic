@@ -216,6 +216,70 @@ namespace supera {
         return labels;
     }  // LArTPCMLReco3D::InitializeLabels()
 
+
+    // ------------------------------------------------------
+
+    void LArTPCMLReco3D::MergeShowerConversion(std::vector<supera::ParticleLabel>& labels)
+    {
+        int merge_ctr = 0;
+        int invalid_ctr = 0;
+        do
+        {
+            merge_ctr = 0;
+            for (auto &label : labels)
+            {
+                if (!label.valid) continue;
+                //if(grp.type != supera::kIonization && grp.type != supera::kConversion) continue;
+                if (label.type != supera::kConversion) continue;
+                // merge to a valid "parent"
+                bool parent_found = false;
+                unsigned int parent_index = label.part.parent_trackid;
+                unsigned int parent_index_before = label.part.trackid;
+                while (true)
+                {
+                    LOG.DEBUG() << "Inspecting: " << label.part.trackid << " => " << parent_index;
+                    if (parent_index == supera::kINVALID_UINT)
+                    {
+                        LOG.DEBUG() << "Invalid parent track id " << parent_index
+                                      << " Could not find a parent for " << label.part.trackid << " PDG " << label.part.pdg
+                                      << " " << label.part.process << " E = " << label.part.energy_init
+                                      << " (" << label.part.energy_deposit << ") MeV";
+                        auto const &parent = labels[parent_index_before].part;
+                        LOG.DEBUG() << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
+                                      << " " << parent.process;
+                        parent_found = false;
+                        invalid_ctr++;
+                        break;
+                        //throw std::exception();
+                    }
+                    auto const &parent = labels[parent_index];
+                    parent_found = parent.valid;
+                    if (parent_found) break;
+                    else
+                    {
+                        unsigned int ancestor_index = parent.part.parent_trackid;
+                        if (ancestor_index == parent_index)
+                        {
+                            LOG.INFO() << "Particle " << parent_index << " is root and invalid particle...";
+                            LOG.INFO() << "PDG " << parent.part.pdg << " " << parent.part.process;
+                            break;
+                        }
+                        parent_index_before = parent_index;
+                        parent_index = ancestor_index;
+                    }
+                }
+                // if parent is found, merge
+                if (parent_found)
+                {
+                    auto &parent = labels[parent_index];
+                    parent.Merge(label);
+                    merge_ctr++;
+                }
+            }
+            LOG.INFO() << "Merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
+        } while (merge_ctr > 0);
+    }  // LArTPCMLReco3D::MergeShowerConversion()
+
     // ------------------------------------------------------
 
     void LArTPCMLReco3D::MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const
