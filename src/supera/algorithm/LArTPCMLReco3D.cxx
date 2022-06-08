@@ -143,11 +143,11 @@ namespace supera {
             // If compton, here decide whether it should be supera::kComptonHE (high energy)
             if (label.type == supera::kCompton && label.energy.size() > _compton_size)
             {
-                //std::cout<<"Track ID "<<grp.part.track_id()<<" high energy compton"<<std::endl;
+                //std::cout<<"Track ID "<<grp.part.trackid<<" high energy compton"<<std::endl;
                 label.type = supera::kComptonHE;
             } else if (label.type == supera::kOtherShower && label.energy.size() > _compton_size)
             {
-                //std::cout<<"Track ID "<<grp.part.track_id()<<" high energy compton"<<std::endl;
+                //std::cout<<"Track ID "<<grp.part.trackid<<" high energy compton"<<std::endl;
                 label.type = supera::kOtherShowerHE;
             }
         }
@@ -359,7 +359,7 @@ namespace supera {
                 unsigned int parent_index_before = label.part.trackid;
                 while (true)
                 {
-                    //std::cout<< "Inspecting: " << label.part.track_id() << " => " << parent_index << std::endl;
+                    //std::cout<< "Inspecting: " << label.part.trackid << " => " << parent_index << std::endl;
                     if (parent_index == supera::kINVALID_UINT)
                     {
                         LOG.ERROR() << "Invalid parent track id " << parent_index
@@ -433,11 +433,11 @@ namespace supera {
                     /*
                     while(1){
                       auto const& parent_a = labels[trackid];
-                      if(parent_a.part.parent_track_id() >= labels.size())
+                      if(parent_a.part.parent_trackid >= labels.size())
                         break;
-                      if(parent_a.part.parent_track_id() == parent_a.part.track_id())
+                      if(parent_a.part.parent_trackid == parent_a.part.trackid)
                         break;
-                      trackid = parent_a.part.parent_track_id();
+                      trackid = parent_a.part.parent_trackid;
                       if(parent_a.shape() == larcv::kShapeMichel ||
                          parent_a.shape() == larcv::kShapeShower ||
                          parent_a.shape() == larcv::kShapeDelta )
@@ -446,7 +446,7 @@ namespace supera {
                         parent_a.shape() == larcv::kShapeUnknown)
                         break;
           
-                      if(trackid < labels.size() && labels[trackid].part.parent_track_id() == trackid)
+                      if(trackid < labels.size() && labels[trackid].part.parent_trackid == trackid)
                         break;
                     }
                     */
@@ -458,11 +458,11 @@ namespace supera {
                     /*
                     while(1){
                       auto const& parent_b = labels[trackid];
-                      if(parent_b.part.parent_track_id() >= labels.size())
+                      if(parent_b.part.parent_trackid >= labels.size())
                         break;
-                      if(parent_b.part.parent_track_id() == parent_b.part.track_id())
+                      if(parent_b.part.parent_trackid == parent_b.part.trackid)
                         break;
-                      trackid = parent_b.part.parent_track_id();
+                      trackid = parent_b.part.parent_trackid;
                       if(parent_b.shape() == larcv::kShapeMichel ||
                          parent_b.shape() == larcv::kShapeShower ||
                          parent_b.shape() == larcv::kShapeDelta )
@@ -470,7 +470,7 @@ namespace supera {
                       else if(parent_b.shape() == larcv::kShapeTrack ||
                         parent_b.shape() == larcv::kShapeUnknown)
                         break;
-                      if(trackid < labels.size() && labels[trackid].part.parent_track_id() == trackid)
+                      if(trackid < labels.size() && labels[trackid].part.parent_trackid == trackid)
                         break;
                     }
                     */
