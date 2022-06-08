@@ -69,7 +69,7 @@ namespace supera {
         this->MergeShowerConversion(labels);
         this->MergeShowerFamilyTouching(meta, labels);
         this->MergeShowerTouching(meta, labels);
-        this->MergeShowerDeltas(labels);
+        this->MergeDeltas(labels);
 
         // output containers
         std::vector<int> trackid2output(trackid2index.size(), -1);
@@ -280,6 +280,52 @@ namespace supera {
         } while (merge_ctr > 0);
     }  // LArTPCMLReco3D::MergeShowerConversion()
 
+    // ------------------------------------------------------
+    
+    void LArTPCMLReco3D::MergeDeltas(std::vector<supera::ParticleLabel>& labels) const
+    {
+        for (auto &label : labels)
+        {
+            //if(label.type != supera::kDelta) continue;
+            if (label.shape() != supera::kShapeDelta) continue;
+            unsigned int parent_trackid = label.part.parent_trackid;
+            auto &parent = labels[parent_trackid];
+            if (!parent.valid) continue;
+
+            // allows the test on unique voxels to be put in the if() below
+            // and only used if needed due to short-circuiting.
+            const auto UniqueVoxelCount = [](const supera::ParticleLabel & grp, const supera::ParticleLabel & parent)
+            {
+                size_t unique_voxel_count = 0;
+                for (auto const &vox : grp.energy.as_vector())
+                {
+                    if (parent.energy.find(vox.id()).id() == supera::kINVALID_VOXELID)
+                        ++unique_voxel_count;
+                }
+                return unique_voxel_count;
+            };
+
+            // if voxel count is smaller than delta ray requirement, simply merge
+            if (label.energy.size() < _delta_size || UniqueVoxelCount(label, parent) < _delta_size)
+            {
+                // if parent is found, merge
+                LOG.VERBOSE() << "Merging delta " << label.part.trackid << " PDG " << label.part.pdg
+                              << " " << label.part.process << " vox count " << label.energy.size() << "\n"
+                              << " ... parent found " << parent.part.trackid
+                              << " PDG " << parent.part.pdg << " " << parent.part.process;
+                LOG.VERBOSE() << "Time difference: " << label.part.first_step.time - parent.part.first_step.time;
+                parent.Merge(label, parent.shape() != kShapeTrack);  // a delta ray is unlikely to extend a *track* in the up- or downstream directions
+            }
+            else
+            {
+                LOG.VERBOSE() << "NOT merging delta " << label.part.trackid << " PDG " << label.part.pdg
+                              << " " << label.part.process << " vox count " << label.energy.size() << "\n"
+                              <<" ... parent found " << parent.part.trackid
+                              << " PDG " << parent.part.pdg << " " << parent.part.process;
+
+            }
+        }
+    } // LArTPCMLReco3D::MergeShowerDeltas()
     // ------------------------------------------------------
 
     void LArTPCMLReco3D::MergeShowerFamilyTouching(const supera::ImageMeta3D& meta,

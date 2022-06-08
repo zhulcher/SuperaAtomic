@@ -20,6 +20,9 @@ namespace supera {
         std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
 
         // ----- internal label merging methods -----
+        /// Merge deltas into their parents if they have fewer than threshold voxels
+        void MergeDeltas(std::vector<supera::ParticleLabel>& labels) const;
+
         /// Combine particles from e+/e- pair conversion into their parent particles
         void MergeShowerConversion(std::vector<supera::ParticleLabel>& labels) const;
 
