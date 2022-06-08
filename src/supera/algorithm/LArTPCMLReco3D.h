@@ -30,6 +30,9 @@ namespace supera {
         /// Combine 'EM shower' type particles that are 'ionization' process with their parents (they are always touching)
         void MergeShowerIonizations(std::vector<supera::ParticleLabel>& labels) const;
 
+        /// Combine instances of two shower groups that share a common ancestor and are touching
+        void MergeShowerTouching(const supera::ImageMeta3D& meta, std::vector<supera::ParticleLabel>& labels);
+
         /// Combine 'LE scatter' type particles that are touching their parents with them
         void MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
                                           std::vector<supera::ParticleLabel>& labels);

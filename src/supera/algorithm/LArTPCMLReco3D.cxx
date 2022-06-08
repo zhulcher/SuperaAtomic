@@ -68,7 +68,7 @@ namespace supera {
         this->ApplyEnergyThreshold(labels);
         this->MergeShowerConversion(labels);
         this->MergeShowerFamilyTouching(meta, labels);
-        this->MergeShowerTouching(meta, labels, particles);
+        this->MergeShowerTouching(meta, labels);
         this->MergeShowerDeltas(labels);
 
         // output containers
@@ -323,7 +323,7 @@ namespace supera {
                 }
                 if (parent_trackid < 0 || parent_trackid == (int)(label.part.trackid)) continue;
                 auto& parent = labels[parent_trackid];
-                //auto parent_type = part_grp_v[parent_trackid].type;
+                //auto parent_type = labels[parent_trackid].type;
                 //if(parent_type == supera::kTrack || parent_type == supera::kNeutron) continue;
                 if (parent.shape() != supera::kShapeShower && parent.shape() != supera::kShapeDelta && parent.shape() != supera::kShapeMichel) continue;
                 if (this->IsTouching(meta, label.energy, parent.energy)) {
@@ -400,6 +400,111 @@ namespace supera {
             LOG.INFO() << "Ionization merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
         } while (merge_ctr > 0);
     } // LArTPCMLReco3D::MergeShowerIonizations()
+
+
+    // ------------------------------------------------------
+    void LArTPCMLReco3D::MergeShowerTouching(const supera::ImageMeta3D& meta,
+                                             std::vector<supera::ParticleLabel>& labels)
+    {
+        // Go over all pair-wise combination of two shower instances
+        // For each shower, find all consecutive parents of shower/michel/delta type (break if track found)
+        // If there is a common parent in two list AND if two showers are physically touching, merge
+        int merge_ctr = 0;
+        do
+        {
+            merge_ctr = 0;
+            for (size_t i = 0; i < labels.size(); ++i)
+            {
+                auto &lbl_a = labels[i];
+                if (!lbl_a.valid) continue;
+                if (lbl_a.shape() != supera::kShapeShower) continue;
+                for (size_t j = 0; j < labels.size(); ++j)
+                {
+                    if (i == j) continue;
+                    auto &lbl_b = labels[j];
+                    if (!lbl_b.valid) continue;
+                    if (lbl_b.shape() != supera::kShapeShower) continue;
+
+                    // check if these showers share the parentage
+                    // list a's parents
+                    size_t trackid = i;
+                    std::set<size_t> parent_list_a;
+                    std::set<size_t> parent_list_b;
+                    /*
+                    while(1){
+                      auto const& parent_a = labels[trackid];
+                      if(parent_a.part.parent_track_id() >= labels.size())
+                        break;
+                      if(parent_a.part.parent_track_id() == parent_a.part.track_id())
+                        break;
+                      trackid = parent_a.part.parent_track_id();
+                      if(parent_a.shape() == larcv::kShapeMichel ||
+                         parent_a.shape() == larcv::kShapeShower ||
+                         parent_a.shape() == larcv::kShapeDelta )
+                        parent_list_a.insert(trackid);
+                      else if(parent_a.shape() == larcv::kShapeTrack ||
+                        parent_a.shape() == larcv::kShapeUnknown)
+                        break;
+          
+                      if(trackid < labels.size() && labels[trackid].part.parent_track_id() == trackid)
+                        break;
+                    }
+                    */
+                    auto parents_a = this->ParentShowerTrackIDs(trackid, labels);
+                    for (auto const &parent_trackid : parents_a) parent_list_a.insert(parent_trackid);
+                    parent_list_a.insert(trackid);
+
+                    trackid = j;
+                    /*
+                    while(1){
+                      auto const& parent_b = labels[trackid];
+                      if(parent_b.part.parent_track_id() >= labels.size())
+                        break;
+                      if(parent_b.part.parent_track_id() == parent_b.part.track_id())
+                        break;
+                      trackid = parent_b.part.parent_track_id();
+                      if(parent_b.shape() == larcv::kShapeMichel ||
+                         parent_b.shape() == larcv::kShapeShower ||
+                         parent_b.shape() == larcv::kShapeDelta )
+                        parent_list_b.insert(trackid);
+                      else if(parent_b.shape() == larcv::kShapeTrack ||
+                        parent_b.shape() == larcv::kShapeUnknown)
+                        break;
+                      if(trackid < labels.size() && labels[trackid].part.parent_track_id() == trackid)
+                        break;
+                    }
+                    */
+                    auto parents_b = this->ParentShowerTrackIDs(trackid, labels);
+                    for (auto const &parent_trackid : parents_b) parent_list_b.insert(parent_trackid);
+                    parent_list_b.insert(trackid);
+
+                    bool merge = false;
+                    for (auto const &parent_trackid : parent_list_a)
+                    {
+                        if (parent_list_b.find(parent_trackid) != parent_list_b.end())
+                            merge = true;
+                        if (merge) break;
+                    }
+                    for (auto const &parent_trackid : parent_list_b)
+                    {
+                        if (parent_list_a.find(parent_trackid) != parent_list_a.end())
+                            merge = true;
+                        if (merge) break;
+                    }
+
+                    if (merge && this->IsTouching(meta, lbl_a.energy, lbl_b.energy))
+                    {
+                        if (lbl_a.energy.size() < lbl_b.energy.size())
+                            lbl_b.Merge(lbl_a);
+                        else
+                            lbl_a.Merge(lbl_b);
+                        merge_ctr++;
+                    }
+                }
+            }
+            LOG.INFO() << "Merge counter: " << merge_ctr;
+        } while (merge_ctr > 0);
+    } // LArTPCMLReco3D::MergeShowerTouching()
 
     // ------------------------------------------------------
 
