@@ -42,6 +42,13 @@ namespace supera {
         /// Do the two given VoxelSets overlap at all?
         bool IsTouching(const ImageMeta3D& meta, const VoxelSet& vs1, const VoxelSet& vs2) const;
 
+        /// Get a list of all the GEANT4 tracks that are in the ancestry chain of the given one,
+        /// constrained to staying within the same EM shower.
+        std::vector<unsigned int>
+        ParentShowerTrackIDs(size_t trackid,
+                             const std::vector<supera::ParticleLabel>& labels,
+                             bool include_lescatter=false) const;
+
         /// Get a list of all the GEANT4 tracks that are in the ancestry chain of the given one.
         /// Most recent ancestor at index 0.
         std::vector<unsigned int> ParentTrackIDs(size_t trackid) const;

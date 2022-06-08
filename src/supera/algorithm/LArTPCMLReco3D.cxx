@@ -473,6 +473,38 @@ namespace supera {
         return touching;
     } // LArTPCMLReco3D::IsTouching()
 
+
+    // ------------------------------------------------------
+
+    std::vector<unsigned int>
+    LArTPCMLReco3D::ParentShowerTrackIDs(size_t trackid,
+                                         const std::vector<supera::ParticleLabel>& labels,
+                                         bool include_lescatter) const
+    {
+        auto parents = this->ParentTrackIDs(trackid);
+        std::vector<unsigned int> result;
+        result.reserve(parents.size());
+
+        for(auto const& parent_id : parents) {
+
+            if(parent_id >= labels.size()) continue;
+
+            auto const& grp = labels[parent_id];
+            if(!grp.valid) continue;
+
+            if(grp.shape() == supera::kShapeTrack ||
+               grp.shape() == supera::kShapeUnknown)
+                break;
+
+            if(grp.shape() == supera::kShapeMichel ||
+               grp.shape() == supera::kShapeShower ||
+               grp.shape() == supera::kShapeDelta  ||
+               (grp.shape() == supera::kShapeLEScatter && include_lescatter))
+                result.push_back(parent_id);
+        }
+        return result;
+    } // LArTPCMLReco3D::ParentShowerTrackIDs()
+
     // ------------------------------------------------------
 
     std::vector<unsigned int> LArTPCMLReco3D::ParentTrackIDs(size_t trackid) const
