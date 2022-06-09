@@ -5,6 +5,8 @@
 
 #include <cassert>
 #include <set>
+#include <string>
+#include <sstream>
 
 namespace supera {
 
@@ -81,9 +83,8 @@ namespace supera {
         std::vector<supera::TrackID_t> output2trackid;  // reverse of above.
         this->AssignParticleGroupIDs(trackid2index, labels, output2trackid, trackid2output);
 
-
-        // For shower orphans, we need to register the most base shower particle in the output (for group)
-        this->FixOrphanShowerGroups(particles, output2trackid, labels, trackid2output);
+        // Next, we need to clean up a number of edge cases that don't always get assigned correctly.
+        this->FixOrphanShowerGroups(labels, output2trackid, trackid2output);
 
 
         // For LEScatter orphans, we need to register the immediate valid (=to be stored) particle
@@ -304,6 +305,150 @@ namespace supera {
         }
         LOG.VERBOSE() << "\n\n#### Dump done ####";
     } // LArTPCMLReco3D::DumpHierarchy()
+
+    // ------------------------------------------------------
+
+    void LArTPCMLReco3D::FixOrphanShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                               std::vector<supera::TrackID_t> &output2trackid,
+                                               std::vector<int> &trackid2output) const
+    {
+        for (size_t out_index = 0; out_index < output2trackid.size(); ++out_index)
+        {
+
+            supera::TrackID_t trackid = output2trackid[out_index];
+            auto &label = inputLabels[trackid];
+            if (!label.valid)
+                continue;
+            if (label.part.group_id != kINVALID_INSTANCEID)
+                continue;
+            if (label.shape() != kShapeShower)
+                continue;
+            LOG.DEBUG() << " #### SHOWER ROOT SEARCH: Analyzing a particle index " << out_index
+                        << " track id " << label.part.trackid << "\n"
+                        << label.part.dump()
+                        << "      group type = " << label.type << "\n"
+                        << "      group shape = " << label.shape() << "\n"
+                        << "      group is valid = " << label.valid << "\n"
+                         << "      group is mapped to output index = " << trackid2output[trackid];
+
+            auto parent_trackid_v = ParentTrackIDs(trackid);
+            std::stringstream ss;
+            ss << "   candidate ancestor track IDs:";
+            for (const auto & trkid : parent_trackid_v)
+                ss << " " << trkid;
+            LOG.VERBOSE() << "       " << ss.str();
+            supera::TrackID_t root_id = label.part.id;
+            supera::TrackID_t root_trackid = label.part.trackid;
+            bool stop = false;
+            std::vector<size_t> intermediate_trackid_v;
+            intermediate_trackid_v.push_back(trackid);
+            for (auto const &parent_trackid : parent_trackid_v)
+            {
+                auto const &parent = inputLabels[parent_trackid];
+                LOG.VERBOSE() << "  ancestor track id " << parent_trackid << "\n"
+                              << parent.part.dump()
+                              << "      group type = " << parent.type << "\n"
+                              << "      group shape = " << parent.shape() << "\n"
+                              << "      group is valid = " << parent.valid << "\n"
+                              << "      group is mapped to output index = " << trackid2output[parent_trackid];
+
+                switch (parent.shape())
+                {
+                    case kShapeShower:
+                    case kShapeMichel:
+                    case kShapeDelta:
+                        // group candidate: check if it is "valid" = exists in the output
+                        if (trackid2output[parent_trackid] >= 0 && parent.valid)
+                        {
+                            root_trackid = parent_trackid;
+                            root_id = trackid2output[root_trackid];
+                            // found the valid group: stop the loop
+                            LOG.VERBOSE() << " found root ancestor: trkid " << root_trackid << " (particle id " << root_id << ")";
+                            stop = true;
+                            // If not, root_id will be a new output index
+                        }
+                        else
+                        {
+//              root_id = output2trackid.size();
+                            LOG.VERBOSE() << "  ancestor trkid " << parent_trackid << " is also not in output.  keep looking...";
+                            // If this particle is invalid, this also needs the group id.
+                            // Add to intermediate_id_v list so we can set the group id for all of them
+                            intermediate_trackid_v.push_back(root_trackid);
+                        }
+                        stop = (stop || parent.shape() != kShapeShower);
+                        break;
+                    case kShapeTrack:
+                        LOG.VERBOSE() << "  ancestor group is a 'track' shape.  Stop looking...";
+                        stop = true;
+                        break;
+                    case kShapeUnknown:
+                        LOG.VERBOSE() << "  ancestor group is unknown shape.  Stop looking... ";
+                        stop = true;
+                        break;
+                    case kShapeLEScatter:
+                    case kShapeGhost:
+                        /*
+                        LARCV_CRITICAL() << "Unexpected type found while searching for kShapeShower orphans's root!" << std::endl;
+                        this->DumpHierarchy(trackid,part_grp_v);
+                        throw std::exception();
+                        */
+                        break;
+                }
+                if (stop)
+                    break;
+            }
+            LOG.VERBOSE() << " found root ancestor: trkid " << root_trackid << " (particle id()=" << root_id << ")";
+            if (root_id < ((int) (output2trackid.size())) && trackid2output[root_trackid] != (int) (root_id))
+            {
+                LOG.FATAL() << "Logic error for the search of shower root particle for an orphan..." << "\n"
+                            << "This particle id=" << out_index << " and track_id=" << trackid << "\n"
+                            << "ROOT particle id=" << root_id << " and track_id=" << root_trackid;
+                DumpHierarchy(trackid, inputLabels);
+                throw std::exception();
+            }
+
+            if (((int) (output2trackid.size())) <= root_id)
+            {
+                output2trackid.push_back(root_trackid);
+                // Register the root parent to the output
+                LOG.DEBUG() << "Adding a new particle to the output to define a group...\n"
+                             << "ROOT particle id=" << root_id << " and track_id=" << root_trackid << "\n"
+                             << inputLabels[root_trackid].part.dump();
+            }
+            assert((size_t) (root_id) < output2trackid.size());
+
+            auto &root = inputLabels[root_trackid];
+            //root.valid = true;
+            assert(root.valid);
+            root.part.id = root_id;
+            root.part.group_id = root_id;
+            trackid2output[root_trackid] = static_cast<int>(root_id);
+            LOG.VERBOSE() << "Updating group " << root.part.group_id << "'s child groups to have the correct root group id...";
+            for (auto const &child_id : root.part.children_id)
+            {
+                auto &child = inputLabels[output2trackid[child_id]];
+                if (child.valid)
+                    continue;
+                LOG.VERBOSE() << "   group for trackid " << child.part.trackid << " had group: " << child.part.group_id;
+                assert(child.part.group_id == kINVALID_INSTANCEID || child.part.group_id == root_id);
+                child.part.group_id = root_id;
+            }
+            // Set the group ID for THIS + intermediate particles
+            for (auto const &child_trackid : intermediate_trackid_v)
+            {
+                auto &child = inputLabels[child_trackid];
+                if (!child.valid)
+                    continue;
+                assert(child.part.group_id == kINVALID_INSTANCEID || child.part.group_id == root_id);
+                child.part.group_id = root_id;
+
+                // todo: is this correct?  if we don't, the parent_id points to a nonexistent particle group...
+                child.part.parent_id = root_id;
+            }
+
+            LOG.DEBUG() << "... after update ... \n" << inputLabels[trackid].part.dump();
+        }
+    } // LArTPCMLReco3D::FixOrphanShowerGroups()
 
     // ------------------------------------------------------
 

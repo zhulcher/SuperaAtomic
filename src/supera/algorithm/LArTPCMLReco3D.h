@@ -47,6 +47,12 @@ namespace supera {
                                     std::vector<int> &trackid2output) const;
 
 
+        // -----  internal group-sanitizing methods -----
+        ///  Sometimes shower type groups don't get fully connected all the way back to their primary particle.  Fix those.
+        void FixOrphanShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                   std::vector<supera::TrackID_t> &output2trackid,
+                                   std::vector<int> &trackid2output) const;
+
         // -----  utility methods -----
         /// filter out any voxels voxels that have energy below the given threshold
         void ApplyEnergyThreshold(std::vector<supera::ParticleLabel>& labels) const;
