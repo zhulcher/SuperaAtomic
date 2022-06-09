@@ -77,8 +77,8 @@ namespace supera {
         // The first step will be to create a mapping
         // from the original GEANT4 trackids to the new groups.
         std::vector<int> trackid2output(trackid2index.size(), -1);  // index: original GEANT4 trackid.  stored value: output group index.
-        std::vector<int> output2trackid;  // reverse of above.
-        this->AssignParticleGroupIDs(trackid2index, output2trackid, labels, trackid2output);
+        std::vector<supera::TrackID_t> output2trackid;  // reverse of above.
+        this->AssignParticleGroupIDs(trackid2index, labels, output2trackid, trackid2output);
 
 
         // For shower orphans, we need to register the most base shower particle in the output (for group)
@@ -157,8 +157,9 @@ namespace supera {
 
     // ------------------------------------------------------
     
-    void LArTPCMLReco3D::AssignParticleGroupIDs(const std::vector<TrackID_t> &trackid2index, std::vector<int> &output2trackid,
+    void LArTPCMLReco3D::AssignParticleGroupIDs(const std::vector<TrackID_t> &trackid2index,
                                                 std::vector<supera::ParticleLabel> &inputLabels,
+                                                std::vector<TrackID_t> &output2trackid,
                                                 std::vector<int> &trackid2output) const
     {
         // first create the track id list
@@ -242,7 +243,7 @@ namespace supera {
                 */
                 inputLabel.part.parent_id = trackid2output[parent_trackid];
                 int parent_output_id = trackid2output[parent_trackid];
-                int parent_id = output2trackid[parent_output_id];
+                TrackID_t parent_id = output2trackid[parent_output_id];
                 if (inputLabels[parent_id].valid)
                     inputLabels[parent_id].part.children_id.push_back(inputLabel.part.id);
             } // if (parent_trackid != larcv::kINVALID_UINT)

@@ -40,9 +40,10 @@ namespace supera {
         void MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
                                           std::vector<supera::ParticleLabel>& labels) const;
 
-        // -----  internal particle-group-building methods -----
-        void AssignParticleGroupIDs(const std::vector<TrackID_t> &trackid2index, std::vector<int> &output2trackid,
+        // -----  internal particle-group-building method -----
+        void AssignParticleGroupIDs(const std::vector<TrackID_t> &trackid2index,
                                     std::vector<supera::ParticleLabel> &inputLabels,
+                                    std::vector<TrackID_t> &output2trackid,
                                     std::vector<int> &trackid2output) const;
 
 
