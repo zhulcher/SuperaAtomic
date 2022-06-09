@@ -40,6 +40,11 @@ namespace supera {
         void MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
                                           std::vector<supera::ParticleLabel>& labels) const;
 
+        // -----  internal particle-group-building methods -----
+        void AssignParticleGroupIDs(const std::vector<TrackID_t> &trackid2index, std::vector<int> &output2trackid,
+                                    std::vector<supera::ParticleLabel> &inputLabels,
+                                    std::vector<int> &trackid2output) const;
+
 
         // -----  utility methods -----
         /// filter out any voxels voxels that have energy below the given threshold

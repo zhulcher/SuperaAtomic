@@ -71,11 +71,13 @@ namespace supera {
         this->MergeShowerTouching(meta, labels);
         this->MergeDeltas(labels);
 
-        // output containers
-        std::vector<int> trackid2output(trackid2index.size(), -1);
-        std::vector<int> output2trackid;
-
-        // Assign output IDs and relationships
+        // Now that we have grouped the true particles together,
+        // at this point we're ready to build a new set of labels
+        // which contain only the top particle of each merged group.
+        // The first step will be to create a mapping
+        // from the original GEANT4 trackids to the new groups.
+        std::vector<int> trackid2output(trackid2index.size(), -1);  // index: original GEANT4 trackid.  stored value: output group index.
+        std::vector<int> output2trackid;  // reverse of above.
         this->AssignParticleGroupIDs(trackid2index, output2trackid, labels, trackid2output);
 
 
@@ -152,6 +154,120 @@ namespace supera {
             }
         }
     } // LArTPCMLReco3D::ApplyEnergyThreshold()
+
+    // ------------------------------------------------------
+    
+    void LArTPCMLReco3D::AssignParticleGroupIDs(const std::vector<TrackID_t> &trackid2index, std::vector<int> &output2trackid,
+                                                std::vector<supera::ParticleLabel> &inputLabels,
+                                                std::vector<int> &trackid2output) const
+    {
+        // first create the track id list
+        output2trackid.resize(trackid2index.size());
+        output2trackid.clear();
+
+        // assign particle group ID numbers and make sure they have all info set
+        LOG.VERBOSE() << "Considering incoming particle groups:";
+        for (auto & inputLabel : inputLabels)
+        {
+            LOG.VERBOSE() << " Particle ID=" << inputLabel.part.id << " Track ID=" << inputLabel.part.trackid;
+            LOG.VERBOSE() << "     Edep=" << inputLabel.part.energy_deposit;
+            size_t output_counter = output2trackid.size();
+            if (!inputLabel.valid)
+            {
+                LOG.VERBOSE() << "   --> invalid group (i.e. already merged), skipping";
+                continue;
+            }
+            if (inputLabel.part.process != "primary" && inputLabel.Size() < 1)
+            {
+                LOG.VERBOSE() << "   --> no voxels, skipping";
+                continue;
+            }
+            // Also define particle "first step" and "last step"
+            auto &part = inputLabel.part;
+            auto const &first_pt = inputLabel.first_pt;
+            auto const &last_pt = inputLabel.last_pt;
+            LOG.VERBOSE() << "      examining true particle start:" << first_pt.x<< " " << first_pt.y << " " << first_pt.z;
+            if (first_pt.t != kINVALID_DOUBLE)
+                part.first_step = supera::Vertex(first_pt.x, first_pt.y, first_pt.z, first_pt.t);
+            if (last_pt.t != kINVALID_DOUBLE)
+                part.last_step = supera::Vertex(last_pt.x, last_pt.y, last_pt.z, last_pt.t);
+            LOG.VERBOSE() << "     true particle start: " << inputLabel.part.first_step.dump()
+                          << "                   end: " << inputLabel.part.last_step.dump();
+            inputLabel.part.energy_deposit = inputLabel.energy.size() ? inputLabel.energy.sum() : 0.;
+
+
+            //if (grp.part.process != "primary" && grp.shape() == kShapeLEScatter)
+            //{
+            //  LOG.VERBOSE() << "   --> LEScatter shape, skipping" << std::endl;
+            //  continue;
+            //}
+
+            inputLabel.part.id = output_counter;
+            LOG.VERBOSE() << "   --> Assigned output group id = " << inputLabel.part.id;
+            trackid2output[inputLabel.part.trackid] = static_cast<int>(output_counter);
+            for (auto const &child : inputLabel.trackid_v)
+                trackid2output[child] = static_cast<int>(output_counter);
+            output2trackid.push_back(static_cast<int>(inputLabel.part.trackid));
+            ++output_counter;
+        }
+
+        LOG.VERBOSE() << "trackid2output (i.e., map of track IDs to output group IDs) contents:";
+        for (std::size_t idx = 0; idx < trackid2output.size(); idx++)
+            LOG.VERBOSE() << "   " << idx << " -> " << trackid2output[idx];
+
+        // now assign relationships
+        LOG.VERBOSE() << "Assigning group relationships:";
+        for (auto const &trackid : output2trackid)
+        {
+            auto &inputLabel = inputLabels[trackid];
+            LOG.VERBOSE() << "  Group for trackid=" << trackid
+                          << " (pdg = " << inputLabel.part.pdg << ", particle id=" << inputLabel.part.id << ")";
+            if (std::abs(inputLabel.part.pdg) != 11 && std::abs(inputLabel.part.pdg) != 22)
+            {
+                LOG.VERBOSE() << "    ---> not EM, leaving alone (parent id=" << inputLabel.part.parent_id
+                              << " and group id=" << inputLabel.part.group_id << ")";
+                continue;
+            }
+
+            unsigned int parent_trackid = inputLabel.part.parent_trackid;
+            LOG.VERBOSE() << "   initial parent track id:" << parent_trackid;
+
+            if (parent_trackid != supera::kINVALID_UINT && trackid2output[parent_trackid] >= 0)
+            {
+                LOG.VERBOSE() << "   --> assigning group for trackid " << trackid << " to parent trackid: " << parent_trackid;
+                /*
+                if(trackid2output[parent_trackid] < 0)
+            grp.part.parent_id(grp.part.id());
+                else {
+                */
+                inputLabel.part.parent_id = trackid2output[parent_trackid];
+                int parent_output_id = trackid2output[parent_trackid];
+                int parent_id = output2trackid[parent_output_id];
+                if (inputLabels[parent_id].valid)
+                    inputLabels[parent_id].part.children_id.push_back(inputLabel.part.id);
+            } // if (parent_trackid != larcv::kINVALID_UINT)
+            else
+            {
+                LOG.VERBOSE() << "     --> no valid ancestor.  Assigning this particle's parent IDs to itself.  "
+                              << " (group id=" << inputLabel.part.group_id << ")";
+                // otherwise checks in CheckParticleValidity() will fail (parent ID will point to something not in output)
+                inputLabel.part.parent_id = inputLabel.part.id;
+            }
+        }
+
+        // make sure the primary particles' parent and group id are set (they are themselves)
+        for (auto &grp : inputLabels)
+        {
+            auto &part = grp.part;
+            if (part.parent_trackid != supera::kINVALID_UINT)
+                continue;
+            part.group_id = part.id;
+            part.parent_id = part.id;
+            LOG.VERBOSE() << "Assigned primary particle's own ID to its group and parent IDs:\n" << part.dump();
+        }
+
+    } // LArTPCMLReco3D::AssignParticleGroupIDs()
+
 
 
     std::vector<supera::ParticleLabel> LArTPCMLReco3D::InitializeLabels(const std::vector<ParticleInput> & evtInput) const
