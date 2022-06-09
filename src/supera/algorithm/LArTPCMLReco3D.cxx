@@ -3,6 +3,7 @@
 
 #include "LArTPCMLReco3D.h"
 
+#include <cassert>
 #include <set>
 
 namespace supera {
@@ -270,6 +271,41 @@ namespace supera {
     } // LArTPCMLReco3D::AssignParticleGroupIDs()
 
 
+    // ------------------------------------------------------
+    
+    void LArTPCMLReco3D::DumpHierarchy(size_t trackid, const std::vector<supera::ParticleLabel>& inputLabels) const
+    {
+        assert(trackid < inputLabels.size());
+
+        auto const &label = inputLabels[trackid];
+        LOG.VERBOSE() << "\n#### Dumping particle record for track id "
+                      << label.part.trackid << " ####";
+        LOG.VERBOSE() << "id " << label.part.id << " from " << label.part.parent_id << "\n"
+                      << "children: ";
+        for (auto const &child : label.part.children_id)
+            LOG.VERBOSE() <<  "   " << child;
+        LOG.VERBOSE() << label.part.dump();
+
+        size_t parent_trackid = label.part.parent_trackid;
+        while (parent_trackid < inputLabels.size())
+        {
+
+            auto const &parent = inputLabels[parent_trackid];
+            LOG.VERBOSE() << "Parent's group id: " << parent.part.group_id << " valid? " << parent.valid;
+            LOG.VERBOSE() << "Parent's children: " ;
+            for (auto const &child : parent.part.children_id)
+                LOG.VERBOSE() << "    " << child;
+            LOG.VERBOSE() << parent.part.dump();
+            if (parent_trackid == parent.part.parent_trackid)
+                break;
+            if (parent_trackid == supera::kINVALID_UINT)
+                break;
+            parent_trackid = parent.part.parent_trackid;
+        }
+        LOG.VERBOSE() << "\n\n#### Dump done ####";
+    } // LArTPCMLReco3D::DumpHierarchy()
+
+    // ------------------------------------------------------
 
     std::vector<supera::ParticleLabel> LArTPCMLReco3D::InitializeLabels(const std::vector<ParticleInput> & evtInput) const
     {

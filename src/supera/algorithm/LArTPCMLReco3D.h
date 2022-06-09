@@ -51,6 +51,9 @@ namespace supera {
         /// filter out any voxels voxels that have energy below the given threshold
         void ApplyEnergyThreshold(std::vector<supera::ParticleLabel>& labels) const;
 
+        /// write the full ancestry of true particle with specified GEANT4 track id to the debug stream
+        void DumpHierarchy(size_t trackid, const std::vector<supera::ParticleLabel>& inputLabels) const;
+
         /// Do the two given VoxelSets overlap at all?
         bool IsTouching(const ImageMeta3D& meta, const VoxelSet& vs1, const VoxelSet& vs2) const;
 
