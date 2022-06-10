@@ -28,7 +28,7 @@ namespace supera {
     /// Default constructor
     Voxel(VoxelID_t id = kINVALID_VOXELID, float value = kINVALID_FLOAT);
     /// Default destructor
-    ~Voxel() {}
+    ~Voxel() = default;
 
     /// ID getter
     inline VoxelID_t id() const { return _id; }
@@ -95,7 +95,7 @@ namespace supera {
     /// Default ctor
   VoxelSet() : _id(supera::kINVALID_INSTANCEID) {}
     /// Default dtor
-    virtual ~VoxelSet() {}
+    virtual ~VoxelSet() = default;
 
     //
     // Read-access
@@ -185,9 +185,9 @@ namespace supera {
   class VoxelSetArray {
   public:
     /// Default ctor
-    VoxelSetArray() {}
+    VoxelSetArray() = default;
     /// Default dtor
-    virtual ~VoxelSetArray() {}
+    virtual ~VoxelSetArray() = default;
 
     //
     // Read-access
