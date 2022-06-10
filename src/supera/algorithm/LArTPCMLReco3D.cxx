@@ -85,14 +85,8 @@ namespace supera {
 
         // Next, we need to clean up a number of edge cases that don't always get assigned correctly.
         this->FixOrphanShowerGroups(labels, output2trackid, trackid2output);
-
-
-        // For LEScatter orphans, we need to register the immediate valid (=to be stored) particle
         this->FixOrphanNonShowerGroups(labels, output2trackid, trackid2output);
-
-
-        // for shower particles with invalid parent ID, attempt a search
-        this->FixInvalidParentShowerGroups(particles, labels, trackid2output, output2trackid);
+        this->FixInvalidParentShowerGroups(labels, output2trackid, trackid2output);
 
 
         // Now sort out all parent IDs where it's simply not assigned
@@ -305,6 +299,96 @@ namespace supera {
         }
         LOG.VERBOSE() << "\n\n#### Dump done ####";
     } // LArTPCMLReco3D::DumpHierarchy()
+
+    // ------------------------------------------------------
+
+    void LArTPCMLReco3D::FixInvalidParentShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                                      std::vector<TrackID_t> &output2trackid,
+                                                      std::vector<int> &trackid2output) const
+    {
+        for (size_t out_index = 0; out_index < output2trackid.size(); ++out_index)
+        {
+            TrackID_t trackid = output2trackid[out_index];
+            auto &grp = inputLabels[trackid];
+            if (!grp.valid)
+                continue;
+            if (grp.part.parent_id != kINVALID_INSTANCEID)
+                continue;
+            if (grp.shape() != kShapeShower)
+                continue;
+            LOG.DEBUG() << "Analyzing particle id " << out_index << " trackid " << trackid << "\n"
+                        << grp.part.dump();
+            int parent_partid = -1;
+            unsigned int parent_trackid;
+            auto parent_trackid_v = ParentTrackIDs(trackid);
+            for (unsigned int idx : parent_trackid_v)
+            {
+                parent_trackid = idx;
+                if (trackid2output[parent_trackid] < 0 || !inputLabels[parent_trackid].valid)
+                    continue;
+                auto const &parent = inputLabels[parent_trackid].part;
+                // shower parent can be either shower, michel, or delta
+                if (parent.shape == kShapeMichel ||
+                    parent.shape == kShapeDelta ||
+                    parent.shape == kShapeShower)
+                    parent_partid = parent.id;
+                break;
+            }
+            /*
+            int own_partid = grp.part.id;
+            // initiate a search of parent in the valid output particle
+            int parent_trackid = grp.part.parent_track_id();
+            int parent_partid  = -1;
+            while(1) {
+          if(parent_trackid >= ((int)(trackid2index.size())) || trackid2index[parent_trackid] <0)
+            break;
+          if(parent_trackid < ((int)(trackid2output.size())) &&
+             trackid2output[parent_trackid] >= 0 &&
+             part_grp_v[parent_trackid].valid ) {
+            //parent_partid = trackid2output[parent_trackid];
+            parent_partid = part_grp_v[parent_trackid].part.id;
+            break;
+          }
+          parent_trackid = larmcp_v[trackid2index[parent_trackid]].Mother();
+            }
+            */
+            if (parent_partid >= 0)
+            {
+                // assert the group is same
+                auto &parent = inputLabels[output2trackid[parent_partid]];
+                if (grp.part.group_id == kINVALID_INSTANCEID)
+                {
+                    grp.part.group_id = parent.part.group_id;
+                    for (auto const &child_id : grp.part.children_id)
+                    {
+                        auto &child = inputLabels[output2trackid[child_id]];
+                        child.part.group_id = parent.part.group_id;
+                    }
+                }
+                else
+                {
+                    assert(grp.part.group_id == inputLabels[output2trackid[parent_partid]].part.group_id);
+                }
+                grp.part.parent_id = parent_partid;
+                inputLabels[parent_trackid].part.children_id.push_back(grp.part.id);
+                LOG.DEBUG() << "PartID " << grp.part.id << " (output index " << out_index << ") assigning parent "
+                            << parent_partid;
+            }
+            else
+            {
+                grp.part.parent_id = grp.part.id;
+                if (grp.part.group_id == kINVALID_INSTANCEID)
+                    grp.part.group_id = grp.part.id;
+                for (auto const &child_id : grp.part.children_id)
+                {
+                    auto &child = inputLabels[output2trackid[child_id]];
+                    child.part.group_id = grp.part.id;
+                }
+                LOG.DEBUG() << "PartID " << grp.part.id << " (output index " << out_index
+                            << ") assigning itself as a parent...";
+            } // else (original if: (parent_partid >= 0))
+        } // for (out_index)
+    } // LArTPCMLReco3D::FixInvalidParentShowerGroups
 
     // ------------------------------------------------------
 
