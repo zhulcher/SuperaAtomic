@@ -294,9 +294,9 @@ namespace supera {
                                           const supera::ImageMeta3D &meta,
                                           const std::vector<TrackID_t> &output2trackid)
     {
-        for (TrackID_t output_index : output2trackid)
+        for (std::size_t idx = 0; idx < output2trackid.size(); idx++)
         {
-            auto &grp = inputLabels[output_index];
+            auto &grp = inputLabels[idx];
             auto const &fs = grp.part.first_step;
             if (fs.pos.x != 0. || fs.pos.y != 0. || fs.pos.z != 0. || fs.time != 0.)
                 continue;
