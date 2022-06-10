@@ -48,6 +48,12 @@ namespace supera {
 
 
         // -----  internal group-sanitizing methods -----
+        /// The first step of the true trajectory is important, and sometimes winds up unset.
+        /// If so, clean it up using the first voxel attached to the label group.
+        static void FixFirstStepInfo(std::vector<supera::ParticleLabel> &inputLabels,
+                                     const supera::ImageMeta3D &meta,
+                                     const std::vector<TrackID_t> &output2trackid);
+
         /// Occasionally shower-type particles may be marked as merged to a parent, but have the wrong parent ID stored.
         /// Search for the right parent to try to fix it.
         void FixInvalidParentShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,

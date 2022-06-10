@@ -90,9 +90,7 @@ namespace supera {
         this->FixUnassignedParentGroups(labels, output2trackid, trackid2output);
         this->FixUnassignedGroups(labels, output2trackid);
         this->FixUnassignedLEScatterGroups(labels, output2trackid);
-
-        // Next loop over to find any particle for which first_step is not defined
-        this->FixFirstStepInfo(labels, meta3d, output2trackid);
+        this->FixFirstStepInfo(labels, meta, output2trackid);
 
 
         return result;
@@ -289,6 +287,38 @@ namespace supera {
         }
         LOG.VERBOSE() << "\n\n#### Dump done ####";
     } // LArTPCMLReco3D::DumpHierarchy()
+
+    // ------------------------------------------------------
+
+    void LArTPCMLReco3D::FixFirstStepInfo(std::vector<supera::ParticleLabel> &inputLabels,
+                                          const supera::ImageMeta3D &meta,
+                                          const std::vector<TrackID_t> &output2trackid)
+    {
+        for (TrackID_t output_index : output2trackid)
+        {
+            auto &grp = inputLabels[output_index];
+            auto const &fs = grp.part.first_step;
+            if (fs.pos.x != 0. || fs.pos.y != 0. || fs.pos.z != 0. || fs.time != 0.)
+                continue;
+            auto const vtx = grp.part.vtx.pos;
+            double min_dist = fabs(kINVALID_DOUBLE);
+            Point3D min_pt;
+            for (auto const &vox : grp.energy.as_vector())
+            {
+                auto const pt = meta.position(vox.id());
+                double dist = pt.squared_distance(vtx);
+                if (dist > min_dist)
+                    continue;
+                min_dist = dist;
+                min_pt = pt;
+            }
+            if (min_dist > (sqrt(3.) + 1.e-3))
+                grp.part.first_step = {kINVALID_DOUBLE, kINVALID_DOUBLE, kINVALID_DOUBLE, kINVALID_DOUBLE};
+            else
+                grp.part.first_step = {min_pt.x, min_pt.y, min_pt.z, grp.part.vtx.time};
+
+        }
+    } // LArTPCMLReco3D::FixFirstStepInfo()
 
     // ------------------------------------------------------
 
