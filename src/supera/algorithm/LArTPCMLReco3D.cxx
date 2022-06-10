@@ -258,7 +258,6 @@ namespace supera {
 
     } // LArTPCMLReco3D::AssignParticleGroupIDs()
 
-
     // ------------------------------------------------------
     
     void LArTPCMLReco3D::DumpHierarchy(size_t trackid, const std::vector<supera::ParticleLabel>& inputLabels) const
@@ -324,7 +323,7 @@ namespace supera {
                 if (parent.shape == kShapeMichel ||
                     parent.shape == kShapeDelta ||
                     parent.shape == kShapeShower)
-                    parent_partid = parent.id;
+                    parent_partid = static_cast<int>(parent.id);
                 break;
             }
             /*
@@ -549,7 +548,7 @@ namespace supera {
                     case kShapeLEScatter:
                     case kShapeGhost:
                         /*
-                        LARCV_CRITICAL() << "Unexpected type found while searching for kShapeShower orphans's root!" << std::endl;
+                        LOG.FATAL() << "Unexpected type found while searching for kShapeShower orphans's root!" << std::endl;
                         this->DumpHierarchy(trackid,part_grp_v);
                         throw std::exception();
                         */
