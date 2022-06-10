@@ -64,6 +64,11 @@ namespace supera {
                                    std::vector<supera::TrackID_t> &output2trackid,
                                    std::vector<int> &trackid2output) const;
 
+        /// Usually there are some label groups that wind up with no parents at all.  Clean those up too.
+        void FixUnassignedParentGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                       std::vector<TrackID_t> &output2trackid,
+                                       std::vector<int> &trackid2output) const;
+
         // -----  utility methods -----
         /// filter out any voxels voxels that have energy below the given threshold
         void ApplyEnergyThreshold(std::vector<supera::ParticleLabel>& labels) const;

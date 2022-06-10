@@ -87,11 +87,7 @@ namespace supera {
         this->FixOrphanShowerGroups(labels, output2trackid, trackid2output);
         this->FixOrphanNonShowerGroups(labels, output2trackid, trackid2output);
         this->FixInvalidParentShowerGroups(labels, output2trackid, trackid2output);
-
-
-        // Now sort out all parent IDs where it's simply not assigned
-        // (it's ok to have invalid parent id if parent track id is not stored)
-        this->FixUnassignedParentGroups(labels, trackid2output, output2trackid);
+        this->FixUnassignedParentGroups(labels, output2trackid, trackid2output);
 
         // Now loop over otuput particle list and check if any remaining group id needs to be assigned
         // Use its parent to group...
@@ -617,6 +613,54 @@ namespace supera {
             LOG.DEBUG() << "... after update ... \n" << inputLabels[trackid].part.dump();
         }
     } // LArTPCMLReco3D::FixOrphanShowerGroups()
+
+    // ------------------------------------------------------
+
+    void LArTPCMLReco3D::FixUnassignedParentGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                                   std::vector<TrackID_t> &output2trackid,
+                                                   std::vector<int> &trackid2output) const
+    {
+        LOG.DEBUG() << "Inspecting parent groups for unassigned entries...";
+        for (TrackID_t output_index : output2trackid)
+        {
+            auto &grp = inputLabels[output_index];
+            auto parent_trackid = grp.part.parent_trackid;
+            auto parent_id = grp.part.parent_id;
+            LOG.VERBOSE() << "  index=" << output_index
+                          << "  id=" << grp.part.id
+                          << "  track id=" << grp.part.trackid
+                          << "  parent trackid=" << parent_trackid
+                          << "  parent id=" << parent_id;
+
+            auto &parent = inputLabels[parent_trackid].part;
+            // if parent_id is invalid, try if parent_trackid can help out
+            if (parent_id == supera::kINVALID_INSTANCEID &&
+                parent_trackid != supera::kINVALID_UINT &&
+                trackid2output[parent_trackid] >= 0)
+            {
+                parent_id = trackid2output[parent_trackid];
+                grp.part.parent_id = parent_id;
+            }
+            // note that for shower types, the parent_id was already reset to be the same as the id in FixInvalidParentShowerGroups()
+            if (parent_id == kINVALID_INSTANCEID || parent_id == grp.part.id)
+                continue;
+            // if parent id is set, make sure this particle is in the children
+            auto children = parent.children_id;
+            bool add = true;
+            for (auto const &child : children)
+            {
+                if (child != grp.part.id)
+                    continue;
+                add = false;
+                break;
+            }
+            if (add)
+            {
+                children.push_back(grp.part.id);
+                parent.children_id = children;
+            }
+        } // for (output_index)
+    } // LArTPCMLReco3D::FixUnassignedParentGroups()
 
     // ------------------------------------------------------
 
