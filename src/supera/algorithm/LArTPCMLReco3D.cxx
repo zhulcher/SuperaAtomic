@@ -88,7 +88,7 @@ namespace supera {
 
 
         // For LEScatter orphans, we need to register the immediate valid (=to be stored) particle
-        this->FixOrphanNonShowerGroups(particles, output2trackid, labels, trackid2output);
+        this->FixOrphanNonShowerGroups(labels, output2trackid, trackid2output);
 
 
         // for shower particles with invalid parent ID, attempt a search
@@ -305,6 +305,90 @@ namespace supera {
         }
         LOG.VERBOSE() << "\n\n#### Dump done ####";
     } // LArTPCMLReco3D::DumpHierarchy()
+
+    // ------------------------------------------------------
+
+    void LArTPCMLReco3D::FixOrphanNonShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                                  const std::vector<TrackID_t> &output2trackid,
+                                                  std::vector<int> &trackid2output) const
+    {
+        LOG.VERBOSE() << "Examining outputs to find orphaned non-shower groups...";
+        for (size_t out_index = 0; out_index < output2trackid.size(); ++out_index)
+        {
+            TrackID_t trackid = output2trackid[out_index];
+            auto &grp = inputLabels[trackid];
+            // these were fixed in FixOrphanShowerGroups()
+            if (grp.shape() == kShapeShower)
+                continue;
+            if (grp.part.group_id != kINVALID_INSTANCEID)
+            {
+                LOG.VERBOSE() << "  group for trackid " << trackid << "  has group id " << grp.part.group_id << " already.  Skipping";
+                continue;
+            }
+            LOG.DEBUG() << " #### Non-shower ROOT SEARCH #### \n"
+                         << " Analyzing a particle index " << out_index << " id " << grp.part.id << "\n" << grp.part.dump();
+
+            auto parent_trackid_v = ParentTrackIDs(trackid);
+            std::stringstream ss;
+            ss << "   candidate ancestor track IDs:";
+            for (const auto & trkid : parent_trackid_v)
+                ss << " " << trkid;
+            LOG.VERBOSE() << ss.str();
+            size_t group_id = kINVALID_INSTANCEID;
+            bool stop = false;
+            for (auto const &parent_trackid : parent_trackid_v)
+            {
+                auto const &parent = inputLabels[parent_trackid];
+                LOG.VERBOSE() << "     considering ancestor: " << parent_trackid
+                              << ", which has output index " << trackid2output[parent_trackid] << ":\n"
+                              << parent.part.dump();
+                if (parent.part.pdg == 0)
+                {
+                    LOG.VERBOSE() << "      --> particle was removed from output (maybe a nuclear fragment?), keep looking";
+                    continue;
+                }
+                switch (parent.shape())
+                {
+                    case kShapeShower:
+                    case kShapeMichel:
+                    case kShapeDelta:
+                    case kShapeTrack:
+                    case kShapeLEScatter:
+                        // group candidate: check if it is "valid" = exists in the output
+                        if (parent.valid && trackid2output[parent_trackid] >= 0)
+                        {
+                            LOG.VERBOSE() << "      -->  accepted";
+                            group_id = trackid2output[parent_trackid];
+                            // found the valid group: stop the loop
+                            stop = true;
+                        }
+                        break;
+                    case kShapeUnknown:
+                    case kShapeGhost:
+                        LOG.FATAL() << "Unexpected type found while searching for non-shower orphans's root!";
+                        throw std::exception();
+                        break;
+                }
+                if (stop)
+                    break;
+            }
+            if (group_id == kINVALID_INSTANCEID)
+            {
+                LOG.DEBUG() << "Ignoring non-shower particle as its root particle (for group id) is not to be stored...\n"
+                             << grp.part.dump();
+                continue;
+            }
+            LOG.DEBUG() << "Assigning a group ID " << group_id << " to non-shower orphan\n"
+                         << "  Track ID " << grp.part.trackid << " PDG " << grp.part.pdg
+                         << " " << grp.part.process;
+            grp.part.group_id = group_id;
+            // todo: is this correct?  if we don't, the parent_id points to a nonexistent particle group...
+            grp.part.parent_id = group_id;
+
+            trackid2output[trackid] = static_cast<int>(group_id);
+        }
+    } // LArTPCMLReco3D::FixOrphanNonShowerGroups()
+
 
     // ------------------------------------------------------
 

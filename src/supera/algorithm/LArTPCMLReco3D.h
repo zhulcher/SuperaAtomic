@@ -48,6 +48,11 @@ namespace supera {
 
 
         // -----  internal group-sanitizing methods -----
+        /// Sometimes non-shower types that aren't the top of their own group don't get connected to the closest particle that is.  Try to fix that.
+        void FixOrphanNonShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                      const std::vector<TrackID_t> &output2trackid,
+                                      std::vector<int> &trackid2output) const;
+
         ///  Sometimes shower type groups don't get fully connected all the way back to their primary particle.  Fix those.
         void FixOrphanShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
                                    std::vector<supera::TrackID_t> &output2trackid,
