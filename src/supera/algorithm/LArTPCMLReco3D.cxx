@@ -88,9 +88,6 @@ namespace supera {
         this->FixOrphanNonShowerGroups(labels, output2trackid, trackid2output);
         this->FixInvalidParentShowerGroups(labels, output2trackid, trackid2output);
         this->FixUnassignedParentGroups(labels, output2trackid, trackid2output);
-
-        // Now loop over otuput particle list and check if any remaining group id needs to be assigned
-        // Use its parent to group...
         this->FixUnassignedGroups(labels, output2trackid);
 
         // Next handle LEScatter group id if not assigned yet
@@ -613,6 +610,96 @@ namespace supera {
             LOG.DEBUG() << "... after update ... \n" << inputLabels[trackid].part.dump();
         }
     } // LArTPCMLReco3D::FixOrphanShowerGroups()
+
+    // ------------------------------------------------------
+    
+    void LArTPCMLReco3D::FixUnassignedGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                             std::vector<TrackID_t> &output2trackid) const
+    {
+        for (size_t output_index = 0; output_index < output2trackid.size(); ++output_index)
+        {
+            auto &label = inputLabels[output2trackid[output_index]];
+            if (label.part.group_id != kINVALID_INSTANCEID)
+                continue;
+            auto shape = label.shape();
+            auto parent_shape = kShapeUnknown;
+            auto parent_partid = label.part.parent_id;
+            //auto parent_groupid = larcv::kINVALID_INSTANCEID;
+            // If delta, its own grouping
+
+            switch (shape)
+            {
+                case kShapeLEScatter:
+                    // if LEScatter, we handle later (next loop)
+                    break;
+                case kShapeDelta:
+                case kShapeMichel:
+                case kShapeTrack:
+                    // If delta, Michel, or track, it's own group
+                    label.part.group_id = output_index;
+                    for (auto const &child_index : label.part.children_id)
+                    {
+                        inputLabels[output2trackid[child_index]].part.group_id = output_index;
+                    }
+                    break;
+
+                case kShapeShower:
+                    // If shower && no parent, consider it as a primary = assign group id for all children
+                    if (parent_partid == kINVALID_INSTANCEID)
+                    {
+                        label.part.group_id = output_index;
+                        for (auto const &child_index : label.part.children_id)
+                            inputLabels[output2trackid[child_index]].part.group_id = output_index;
+                        continue;
+                    }
+                    parent_shape = inputLabels[output2trackid[parent_partid]].shape();
+                    switch (parent_shape)
+                    {
+                        case kShapeMichel:
+                        case kShapeDelta:
+                            label.part.group_id = parent_partid;
+                            for (auto const &child_index : label.part.children_id)
+                            {
+                                inputLabels[output2trackid[child_index]].part.group_id = parent_partid;
+                            }
+                            break;
+                        case kShapeTrack:
+                            label.part.group_id = output_index;
+                            for (auto const &child_index : label.part.children_id)
+                            {
+                                inputLabels[output2trackid[child_index]].part.group_id = output_index;
+                            }
+                            break;
+                        case kShapeShower:
+                            LOG.FATAL() << "Unexpected case: a shower has no group id while being a child of another shower...";
+                            DumpHierarchy(label.part.trackid, inputLabels);
+                            throw std::exception();
+                            /*
+                            // COMMENTED OUT as this is no longer expected
+                            parent_groupid = part_grp_v[output2trackid[parent_partid]].part.group_id();
+                            if(parent_groupid != larcv::kINVALID_INSTANCEID) {
+                              grp.part.group_id(parent_groupid);
+                              for(auto const& child_index : grp.part.children_id()) {
+                                part_grp_v[output2trackid[child_index]].part.group_id(parent_groupid);
+                              }
+                            }
+                            */
+                            break;
+                        case kShapeLEScatter:
+                            LOG.FATAL() << "Logic error: shower parent shape cannot be LEScatter!";
+                            throw std::exception();
+                        default:
+                            LOG.FATAL() << "Unexpected larcv::ShapeType_t encountered at " << __LINE__;
+                            throw std::exception();
+                    } // switch (parent_shape)
+                    break;
+                case kShapeGhost:
+                case kShapeUnknown:
+                    LOG.FATAL() << "Unexpected larcv::ShapeType_t encountered at " << __LINE__;
+                    throw std::exception();
+            } // switch(shape)
+        } // for (output_index)
+    } // LArTPCMLReco3D::FixUnassignedGroups()
 
     // ------------------------------------------------------
 
