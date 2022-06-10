@@ -16,8 +16,10 @@ namespace supera {
 		EventOutput Generate(const EventInput& data, const ImageMeta3D& meta) override;
 
 	private:
-        // ----- internal label initialization -----
+        // ----- label making -----
         std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
+
+        EventOutput BuildOutputLabels(std::vector<supera::ParticleLabel> &groupedInputLabels, const std::vector<TrackID_t> & output2trackid) const;
 
         // ----- internal label merging methods -----
         /// Merge deltas into their parents if they have fewer than threshold voxels

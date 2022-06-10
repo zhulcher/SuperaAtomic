@@ -90,7 +90,18 @@ namespace supera {
         this->FixUnassignedParentGroups(labels, output2trackid, trackid2output);
         this->FixUnassignedGroups(labels, output2trackid);
         this->FixUnassignedLEScatterGroups(labels, output2trackid);
-        this->FixFirstStepInfo(labels, meta, output2trackid);
+        LArTPCMLReco3D::FixFirstStepInfo(labels, meta, output2trackid);
+
+        // We're finally to fill in the output containers.
+        // There are two things we need:
+        //  (1) labels for each voxel (what semantic type is each one?)
+        //  (2) labels for particle groups.
+        // The output format is a collection of supera::ParticleLabels, each of which has voxels attached to it,
+        // so that covers both things.
+
+
+        std::vector<supera::ParticleLabel> outputLabels = this->BuildOutputLabels(labels, output2trackid);
+
 
 
         return result;
@@ -253,6 +264,72 @@ namespace supera {
         }
 
     } // LArTPCMLReco3D::AssignParticleGroupIDs()
+
+    // ------------------------------------------------------
+
+    EventOutput LArTPCMLReco3D::BuildOutputLabels(std::vector<supera::ParticleLabel> &groupedInputLabels, const std::vector<TrackID_t> & output2trackid) const
+    {
+        EventOutput outputLabels(output2trackid.size());
+        
+        for (size_t index = 0; index < output2trackid.size(); ++index)
+        {
+            TrackID_t trackid = output2trackid[index];
+            auto &groupedInputLabel = groupedInputLabels[_mcpl.TrackIdToIndex()[trackid]];
+
+            LOG.VERBOSE() << "Creating output cluster for group " << groupedInputLabel.part.id << " (" << groupedInputLabel.energy.size() << " voxels)";
+
+            // set semantic type
+            supera::SemanticType_t semantic = groupedInputLabel.shape();
+            if (semantic == kShapeUnknown)
+            {
+                LOG.FATAL() << "Unexpected type while assigning semantic class: " << groupedInputLabel.type;
+                auto const &part = groupedInputLabel.part;
+                LOG.FATAL() << "Particle ID " << part.id << " Type " << groupedInputLabel.type << " Valid " << groupedInputLabel.valid
+                            << " Track ID " << part.trackid << " PDG " << part.pdg
+                            << " " << part.process << " ... " << part.energy_init << " MeV => "
+                            << part.energy_deposit << " MeV "
+                            << groupedInputLabel.trackid_v.size() << " children " << groupedInputLabel.energy.size() << " voxels " << groupedInputLabel.energy.sum()
+                                 << " MeV";
+                LOG.FATAL() << "  Parent " << part.parent_trackid << " PDG " << part.parent_pdg
+                                 << " " << part.parent_process << " Ancestor " << part.ancestor_trackid
+                                 << " PDG " << part.ancestor_pdg << " " << part.ancestor_process;
+
+
+                throw std::exception();
+            }
+            // todo: how should this be fixed?  we don't have the LArSoft MCShowers
+            //if(semantic == larcv::kShapeLEScatter && mcs_trackid_s.find(trackid) == mcs_trackid_s.end()) {
+            //  LOG.FATAL() << "Unexpected particle to be stored with a shape kShapeLEScatter!" << std::endl;
+            //  this->DumpHierarchy(grp.part.track_id(),part_grp_v);
+            //  throw std::exception();
+            //}
+
+            // Now, we will re-classify some of non LEScatter showers based on pixel count
+            // (BUG FIX: use pca or something better)
+            if (groupedInputLabel.energy.size() < _compton_size)
+            {
+                LOG.DEBUG() << "Particle ID " << groupedInputLabel.part.id << " PDG " << groupedInputLabel.part.pdg << " "
+                            << groupedInputLabel.part.process << "\n"
+                            << "  ... type switching " << groupedInputLabel.part.shape << " => " << kShapeLEScatter
+                            << " (voxel count " << groupedInputLabel.energy.size() << " < " << _compton_size << ")";
+                semantic = kShapeLEScatter;
+            }
+
+            // store the shape (semantic) type in particle
+            groupedInputLabel.part.shape = semantic;
+            // store the voxel count and energy deposit
+            groupedInputLabel.part.energy_deposit = groupedInputLabel.energy.sum();
+
+            // duplicate the particle to the output container
+            outputLabels[index] = groupedInputLabel;
+
+            // set the particle in the original container to 'invalid' so we don't accidentally use it again
+            groupedInputLabel.valid = false;
+        } // for (index)
+
+        return outputLabels;
+    } // LArTPCMLReco3D::BuildOutputClusters
+
 
     // ------------------------------------------------------
     
