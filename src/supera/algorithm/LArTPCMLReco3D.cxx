@@ -89,8 +89,6 @@ namespace supera {
         this->FixInvalidParentShowerGroups(labels, output2trackid, trackid2output);
         this->FixUnassignedParentGroups(labels, output2trackid, trackid2output);
         this->FixUnassignedGroups(labels, output2trackid);
-
-        // Next handle LEScatter group id if not assigned yet
         this->FixUnassignedLEScatterGroups(labels, output2trackid);
 
         // Next loop over to find any particle for which first_step is not defined
@@ -699,6 +697,56 @@ namespace supera {
             } // switch(shape)
         } // for (output_index)
     } // LArTPCMLReco3D::FixUnassignedGroups()
+
+    // ------------------------------------------------------
+
+    void LArTPCMLReco3D::FixUnassignedLEScatterGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                                               const std::vector<TrackID_t> &output2trackid) const
+    {
+        LOG.DEBUG() << "Inspecting LEScatter groups for invalid group ids...";
+        for (auto & label : inputLabels)
+//    for (size_t output_index = 0; output_index < output2trackid.size(); ++output_index)
+        {
+//      auto &grp = part_grp_v[output2trackid[output_index]];
+            if (label.shape() != kShapeLEScatter)
+                continue;
+
+            LOG.VERBOSE() << "   trackid=" << label.part.trackid << " group=" << label.part.group_id;
+            if (label.part.group_id != kINVALID_INSTANCEID)
+            {
+                LOG.VERBOSE() << "     --> group is valid; don't update.";
+                continue;
+            }
+
+            // assign parent's group, otherwise leave as is = kINVALID_INSTANCEID
+            auto parent_partid = label.part.parent_id;
+            if (parent_partid == kINVALID_INSTANCEID)
+            {
+                LOG.VERBOSE() << "     --> invalid, but parent also has invalid parent id??  Can't fix...";
+                continue;
+            }
+
+            // todo: I think there's a more efficient way to find this using
+            //       one of the intermediate vectors, but I can't work it out at the moment
+            auto parent_part = *std::find_if(inputLabels.begin(), inputLabels.end(),
+                                             [&](const supera::ParticleLabel & searchGrp)
+                                             {
+                                                 return searchGrp.part.trackid == label.part.parent_trackid;
+                                             });
+            if (parent_part.part.group_id != supera::kINVALID_INSTANCEID)
+            {
+                LOG.VERBOSE() << "     --> rewrote group id to parent (trackid=" << parent_part.part.trackid
+                              << ")'s group id = " << parent_part.part.group_id;
+                label.part.group_id = parent_part.part.group_id;
+            }
+            else
+            {
+                LOG.VERBOSE() << "     --> no valid parent.  Rewrote group id to its own particle ID ("
+                              << label.part.id << ")";
+                label.part.group_id = label.part.id;
+            }
+        } // for (label)
+    } // LArTPCMLReco3D::FixUnassignedLEScatterGroups
 
     // ------------------------------------------------------
 

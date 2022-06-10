@@ -70,6 +70,11 @@ namespace supera {
         void FixUnassignedGroups(std::vector<supera::ParticleLabel> &inputLabels,
                                  std::vector<TrackID_t> &output2trackid) const;
 
+        /// Rescue any LEScatter type labels that wind up unassociated.
+        /// (See also \ref FixUnassignedGroups.)
+        void FixUnassignedLEScatterGroups(std::vector<supera::ParticleLabel> &inputLabels,
+                                          const std::vector<TrackID_t> &output2trackid) const;
+
         /// Usually there are some label groups that wind up with no parents at all.  Clean those up too.
         void FixUnassignedParentGroups(std::vector<supera::ParticleLabel> &inputLabels,
                                        std::vector<TrackID_t> &output2trackid,
