@@ -269,7 +269,8 @@ namespace supera {
 
     EventOutput LArTPCMLReco3D::BuildOutputLabels(std::vector<supera::ParticleLabel> &groupedInputLabels, const std::vector<TrackID_t> & output2trackid) const
     {
-        EventOutput outputLabels(output2trackid.size());
+        EventOutput outputLabels;
+        outputLabels.Particles().resize(output2trackid.size());
         
         for (size_t index = 0; index < output2trackid.size(); ++index)
         {
@@ -321,7 +322,7 @@ namespace supera {
             groupedInputLabel.part.energy_deposit = groupedInputLabel.energy.sum();
 
             // duplicate the particle to the output container
-            outputLabels[index] = groupedInputLabel;
+            outputLabels.Particles()[index] = groupedInputLabel;
 
             // set the particle in the original container to 'invalid' so we don't accidentally use it again
             groupedInputLabel.valid = false;
