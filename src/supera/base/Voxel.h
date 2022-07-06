@@ -175,7 +175,7 @@ namespace supera {
     { paint(value); return (*this); }
 
     // assign & move assign operators
-    inline VoxelSet& operator=(const VoxelSet & rhs) noexcept = default;
+    inline VoxelSet& operator=(const VoxelSet & rhs) = default;
     inline VoxelSet& operator=(VoxelSet && rhs) noexcept { _id = rhs._id; _voxel_v = std::move(rhs._voxel_v); return *this; }
 
   private:
