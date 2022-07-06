@@ -57,7 +57,7 @@ namespace supera {
     {}
 
     /// Default destructor
-    ~Particle(){}
+    ~Particle() = default;
 
     inline double p() const { return sqrt(pow(px,2)+pow(py,2)+pow(pz,2)); }
     std::string dump() const;
