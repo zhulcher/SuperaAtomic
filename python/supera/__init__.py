@@ -1,4 +1,5 @@
 from . pysupera import *
+from . pysupera import test as test
 
 import os
 

@@ -6,12 +6,14 @@ add_subdirectory(base)
 add_subdirectory(data)
 add_subdirectory(algorithm)
 add_subdirectory(process)
+add_subdirectory(test)
 
 add_library(supera SHARED
     $<TARGET_OBJECTS:base>
     $<TARGET_OBJECTS:data>
     $<TARGET_OBJECTS:algorithm>
     $<TARGET_OBJECTS:process>
+    $<TARGET_OBJECTS:test>
 )
 
 target_link_libraries(supera 
@@ -24,7 +26,7 @@ if(NOT WITHOUT_PYTHON)
     # Python binding (via pybind11)
     ###############################
 
-    pybind11_add_module(pysupera SHARED supera_pybind.cxx)
+    pybind11_add_module(pysupera MODULE supera_pybind.cxx)
 
     # Add a shared library
     set_target_properties(pysupera PROPERTIES SKIP_BUILD_RPATH FALSE)
