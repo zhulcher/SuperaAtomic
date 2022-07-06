@@ -1442,14 +1442,15 @@ namespace supera {
         {
             if (accessed.find(parent_trackid) != accessed.end())
             {
-                LOG.FATAL() << "LOOP-LOGIC-ERROR for ParentTrackIDs for track id " << trackid;
+                LOG.FATAL() << "LOOP-LOGIC-ERROR for ParentTrackIDs for track id " << trackid << ": repeated ancestor!\n";
+                LOG.FATAL() << "Ancestors found:\n";
                 for (size_t parent_cand_idx = 0; parent_cand_idx < result.size(); ++parent_cand_idx)
                 {
                     auto const &parent_cand_trackid = result[parent_cand_idx];
-                    LOG.FATAL() << "Parent " << parent_cand_idx
-                                << " Track ID " << parent_trackid
-                                << " PDG " << _mcpl.PdgCode()[trackid2index[parent_trackid]]
-                                << " Mother " << _mcpl.ParentTrackId()[trackid2index[parent_trackid]];
+                    LOG.FATAL() << "Ancestor #" << parent_cand_idx
+                                << " Track ID " << parent_cand_trackid
+                                << " PDG " << _mcpl.PdgCode()[trackid2index[parent_cand_trackid]]
+                                << " Its mother " << _mcpl.ParentTrackId()[trackid2index[parent_cand_trackid]];
                 }
                 throw meatloaf();
             }
