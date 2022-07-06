@@ -108,6 +108,11 @@ namespace supera {
   class ParticleLabel {
   public:
     ParticleLabel(size_t num_planes=0);
+    ParticleLabel(const ParticleLabel& other) = default;
+    ParticleLabel(ParticleLabel&& other) = default;
+
+    ParticleLabel & operator=(const ParticleLabel& other) = default;
+
     void AddEDep(const EDep& pt);
     void SizeCheck() const;
     size_t Size() const;

@@ -93,7 +93,14 @@ namespace supera {
   class VoxelSet {
   public:
     /// Default ctor
-  VoxelSet() : _id(supera::kINVALID_INSTANCEID) {}
+    VoxelSet() : _id(supera::kINVALID_INSTANCEID) {}
+
+    /// Copy constructor
+    VoxelSet(const VoxelSet & rhs) = default;
+
+      /// Move constructor
+    VoxelSet(VoxelSet && rhs) = default;  //{ _id = rhs._id; _voxel_v = std::move(rhs._voxel_v); return *this; }
+
     /// Default dtor
     virtual ~VoxelSet() = default;
 
@@ -167,7 +174,7 @@ namespace supera {
     inline VoxelSet& operator =  (float value)
     { paint(value); return (*this); }
 
-    // copy & move operators
+    // assign & move assign operators
     inline VoxelSet& operator=(const VoxelSet & rhs) noexcept = default;
     inline VoxelSet& operator=(VoxelSet && rhs) noexcept { _id = rhs._id; _voxel_v = std::move(rhs._voxel_v); return *this; }
 
