@@ -101,6 +101,102 @@ namespace supera {
     }else
     return supera::kShapeTrack;
   }
-  
 
-}
+  // --------------------------------------------------------
+
+  const supera::VoxelSet &EventOutput::VoxelDeDxs() const
+  {
+    // recompute only if particle list has changed under us
+    if (IsDirty(DIRTY_FLAG::kDeDx))
+    {
+      // we want an energy-weighted mean here.
+      // first add all the dEdXs up, weighted by their energies...
+      supera::VoxelSet dEdXs;
+      for (const supera::ParticleLabel & part : Particles())
+      {
+        for (const supera::Voxel & dedx : part.dedx.as_vector())
+          dEdXs.emplace(dedx.id(), dedx.value() * VoxelEnergies().find(dedx.id()).value(), true);
+      }
+
+      // now renormalize them...
+      for (const supera::Voxel & dedx : dEdXs.as_vector())
+      {
+        auto energy = VoxelEnergies().find(dedx.id()).value();
+        if (energy > 0)
+          dEdXs.emplace(dedx.id(), dedx.value() / energy, false);
+      }
+
+      _dEdXs = std::move(dEdXs);
+    } // if (IsDirty(...))
+
+    return _dEdXs;
+  }
+
+  // --------------------------------------------------------
+
+  const supera::VoxelSet &EventOutput::VoxelEnergies() const
+  {
+    // recompute only if particle list has changed under us
+    if (IsDirty(DIRTY_FLAG::kEnergy))
+    {
+      supera::VoxelSet energies;
+      for (const supera::ParticleLabel & part : Particles())
+        energies.emplace(part.energy, true);
+      _energies = std::move(energies);
+    }
+
+    return _energies;
+  }
+
+  // --------------------------------------------------------
+
+  const supera::VoxelSet &
+  EventOutput::VoxelLabels(const std::vector<supera::SemanticType_t> &semanticPriority) const
+  {
+    // recompute only if particle list has changed under us
+    if (IsDirty(DIRTY_FLAG::kLabel))
+    {
+      supera::VoxelSet semantics;
+      for (const supera::ParticleLabel & part : Particles())
+      {
+        auto const &vs = part.energy;
+        SemanticType_t semantic = part.shape();
+        for (auto const &vox : vs.as_vector())
+        {
+          auto const &prev = semantics.find(vox.id());
+          if (prev.id() == supera::kINVALID_VOXELID)
+            semantics.emplace(vox.id(), semantic, false);
+          else
+          {
+            // todo: what if the new voxel has 10x the energy??
+            SemanticType_t prioritized_semantic = EventOutput::_SemanticPriority(static_cast<SemanticType_t>(prev.value()), semantic, semanticPriority);
+            if (prioritized_semantic != static_cast<SemanticType_t>(prev.value()))
+              semantics.emplace(vox.id(), semantic, false);
+          }
+        } // for (vox)
+      } // for (part)
+
+      _semanticLabels = std::move(semantics);
+    } // if (IsDirty(...))
+
+    return _semanticLabels;
+  }
+
+  // --------------------------------------------------------
+
+  supera::SemanticType_t EventOutput::_SemanticPriority(supera::SemanticType_t a, supera::SemanticType_t b,
+                                                        const std::vector<supera::SemanticType_t> & semanticPriority)
+  {
+    if (a == b)
+      return a;
+    for (auto const &semantic : semanticPriority)
+    {
+      if (a == semantic)
+        return a;
+      if (b == semantic)
+        return b;
+    }
+    return a;
+  }
+
+} // namespace supera
