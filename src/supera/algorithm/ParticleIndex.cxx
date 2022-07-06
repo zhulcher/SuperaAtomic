@@ -35,7 +35,7 @@ namespace supera{
       _trackid_v[index] = abs(mcpart.trackid);
       _pdgcode_v[index] = abs(mcpart.pdg);
       _parent_trackid_v[index] = mcpart.parent_trackid;
-      if(mcpart.trackid >= ((int)(_trackid2index.size()))) _trackid2index.resize(mcpart.trackid+1, supera::kINVALID_INDEX);
+      if(mcpart.trackid >= _trackid2index.size()) _trackid2index.resize(mcpart.trackid+1, supera::kINVALID_INDEX);
       _trackid2index[mcpart.trackid] = index;
     }
     // now fill in the mapping between the index in the particle array <-> Parent/Ancestor info.
@@ -51,7 +51,7 @@ namespace supera{
       if(mother_id == 0) mother_id = abs(mcpart.trackid);
 
       // Otherwise search if a mother particle is available
-      if(mother_id < ((int)(_trackid2index.size()))) {
+      if(mother_id < _trackid2index.size()) {
         mother_index = _trackid2index[mother_id];
         if(mother_index != supera::kINVALID_INDEX) {
           _parent_pdg_v[index] = larmcp_v[mother_index].part.pdg;
@@ -63,7 +63,6 @@ namespace supera{
       unsigned long parent_track_id  = mcpart.parent_trackid;
       unsigned long ancestor_index = supera::kINVALID_INDEX;
       unsigned long ancestor_track_id = supera::kINVALID_TRACKID;
-      long ancestor_pdg = supera::kINVALID_PDG;
       while(true) {
         if((size_t)(parent_track_id) >= _trackid2index.size())
           break;

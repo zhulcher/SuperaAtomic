@@ -682,7 +682,7 @@ namespace supera {
                     break;
             }
             LOG.VERBOSE() << " found root ancestor: trkid " << root_trackid << " (particle id()=" << root_id << ")";
-            if (root_id < ((int) (output2trackid.size())) && trackid2output[root_trackid] != (int) (root_id))
+            if (root_id < output2trackid.size() && trackid2output[root_trackid] != (int) (root_id))
             {
                 LOG.FATAL() << "Logic error for the search of shower root particle for an orphan..." << "\n"
                             << "This particle id=" << out_index << " and track_id=" << trackid << "\n"
@@ -691,7 +691,7 @@ namespace supera {
                 throw std::exception();
             }
 
-            if (((int) (output2trackid.size())) <= root_id)
+            if (output2trackid.size() <= root_id)
             {
                 output2trackid.push_back(root_trackid);
                 // Register the root parent to the output
