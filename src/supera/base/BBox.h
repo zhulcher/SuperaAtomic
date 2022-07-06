@@ -51,7 +51,7 @@ namespace supera {
     bool contains(const Point3D& point) const;
     bool contains(double x, double y, double z) const;
 
-    std::string dump() const;
+    virtual std::string dump() const;
 
   private:
 
