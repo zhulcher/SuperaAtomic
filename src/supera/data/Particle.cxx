@@ -1,8 +1,36 @@
 #include "Particle.h"
+
 #include <iostream>
+#include <sstream>
 
 namespace supera {
 
+
+  std::string Particle::dump() const
+  {
+    std::stringstream ss;
+    std::stringstream buf;
+    ss  << "      \033[95m" << "Particle " << " (PdgCode,TrackID) = (" << pdg << "," << trackid << ")\033[00m "
+        << "... with Parent (" << parent_pdg << "," << parent_trackid << ")" << std::endl;
+    buf << "      ";
+
+    ss << buf.str() << "Vertex   (x, y, z, t) = (" << vtx.pos.x << "," << vtx.pos.y << "," << vtx.pos.z << "," << vtx.time << ")" << std::endl
+       << buf.str() << "Momentum (px, py, pz) = (" << px << "," << py << "," << pz << ")" << std::endl
+       << buf.str() << "Inittial Energy  = " << energy_init << std::endl
+       << buf.str() << "Deposit  Energy  = " << energy_deposit << std::endl
+       << buf.str() << "Creation Process = " << process << std::endl
+       << buf.str() << "Group ID = " << group_id << std::endl
+       << buf.str() << "Shape = " << shape << std::endl;
+    ss << buf.str() << "Children =  ";
+    for (const auto & child :  children_id)
+      ss << " " << child;
+    ss << std::endl;
+
+    return ss.str();
+
+  }
+
+  // --------------------------------------------------------
 
   ParticleLabel::ParticleLabel(size_t num_planes)
   : valid(false)
@@ -193,5 +221,4 @@ namespace supera {
     }
     return a;
   }
-
 } // namespace supera
