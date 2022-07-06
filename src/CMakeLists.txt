@@ -97,3 +97,9 @@ include_directories(${HDF5_INCLUDE_DIR})
 #include_directories(${LARCV_INCLUDE_DIR})
 
 add_subdirectory(supera)
+
+# if the build isn't being driven by scikit-build, we won't get the python __init__.py installed correctly
+if(NOT SKBUILD)
+    message("Not using scikit-build.  Installing supera's __init__.py by hand!...")
+    install(FILES ../python/supera/__init__.py DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()
