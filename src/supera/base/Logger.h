@@ -21,7 +21,7 @@
     const Logger & threshold() const \
     { \
         if (_thresh >= THRESHOLD::threshold) \
-            (*this) << (_preamble.empty() ? "" : _preamble) << (!_preamble.empty() ? " " : "") << #threshold << ": " << obj << std::endl; \
+            (*this) << (_preamble.empty() ? "" : _preamble) << (!_preamble.empty() ? " " : "") << #threshold << ": "; \
         return *this; \
     }
 

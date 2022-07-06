@@ -128,7 +128,7 @@ namespace supera {
                 const auto & vox = energy_vec[idx];
                 if (vox.value() < _edep_threshold)
                 {
-                    LOG.VERBOSE() << "  Dropping below-threshold voxel " << vox.id() << " with edep = " << vox.value();
+                    LOG.VERBOSE() << "  Dropping below-threshold voxel " << vox.id() << " with edep = " << vox.value() << "\n";
                     continue;
                 }
                 energies.emplace(vox.id(), vox.value(), true);
@@ -162,33 +162,33 @@ namespace supera {
         output2trackid.clear();
 
         // assign particle group ID numbers and make sure they have all info set
-        LOG.VERBOSE() << "Considering incoming particle groups:";
+        LOG.VERBOSE() << "Considering incoming particle groups:\n";
         for (auto & inputLabel : inputLabels)
         {
-            LOG.VERBOSE() << " Particle ID=" << inputLabel.part.id << " Track ID=" << inputLabel.part.trackid;
-            LOG.VERBOSE() << "     Edep=" << inputLabel.part.energy_deposit;
+            LOG.VERBOSE() << " Particle ID=" << inputLabel.part.id << " Track ID=" << inputLabel.part.trackid << "\n";
+            LOG.VERBOSE() << "     Edep=" << inputLabel.part.energy_deposit << "\n";
             size_t output_counter = output2trackid.size();
             if (!inputLabel.valid)
             {
-                LOG.VERBOSE() << "   --> invalid group (i.e. already merged), skipping";
+                LOG.VERBOSE() << "   --> invalid group (i.e. already merged), skipping \n";
                 continue;
             }
             if (inputLabel.part.process != "primary" && inputLabel.Size() < 1)
             {
-                LOG.VERBOSE() << "   --> no voxels, skipping";
+                LOG.VERBOSE() << "   --> no voxels, skipping \n";
                 continue;
             }
             // Also define particle "first step" and "last step"
             auto &part = inputLabel.part;
             auto const &first_pt = inputLabel.first_pt;
             auto const &last_pt = inputLabel.last_pt;
-            LOG.VERBOSE() << "      examining true particle start:" << first_pt.x<< " " << first_pt.y << " " << first_pt.z;
+            LOG.VERBOSE() << "      examining true particle start:" << first_pt.x<< " " << first_pt.y << " " << first_pt.z << "\n";
             if (first_pt.t != kINVALID_DOUBLE)
                 part.first_step = supera::Vertex(first_pt.x, first_pt.y, first_pt.z, first_pt.t);
             if (last_pt.t != kINVALID_DOUBLE)
                 part.last_step = supera::Vertex(last_pt.x, last_pt.y, last_pt.z, last_pt.t);
-            LOG.VERBOSE() << "     true particle start: " << inputLabel.part.first_step.dump()
-                          << "                   end: " << inputLabel.part.last_step.dump();
+            LOG.VERBOSE() << "     true particle start: " << inputLabel.part.first_step.dump() << "\n"
+                          << "                   end: " << inputLabel.part.last_step.dump() << "\n";
             inputLabel.part.energy_deposit = inputLabel.energy.size() ? inputLabel.energy.sum() : 0.;
 
 
@@ -199,7 +199,7 @@ namespace supera {
             //}
 
             inputLabel.part.id = output_counter;
-            LOG.VERBOSE() << "   --> Assigned output group id = " << inputLabel.part.id;
+            LOG.VERBOSE() << "   --> Assigned output group id = " << inputLabel.part.id << "\n";
             trackid2output[inputLabel.part.trackid] = static_cast<int>(output_counter);
             for (auto const &child : inputLabel.trackid_v)
                 trackid2output[child] = static_cast<int>(output_counter);
@@ -207,30 +207,30 @@ namespace supera {
             ++output_counter;
         }
 
-        LOG.VERBOSE() << "trackid2output (i.e., map of track IDs to output group IDs) contents:";
+        LOG.VERBOSE() << "trackid2output (i.e., map of track IDs to output group IDs) contents:\n";
         for (std::size_t idx = 0; idx < trackid2output.size(); idx++)
-            LOG.VERBOSE() << "   " << idx << " -> " << trackid2output[idx];
+            LOG.VERBOSE() << "   " << idx << " -> " << trackid2output[idx] << "\n";
 
         // now assign relationships
-        LOG.VERBOSE() << "Assigning group relationships:";
+        LOG.VERBOSE() << "Assigning group relationships:\n";
         for (auto const &trackid : output2trackid)
         {
             auto &inputLabel = inputLabels[trackid];
             LOG.VERBOSE() << "  Group for trackid=" << trackid
-                          << " (pdg = " << inputLabel.part.pdg << ", particle id=" << inputLabel.part.id << ")";
+                          << " (pdg = " << inputLabel.part.pdg << ", particle id=" << inputLabel.part.id << ")\n";
             if (std::abs(inputLabel.part.pdg) != 11 && std::abs(inputLabel.part.pdg) != 22)
             {
                 LOG.VERBOSE() << "    ---> not EM, leaving alone (parent id=" << inputLabel.part.parent_id
-                              << " and group id=" << inputLabel.part.group_id << ")";
+                              << " and group id=" << inputLabel.part.group_id << ")\n";
                 continue;
             }
 
             unsigned int parent_trackid = inputLabel.part.parent_trackid;
-            LOG.VERBOSE() << "   initial parent track id:" << parent_trackid;
+            LOG.VERBOSE() << "   initial parent track id:" << parent_trackid << "\n";
 
             if (parent_trackid != supera::kINVALID_UINT && trackid2output[parent_trackid] >= 0)
             {
-                LOG.VERBOSE() << "   --> assigning group for trackid " << trackid << " to parent trackid: " << parent_trackid;
+                LOG.VERBOSE() << "   --> assigning group for trackid " << trackid << " to parent trackid: " << parent_trackid << "\n";
                 /*
                 if(trackid2output[parent_trackid] < 0)
             grp.part.parent_id(grp.part.id());
@@ -245,7 +245,7 @@ namespace supera {
             else
             {
                 LOG.VERBOSE() << "     --> no valid ancestor.  Assigning this particle's parent IDs to itself.  "
-                              << " (group id=" << inputLabel.part.group_id << ")";
+                              << " (group id=" << inputLabel.part.group_id << ")\n";
                 // otherwise checks in CheckParticleValidity() will fail (parent ID will point to something not in output)
                 inputLabel.part.parent_id = inputLabel.part.id;
             }
@@ -259,7 +259,7 @@ namespace supera {
                 continue;
             part.group_id = part.id;
             part.parent_id = part.id;
-            LOG.VERBOSE() << "Assigned primary particle's own ID to its group and parent IDs:\n" << part.dump();
+            LOG.VERBOSE() << "Assigned primary particle's own ID to its group and parent IDs:\n" << part.dump() << "\n";
         }
 
     } // LArTPCMLReco3D::AssignParticleGroupIDs()
@@ -279,23 +279,24 @@ namespace supera {
             TrackID_t trackid = output2trackid[index];
             auto &groupedInputLabel = groupedInputLabels[_mcpl.TrackIdToIndex()[trackid]];
 
-            LOG.VERBOSE() << "Creating output cluster for group " << groupedInputLabel.part.id << " (" << groupedInputLabel.energy.size() << " voxels)";
+            LOG.VERBOSE() << "Creating output cluster for group " << groupedInputLabel.part.id << " (" << groupedInputLabel.energy.size() << " voxels)\n";
 
             // set semantic type
             supera::SemanticType_t semantic = groupedInputLabel.shape();
             if (semantic == kShapeUnknown)
             {
-                LOG.FATAL() << "Unexpected type while assigning semantic class: " << groupedInputLabel.type;
+                LOG.FATAL() << "Unexpected type while assigning semantic class: " << groupedInputLabel.type << "\n";
                 auto const &part = groupedInputLabel.part;
                 LOG.FATAL() << "Particle ID " << part.id << " Type " << groupedInputLabel.type << " Valid " << groupedInputLabel.valid
                             << " Track ID " << part.trackid << " PDG " << part.pdg
                             << " " << part.process << " ... " << part.energy_init << " MeV => "
                             << part.energy_deposit << " MeV "
                             << groupedInputLabel.trackid_v.size() << " children " << groupedInputLabel.energy.size() << " voxels " << groupedInputLabel.energy.sum()
-                                 << " MeV";
+                                 << " MeV\n";
                 LOG.FATAL() << "  Parent " << part.parent_trackid << " PDG " << part.parent_pdg
                                  << " " << part.parent_process << " Ancestor " << part.ancestor_trackid
-                                 << " PDG " << part.ancestor_pdg << " " << part.ancestor_process;
+                                 << " PDG " << part.ancestor_pdg << " " << part.ancestor_process
+                                 << "\n";
 
 
                 throw std::exception();
@@ -314,7 +315,7 @@ namespace supera {
                 LOG.DEBUG() << "Particle ID " << groupedInputLabel.part.id << " PDG " << groupedInputLabel.part.pdg << " "
                             << groupedInputLabel.part.process << "\n"
                             << "  ... type switching " << groupedInputLabel.part.shape << " => " << kShapeLEScatter
-                            << " (voxel count " << groupedInputLabel.energy.size() << " < " << _compton_size << ")";
+                            << " (voxel count " << groupedInputLabel.energy.size() << " < " << _compton_size << ")\n";
                 semantic = kShapeLEScatter;
             }
 
@@ -358,30 +359,30 @@ namespace supera {
 
         auto const &label = inputLabels[trackid];
         LOG.VERBOSE() << "\n#### Dumping particle record for track id "
-                      << label.part.trackid << " ####";
+                      << label.part.trackid << " ####\n";
         LOG.VERBOSE() << "id " << label.part.id << " from " << label.part.parent_id << "\n"
                       << "children: ";
         for (auto const &child : label.part.children_id)
             LOG.VERBOSE() <<  "   " << child;
-        LOG.VERBOSE() << label.part.dump();
+        LOG.VERBOSE() << "\n" << label.part.dump() << "\n";
 
         size_t parent_trackid = label.part.parent_trackid;
         while (parent_trackid < inputLabels.size())
         {
 
             auto const &parent = inputLabels[parent_trackid];
-            LOG.VERBOSE() << "Parent's group id: " << parent.part.group_id << " valid? " << parent.valid;
+            LOG.VERBOSE() << "Parent's group id: " << parent.part.group_id << " valid? " << parent.valid << "\n";
             LOG.VERBOSE() << "Parent's children: " ;
             for (auto const &child : parent.part.children_id)
                 LOG.VERBOSE() << "    " << child;
-            LOG.VERBOSE() << parent.part.dump();
+            LOG.VERBOSE() << "\n" << parent.part.dump() << "\n";
             if (parent_trackid == parent.part.parent_trackid)
                 break;
             if (parent_trackid == supera::kINVALID_UINT)
                 break;
             parent_trackid = parent.part.parent_trackid;
         }
-        LOG.VERBOSE() << "\n\n#### Dump done ####";
+        LOG.VERBOSE() << "\n\n#### Dump done ####\n";
     } // LArTPCMLReco3D::DumpHierarchy()
 
     // ------------------------------------------------------
@@ -433,7 +434,7 @@ namespace supera {
             if (grp.shape() != kShapeShower)
                 continue;
             LOG.DEBUG() << "Analyzing particle id " << out_index << " trackid " << trackid << "\n"
-                        << grp.part.dump();
+                        << grp.part.dump() << "\n";
             int parent_partid = -1;
             unsigned int parent_trackid;
             auto parent_trackid_v = ParentTrackIDs(trackid);
@@ -488,7 +489,7 @@ namespace supera {
                 grp.part.parent_id = parent_partid;
                 inputLabels[parent_trackid].part.children_id.push_back(grp.part.id);
                 LOG.DEBUG() << "PartID " << grp.part.id << " (output index " << out_index << ") assigning parent "
-                            << parent_partid;
+                            << parent_partid << "\n";
             }
             else
             {
@@ -501,7 +502,7 @@ namespace supera {
                     child.part.group_id = grp.part.id;
                 }
                 LOG.DEBUG() << "PartID " << grp.part.id << " (output index " << out_index
-                            << ") assigning itself as a parent...";
+                            << ") assigning itself as a parent...\n";
             } // else (original if: (parent_partid >= 0))
         } // for (out_index)
     } // LArTPCMLReco3D::FixInvalidParentShowerGroups
@@ -512,7 +513,7 @@ namespace supera {
                                                   const std::vector<TrackID_t> &output2trackid,
                                                   std::vector<int> &trackid2output) const
     {
-        LOG.VERBOSE() << "Examining outputs to find orphaned non-shower groups...";
+        LOG.VERBOSE() << "Examining outputs to find orphaned non-shower groups...\n";
         for (size_t out_index = 0; out_index < output2trackid.size(); ++out_index)
         {
             TrackID_t trackid = output2trackid[out_index];
@@ -522,18 +523,18 @@ namespace supera {
                 continue;
             if (grp.part.group_id != kINVALID_INSTANCEID)
             {
-                LOG.VERBOSE() << "  group for trackid " << trackid << "  has group id " << grp.part.group_id << " already.  Skipping";
+                LOG.VERBOSE() << "  group for trackid " << trackid << "  has group id " << grp.part.group_id << " already.  Skipping\n";
                 continue;
             }
             LOG.DEBUG() << " #### Non-shower ROOT SEARCH #### \n"
-                         << " Analyzing a particle index " << out_index << " id " << grp.part.id << "\n" << grp.part.dump();
+                         << " Analyzing a particle index " << out_index << " id " << grp.part.id << "\n" << grp.part.dump() << "\n";
 
             auto parent_trackid_v = ParentTrackIDs(trackid);
             std::stringstream ss;
             ss << "   candidate ancestor track IDs:";
             for (const auto & trkid : parent_trackid_v)
                 ss << " " << trkid;
-            LOG.VERBOSE() << ss.str();
+            LOG.VERBOSE() << ss.str() << "\n";
             size_t group_id = kINVALID_INSTANCEID;
             bool stop = false;
             for (auto const &parent_trackid : parent_trackid_v)
@@ -541,10 +542,10 @@ namespace supera {
                 auto const &parent = inputLabels[parent_trackid];
                 LOG.VERBOSE() << "     considering ancestor: " << parent_trackid
                               << ", which has output index " << trackid2output[parent_trackid] << ":\n"
-                              << parent.part.dump();
+                              << parent.part.dump() << "\n";
                 if (parent.part.pdg == 0)
                 {
-                    LOG.VERBOSE() << "      --> particle was removed from output (maybe a nuclear fragment?), keep looking";
+                    LOG.VERBOSE() << "      --> particle was removed from output (maybe a nuclear fragment?), keep looking\n";
                     continue;
                 }
                 switch (parent.shape())
@@ -557,7 +558,7 @@ namespace supera {
                         // group candidate: check if it is "valid" = exists in the output
                         if (parent.valid && trackid2output[parent_trackid] >= 0)
                         {
-                            LOG.VERBOSE() << "      -->  accepted";
+                            LOG.VERBOSE() << "      -->  accepted\n";
                             group_id = trackid2output[parent_trackid];
                             // found the valid group: stop the loop
                             stop = true;
@@ -565,7 +566,7 @@ namespace supera {
                         break;
                     case kShapeUnknown:
                     case kShapeGhost:
-                        LOG.FATAL() << "Unexpected type found while searching for non-shower orphans's root!";
+                        LOG.FATAL() << "Unexpected type found while searching for non-shower orphans's root!\n";
                         throw std::exception();
                         break;
                 }
@@ -575,12 +576,12 @@ namespace supera {
             if (group_id == kINVALID_INSTANCEID)
             {
                 LOG.DEBUG() << "Ignoring non-shower particle as its root particle (for group id) is not to be stored...\n"
-                             << grp.part.dump();
+                             << grp.part.dump() << "\n";
                 continue;
             }
             LOG.DEBUG() << "Assigning a group ID " << group_id << " to non-shower orphan\n"
                          << "  Track ID " << grp.part.trackid << " PDG " << grp.part.pdg
-                         << " " << grp.part.process;
+                         << " " << grp.part.process << "\n";
             grp.part.group_id = group_id;
             // todo: is this correct?  if we don't, the parent_id points to a nonexistent particle group...
             grp.part.parent_id = group_id;
@@ -647,14 +648,14 @@ namespace supera {
                             root_trackid = parent_trackid;
                             root_id = trackid2output[root_trackid];
                             // found the valid group: stop the loop
-                            LOG.VERBOSE() << " found root ancestor: trkid " << root_trackid << " (particle id " << root_id << ")";
+                            LOG.VERBOSE() << " found root ancestor: trkid " << root_trackid << " (particle id " << root_id << ")\n";
                             stop = true;
                             // If not, root_id will be a new output index
                         }
                         else
                         {
 //              root_id = output2trackid.size();
-                            LOG.VERBOSE() << "  ancestor trkid " << parent_trackid << " is also not in output.  keep looking...";
+                            LOG.VERBOSE() << "  ancestor trkid " << parent_trackid << " is also not in output.  keep looking...\n";
                             // If this particle is invalid, this also needs the group id.
                             // Add to intermediate_id_v list so we can set the group id for all of them
                             intermediate_trackid_v.push_back(root_trackid);
@@ -662,11 +663,11 @@ namespace supera {
                         stop = (stop || parent.shape() != kShapeShower);
                         break;
                     case kShapeTrack:
-                        LOG.VERBOSE() << "  ancestor group is a 'track' shape.  Stop looking...";
+                        LOG.VERBOSE() << "  ancestor group is a 'track' shape.  Stop looking...\n";
                         stop = true;
                         break;
                     case kShapeUnknown:
-                        LOG.VERBOSE() << "  ancestor group is unknown shape.  Stop looking... ";
+                        LOG.VERBOSE() << "  ancestor group is unknown shape.  Stop looking... \n";
                         stop = true;
                         break;
                     case kShapeLEScatter:
@@ -681,12 +682,13 @@ namespace supera {
                 if (stop)
                     break;
             }
-            LOG.VERBOSE() << " found root ancestor: trkid " << root_trackid << " (particle id()=" << root_id << ")";
+            LOG.VERBOSE() << " found root ancestor: trkid " << root_trackid << " (particle id()=" << root_id << ")\n";
             if (root_id < output2trackid.size() && trackid2output[root_trackid] != (int) (root_id))
             {
                 LOG.FATAL() << "Logic error for the search of shower root particle for an orphan..." << "\n"
                             << "This particle id=" << out_index << " and track_id=" << trackid << "\n"
-                            << "ROOT particle id=" << root_id << " and track_id=" << root_trackid;
+                            << "ROOT particle id=" << root_id << " and track_id=" << root_trackid
+                            << "\n";
                 DumpHierarchy(trackid, inputLabels);
                 throw std::exception();
             }
@@ -697,7 +699,7 @@ namespace supera {
                 // Register the root parent to the output
                 LOG.DEBUG() << "Adding a new particle to the output to define a group...\n"
                              << "ROOT particle id=" << root_id << " and track_id=" << root_trackid << "\n"
-                             << inputLabels[root_trackid].part.dump();
+                             << inputLabels[root_trackid].part.dump() << "\n";
             }
             assert((size_t) (root_id) < output2trackid.size());
 
@@ -707,13 +709,13 @@ namespace supera {
             root.part.id = root_id;
             root.part.group_id = root_id;
             trackid2output[root_trackid] = static_cast<int>(root_id);
-            LOG.VERBOSE() << "Updating group " << root.part.group_id << "'s child groups to have the correct root group id...";
+            LOG.VERBOSE() << "Updating group " << root.part.group_id << "'s child groups to have the correct root group id...\n";
             for (auto const &child_id : root.part.children_id)
             {
                 auto &child = inputLabels[output2trackid[child_id]];
                 if (child.valid)
                     continue;
-                LOG.VERBOSE() << "   group for trackid " << child.part.trackid << " had group: " << child.part.group_id;
+                LOG.VERBOSE() << "   group for trackid " << child.part.trackid << " had group: " << child.part.group_id << "\n";
                 assert(child.part.group_id == kINVALID_INSTANCEID || child.part.group_id == root_id);
                 child.part.group_id = root_id;
             }
@@ -730,7 +732,7 @@ namespace supera {
                 child.part.parent_id = root_id;
             }
 
-            LOG.DEBUG() << "... after update ... \n" << inputLabels[trackid].part.dump();
+            LOG.DEBUG() << "... after update ... \n" << inputLabels[trackid].part.dump() << "\n";
         }
     } // LArTPCMLReco3D::FixOrphanShowerGroups()
 
@@ -794,7 +796,7 @@ namespace supera {
                             }
                             break;
                         case kShapeShower:
-                            LOG.FATAL() << "Unexpected case: a shower has no group id while being a child of another shower...";
+                            LOG.FATAL() << "Unexpected case: a shower has no group id while being a child of another shower...\n";
                             DumpHierarchy(label.part.trackid, inputLabels);
                             throw std::exception();
                             /*
@@ -809,16 +811,16 @@ namespace supera {
                             */
                             break;
                         case kShapeLEScatter:
-                            LOG.FATAL() << "Logic error: shower parent shape cannot be LEScatter!";
+                            LOG.FATAL() << "Logic error: shower parent shape cannot be LEScatter!\n";
                             throw std::exception();
                         default:
-                            LOG.FATAL() << "Unexpected larcv::ShapeType_t encountered at " << __LINE__;
+                            LOG.FATAL() << "Unexpected larcv::ShapeType_t encountered at " << __LINE__ << "\n";
                             throw std::exception();
                     } // switch (parent_shape)
                     break;
                 case kShapeGhost:
                 case kShapeUnknown:
-                    LOG.FATAL() << "Unexpected larcv::ShapeType_t encountered at " << __LINE__;
+                    LOG.FATAL() << "Unexpected larcv::ShapeType_t encountered at " << __LINE__ << "\n";
                     throw std::exception();
             } // switch(shape)
         } // for (output_index)
@@ -829,7 +831,7 @@ namespace supera {
     void LArTPCMLReco3D::FixUnassignedLEScatterGroups(std::vector<supera::ParticleLabel> &inputLabels,
                                                                const std::vector<TrackID_t> &output2trackid) const
     {
-        LOG.DEBUG() << "Inspecting LEScatter groups for invalid group ids...";
+        LOG.DEBUG() << "Inspecting LEScatter groups for invalid group ids...\n";
         for (auto & label : inputLabels)
 //    for (size_t output_index = 0; output_index < output2trackid.size(); ++output_index)
         {
@@ -837,10 +839,10 @@ namespace supera {
             if (label.shape() != kShapeLEScatter)
                 continue;
 
-            LOG.VERBOSE() << "   trackid=" << label.part.trackid << " group=" << label.part.group_id;
+            LOG.VERBOSE() << "   trackid=" << label.part.trackid << " group=" << label.part.group_id << "\n";
             if (label.part.group_id != kINVALID_INSTANCEID)
             {
-                LOG.VERBOSE() << "     --> group is valid; don't update.";
+                LOG.VERBOSE() << "     --> group is valid; don't update.\n";
                 continue;
             }
 
@@ -848,7 +850,7 @@ namespace supera {
             auto parent_partid = label.part.parent_id;
             if (parent_partid == kINVALID_INSTANCEID)
             {
-                LOG.VERBOSE() << "     --> invalid, but parent also has invalid parent id??  Can't fix...";
+                LOG.VERBOSE() << "     --> invalid, but parent also has invalid parent id??  Can't fix...\n";
                 continue;
             }
 
@@ -862,13 +864,13 @@ namespace supera {
             if (parent_part.part.group_id != supera::kINVALID_INSTANCEID)
             {
                 LOG.VERBOSE() << "     --> rewrote group id to parent (trackid=" << parent_part.part.trackid
-                              << ")'s group id = " << parent_part.part.group_id;
+                              << ")'s group id = " << parent_part.part.group_id << "\n";
                 label.part.group_id = parent_part.part.group_id;
             }
             else
             {
                 LOG.VERBOSE() << "     --> no valid parent.  Rewrote group id to its own particle ID ("
-                              << label.part.id << ")";
+                              << label.part.id << ")\n";
                 label.part.group_id = label.part.id;
             }
         } // for (label)
@@ -880,7 +882,7 @@ namespace supera {
                                                    std::vector<TrackID_t> &output2trackid,
                                                    std::vector<int> &trackid2output) const
     {
-        LOG.DEBUG() << "Inspecting parent groups for unassigned entries...";
+        LOG.DEBUG() << "Inspecting parent groups for unassigned entries...\n";
         for (TrackID_t output_index : output2trackid)
         {
             auto &grp = inputLabels[output_index];
@@ -890,7 +892,8 @@ namespace supera {
                           << "  id=" << grp.part.id
                           << "  track id=" << grp.part.trackid
                           << "  parent trackid=" << parent_trackid
-                          << "  parent id=" << parent_id;
+                          << "  parent id=" << parent_id
+                          << "\n";
 
             auto &parent = inputLabels[parent_trackid].part;
             // if parent_id is invalid, try if parent_trackid can help out
@@ -1007,16 +1010,16 @@ namespace supera {
                 unsigned int parent_index_before = label.part.trackid;
                 while (true)
                 {
-                    LOG.VERBOSE() << "Inspecting: " << label.part.trackid << " => " << parent_index;
+                    LOG.VERBOSE() << "Inspecting: " << label.part.trackid << " => " << parent_index << "\n";
                     if (parent_index == supera::kINVALID_UINT)
                     {
                         LOG.VERBOSE() << "Invalid parent track id " << parent_index
                                       << " Could not find a parent for " << label.part.trackid << " PDG " << label.part.pdg
                                       << " " << label.part.process << " E = " << label.part.energy_init
-                                      << " (" << label.part.energy_deposit << ") MeV";
+                                      << " (" << label.part.energy_deposit << ") MeV\n";
                         auto const &parent = labels[parent_index_before].part;
                         LOG.VERBOSE() << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
-                                      << " " << parent.process;
+                                      << " " << parent.process << "\n";
                         parent_found = false;
                         invalid_ctr++;
                         break;
@@ -1030,8 +1033,8 @@ namespace supera {
                         unsigned int ancestor_index = parent.part.parent_trackid;
                         if (ancestor_index == parent_index)
                         {
-                            LOG.INFO() << "Particle " << parent_index << " is root and invalid particle...";
-                            LOG.INFO() << "PDG " << parent.part.pdg << " " << parent.part.process;
+                            LOG.INFO() << "Particle " << parent_index << " is root and invalid particle...\n";
+                            LOG.INFO() << "PDG " << parent.part.pdg << " " << parent.part.process << "\n";
                             break;
                         }
                         parent_index_before = parent_index;
@@ -1046,7 +1049,7 @@ namespace supera {
                     merge_ctr++;
                 }
             }
-            LOG.INFO() << "Merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
+            LOG.INFO() << "Merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr << "\n";
         } while (merge_ctr > 0);
     }  // LArTPCMLReco3D::MergeShowerConversion()
 
@@ -1082,8 +1085,8 @@ namespace supera {
                 LOG.VERBOSE() << "Merging delta " << label.part.trackid << " PDG " << label.part.pdg
                               << " " << label.part.process << " vox count " << label.energy.size() << "\n"
                               << " ... parent found " << parent.part.trackid
-                              << " PDG " << parent.part.pdg << " " << parent.part.process;
-                LOG.VERBOSE() << "Time difference: " << label.part.first_step.time - parent.part.first_step.time;
+                              << " PDG " << parent.part.pdg << " " << parent.part.process << "\n";
+                LOG.VERBOSE() << "Time difference: " << label.part.first_step.time - parent.part.first_step.time << "\n";
                 parent.Merge(label, parent.shape() != kShapeTrack);  // a delta ray is unlikely to extend a *track* in the up- or downstream directions
             }
             else
@@ -1091,7 +1094,7 @@ namespace supera {
                 LOG.VERBOSE() << "NOT merging delta " << label.part.trackid << " PDG " << label.part.pdg
                               << " " << label.part.process << " vox count " << label.energy.size() << "\n"
                               <<" ... parent found " << parent.part.trackid
-                              << " PDG " << parent.part.pdg << " " << parent.part.process;
+                              << " PDG " << parent.part.pdg << " " << parent.part.process << "\n";
 
             }
         }
@@ -1115,7 +1118,7 @@ namespace supera {
                 int parent_trackid = -1;
                 LOG.VERBOSE() << "   Found particle group with shape 'shower', PDG=" << label.part.pdg
                               << "\n    track id=" << label.part.trackid
-                              << ", and alleged parent track id=" << label.part.parent_trackid;
+                              << ", and alleged parent track id=" << label.part.parent_trackid << "\n";
                 // a direct parent ?
                 if (labels[label.part.parent_trackid].valid)
                     parent_trackid = static_cast<int>(label.part.parent_trackid);
@@ -1145,11 +1148,11 @@ namespace supera {
                 if (this->IsTouching(meta, label.energy, parent.energy)) {
                     // if parent is found, merge
                     parent.Merge(label);
-                    LOG.VERBOSE() << "   Merged to group w/ track id=" << parent.part.trackid;
+                    LOG.VERBOSE() << "   Merged to group w/ track id=" << parent.part.trackid << "\n";
                     merge_ctr++;
                 }
             }
-            LOG.INFO() << "Merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
+            LOG.DEBUG() << "Merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr << "\n";
         } while (merge_ctr>0);
     } // LArTPCMLReco3D::MergeShowerFamilyTouching()
 
@@ -1181,10 +1184,10 @@ namespace supera {
                         LOG.ERROR() << "Invalid parent track id " << parent_index
                                   << " Could not find a parent for " << label.part.trackid << " PDG " << label.part.pdg
                                   << " " << label.part.process << " E = " << label.part.energy_init
-                                  << " (" << label.part.energy_deposit << ") MeV";
+                                  << " (" << label.part.energy_deposit << ") MeV\n";
                         auto const &parent = labels[parent_index_before].part;
                         std::cout << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
-                                      << " " << parent.process;
+                                      << " " << parent.process << "\n";
                         parent_found = false;
                         invalid_ctr++;
                         break;
@@ -1198,7 +1201,7 @@ namespace supera {
                         if (ancestor_index == parent_index)
                         {
                             LOG.INFO() << "Particle " << parent_index << " is root and invalid particle...\n"
-                                         << "PDG " << parent.part.pdg << " " << parent.part.process;
+                                         << "PDG " << parent.part.pdg << " " << parent.part.process << "\n";
                             break;
                         }
                         parent_index_before = parent_index;
@@ -1213,7 +1216,7 @@ namespace supera {
                     merge_ctr++;
                 }
             } // for (grp)
-            LOG.INFO() << "Ionization merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr;
+            LOG.DEBUG() << "Ionization merge counter: " << merge_ctr << " invalid counter: " << invalid_ctr << "\n";
         } while (merge_ctr > 0);
     } // LArTPCMLReco3D::MergeShowerIonizations()
 
@@ -1318,7 +1321,7 @@ namespace supera {
                     }
                 }
             }
-            LOG.INFO() << "Merge counter: " << merge_ctr;
+            LOG.DEBUG() << "Merge counter: " << merge_ctr << "\n";
         } while (merge_ctr > 0);
     } // LArTPCMLReco3D::MergeShowerTouching()
 
@@ -1339,10 +1342,10 @@ namespace supera {
 
                 LOG.VERBOSE() << "Inspecting LEScatter Track ID " << label.part.trackid
                             << " PDG " << label.part.pdg
-                            << " " << label.part.process;
-                LOG.VERBOSE() << "  ... parents:";
+                            << " " << label.part.process << "\n";
+                LOG.VERBOSE() << "  ... parents:\n";
                 for(auto const& parent_trackid : parents)
-                    LOG.VERBOSE() << "     "<< parent_trackid;
+                    LOG.VERBOSE() << "     "<< parent_trackid << "\n";
 
                 for (auto const &parent_trackid : parents)
                 {
@@ -1352,7 +1355,7 @@ namespace supera {
                     {
                         LOG.VERBOSE() << "Merging LEScatter track id = " << label.part.trackid
                                     << " into touching parent shower group (id=" << parent.part.group_id << ")"
-                                    << " with track id = " << parent.part.trackid;
+                                    << " with track id = " << parent.part.trackid << "\n";
                         parent.Merge(label);
                         merge_ctr++;
                         break;
@@ -1384,7 +1387,7 @@ namespace supera {
                 touching = diffx <= 1 && diffy <= 1 && diffz <= 1;
                 if (touching)
                 {
-                    LOG.VERBOSE()<<"Touching ("<<ix1<<","<<iy1<<","<<iz1<<") ("<<ix2<<","<<iy2<<","<<iz2<<")";
+                    LOG.VERBOSE()<<"Touching ("<<ix1<<","<<iy1<<","<<iz1<<") ("<<ix2<<","<<iy2<<","<<iz2<<")\n";
                     break;
                 }
             }
@@ -1450,7 +1453,8 @@ namespace supera {
                     LOG.FATAL() << "Ancestor #" << parent_cand_idx
                                 << " Track ID " << parent_cand_trackid
                                 << " PDG " << _mcpl.PdgCode()[trackid2index[parent_cand_trackid]]
-                                << " Its mother " << _mcpl.ParentTrackId()[trackid2index[parent_cand_trackid]];
+                                << " Its mother " << _mcpl.ParentTrackId()[trackid2index[parent_cand_trackid]]
+                                << "\n";
                 }
                 throw meatloaf();
             }
