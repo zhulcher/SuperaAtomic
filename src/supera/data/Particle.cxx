@@ -31,13 +31,8 @@ namespace supera {
 
   size_t ParticleLabel::Size() const
   { 
-
-    size_t res=energy.size();
-    /*
-    for(auto const& vs2d : vs2d_v) res += vs2d.size();
-      return res;
-    */    
-    return 0;
+    SizeCheck();
+    return energy.size();
   }
 
   void ParticleLabel::Merge(ParticleLabel& child,bool verbose) {
