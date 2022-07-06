@@ -23,7 +23,7 @@ setup(
         '-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9',
         '-DWITHOUT_PYTHON={}'.format(pybind_value),
     ],
-    author=['Corey Adams', 'Kazuhiro Terao', 'Taritree Wongjirad', 'Marco Del Tutto'],
+    author=['Corey Adams', 'Kazuhiro Terao', 'Taritree Wongjirad', 'Marco Del Tutto', 'Jeremy Wolcott'],
     author_email='kterao@slac.stanford.edu',
     description='C++ framework to process particle physics detector simulation output for lartpc_mlreco3d machine learning data reconstruction software',
     license='MIT',
