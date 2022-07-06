@@ -22,7 +22,7 @@ if(NOT WITHOUT_PYTHON)
     #########
     find_package(Python COMPONENTS Interpreter Development)
     message("    Adding Python")
-    message("    INCLUDE: ", ${Python_INCLUDE_DIRS})
+    message("    INCLUDE:  ${Python_INCLUDE_DIRS}")
     include_directories(${Python_INCLUDE_DIRS})
 
     if(NOT Python_EXECUTABLE)
