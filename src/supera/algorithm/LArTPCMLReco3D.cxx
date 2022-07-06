@@ -92,17 +92,16 @@ namespace supera {
         this->FixUnassignedLEScatterGroups(labels, output2trackid);
         LArTPCMLReco3D::FixFirstStepInfo(labels, meta, output2trackid);
 
-        // We're finally to fill in the output containers.
+        // We're finally to fill in the output container.
         // There are two things we need:
         //  (1) labels for each voxel (what semantic type is each one?)
         //  (2) labels for particle groups.
-        // The output format is a collection of supera::ParticleLabels, each of which has voxels attached to it,
-        // so that covers both things.
-
-
-        std::vector<supera::ParticleLabel> outputLabels = this->BuildOutputLabels(labels, output2trackid);
-
-
+        // The output format is an object containing a collection of supera::ParticleLabels,
+        // each of which has voxels attached to it, so that covers both things.
+        // EventOutput computes VoxelSets with the sum across all particles
+        // for voxel energies, dE/dxs, and semantic labels
+        // upon demand (see EventOutput::VoxelEnergies() etc.).
+        result = this->BuildOutputLabels(labels, output2trackid, trackid2output, trackid2index);
 
         return result;
     }
@@ -267,7 +266,10 @@ namespace supera {
 
     // ------------------------------------------------------
 
-    EventOutput LArTPCMLReco3D::BuildOutputLabels(std::vector<supera::ParticleLabel> &groupedInputLabels, const std::vector<TrackID_t> & output2trackid) const
+    EventOutput LArTPCMLReco3D::BuildOutputLabels(std::vector<supera::ParticleLabel> &groupedInputLabels,
+                                                  const std::vector<TrackID_t> &output2trackid,
+                                                  const std::vector<int> &trackid2output,
+                                                  const std::vector<TrackID_t> &trackid2index) const
     {
         EventOutput outputLabels;
         outputLabels.Particles().resize(output2trackid.size());
@@ -327,6 +329,22 @@ namespace supera {
             // set the particle in the original container to 'invalid' so we don't accidentally use it again
             groupedInputLabel.valid = false;
         } // for (index)
+
+        // now vacuum up any orphan particles into a top-level orphan particle
+        // (anything that is still not grouped after all the cleanup steps).
+        // the others *should* have gotten absorbed by the Merge() calls
+        // in the various LArTPCMLReco3D::Merge...() methods...
+        supera::ParticleLabel orphan;
+        orphan.part.pdg = 0;
+        for (std::size_t trkid = 0; trkid < trackid2output.size(); trkid++)
+        {
+            int outputIdx = trackid2output[trkid];
+            if (outputIdx >= 0)
+                continue;
+
+            orphan.Merge(groupedInputLabels[trackid2index[trkid]]);
+        } // for (idx)
+        outputLabels.Particles().push_back(std::move(orphan));
 
         return outputLabels;
     } // LArTPCMLReco3D::BuildOutputClusters
