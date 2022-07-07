@@ -3,8 +3,13 @@
 
 //#include "LArCVBaseUtilFunc.h"
 //#include "larbys.h"
-#include "meatloaf.h"
 #include "Parser.h"
+
+#include <algorithm>
+
+#include "supera/base/meatloaf.h"
+
+
 namespace supera {
   namespace parser{
     
@@ -176,4 +181,3 @@ namespace supera {
   }
 }
 #endif
-  

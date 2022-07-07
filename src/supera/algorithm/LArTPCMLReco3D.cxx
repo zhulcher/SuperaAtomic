@@ -3,6 +3,7 @@
 
 #include "LArTPCMLReco3D.h"
 
+#include <algorithm>
 #include <cassert>
 #include <set>
 #include <string>
