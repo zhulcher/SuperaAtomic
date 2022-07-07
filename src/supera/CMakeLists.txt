@@ -2,6 +2,8 @@
 # Building Supera
 #################
 
+set(ALL_HEADERS "")
+
 add_subdirectory(base)
 add_subdirectory(data)
 add_subdirectory(algorithm)
@@ -43,6 +45,33 @@ if(NOT WITHOUT_PYTHON)
     endif()
 
     set_target_properties(pysupera PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+    # this is extremely fragile and kind of icky.
+    # I think it only works if you're using g++ as the CMake compiler
+    # due to the command used to work out where the system include paths are.
+    if(USE_PYBIND11_MKDOC)
+        message("Setting up pybind11_mkdoc to generate docstrings...")
+        # work out the system include paths if you're using something other than Clang to compile...
+        if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES Clang)
+            # I think in practice this only works with GCC.
+            # If we get defect reports maybe we can pursue further...
+            execute_process(
+                    COMMAND bash -c "${CMAKE_CXX_COMPILER} -Wp,-v -x c++ -fsyntax-only /dev/null 2>&1 | sed -n 's/^ \\(.*\\)/\\1/pg'"
+                    OUTPUT_VARIABLE mkdoc_includes
+            )
+            string(STRIP ${mkdoc_includes} mkdoc_includes)
+            string(REPLACE "\n" ";" mkdoc_includes "${mkdoc_includes}")
+            list(TRANSFORM mkdoc_includes PREPEND "-I")
+            message("using extra system include path to mkdoc: ${mkdoc_includes}")
+            get_filename_component(curdir ${CMAKE_CURRENT_BINARY_DIR} NAME)
+            message("adding output dir to c++ include path: ${PROJECT_BINARY_DIR}/${curdir}")
+            include_directories(${PROJECT_BINARY_DIR}/${curdir})
+        endif()
+        add_custom_target(${PYBIND11_MKDOC_DOCSTRING_FILE}
+                          COMMENT "Generating pybind header ${PYBIND11_MKDOC_DOCSTRING_FILE} from Doxygen docstrings"
+                          COMMAND "${Python_EXECUTABLE}" -m "pybind11_mkdoc" "-std=c++${CMAKE_CXX_STANDARD}" "${mkdoc_includes}" "-I$<JOIN:$<TARGET_PROPERTY:supera,INCLUDE_DIRECTORIES>,;-I>" -o ${PYBIND11_MKDOC_DOCSTRING_FILE} ${ALL_HEADERS}
+                          SOURCES ${ALL_HEADERS} COMMAND_EXPAND_LISTS )
+    endif()
 endif()
 
 

@@ -11,6 +11,8 @@ project(supera)
 set(CMAKE_PACKAGE_DIR "supera")
 set(PROJECT_SOURCE_DIR "./")
 
+set(PYBIND11_MKDOC_DOCSTRING_FILE docstrings.h)
+
 include_directories("./")
 
 message("    Configuring Supera build")
@@ -62,6 +64,20 @@ if(NOT WITHOUT_PYTHON)
     message("    Adding pybind11")
     message("    INCLUDE: " ${PYBIND11_INCLUDE_DIR})
     include_directories(${PYBIND11_INCLUDE_DIR})
+
+    ####################################
+    # Check if pybind11_mkdoc is around
+    ####################################
+    execute_process(
+            COMMAND "${Python_EXECUTABLE}" -c "import pybind11_mkdoc"
+            RESULT_VARIABLE PYBIND11_MKDOC_EXIT_CODE
+    )
+    if (${PYBIND11_MKDOC_EXIT_CODE} EQUAL 0)
+        message("Found pybind11_mkdoc.  Will use it to autogenerate Python docstrings.")
+        set(USE_PYBIND11_MKDOC ON)
+        add_definitions(-DUSE_MKDOC_DOCSTRINGS)
+        include_directories("${CMAKE_INSTALL_PREFIX}")
+    endif()
 
 endif()
 
