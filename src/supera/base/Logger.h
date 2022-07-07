@@ -20,9 +20,9 @@
 #define _SUPERA_INTERNAL_LOGGER_METHOD(threshold) \
     const Logger & threshold() const \
     { \
-        if (_thresh >= THRESHOLD::threshold) \
-            (*this) << (_preamble.empty() ? "" : _preamble) << (!_preamble.empty() ? " " : "") << #threshold << ": "; \
-        return *this; \
+        _isWriting = (THRESHOLD::threshold >= _thresh);      \
+        (*this) << (_preamble.empty() ? "" : _preamble) << (!_preamble.empty() ? " " : "") << #threshold << ": "; \
+        return *this;                         \
     }
 
 namespace supera {
@@ -36,18 +36,21 @@ namespace supera {
         static THRESHOLD parseStringThresh(std::string threshStr);
 
         Logger(THRESHOLD thresh = THRESHOLD::INFO)
-          : _thresh(thresh)
+          : _thresh(thresh), _isWriting(false)
         {}
 
         THRESHOLD GetThreshold() const           { return _thresh; }
         void      SetThreshold(THRESHOLD thresh) { _thresh = thresh; }
 
-        /// Force a write to the output.
+        /// Write to the output, if we're currently doing that; otherwise, discard.
+        /// (Set the state by getting the stream via one of the \ref VERBOSE(), \ref DEBUG(), etc. functions.)
         template <typename T>
         const Logger & operator<<(const T & obj) const
         {
+          if (_isWriting)
             std::cout << obj;
-            return *this;
+
+          return *this;
         }
 
         _SUPERA_INTERNAL_LOGGER_METHOD(VERBOSE)
@@ -61,9 +64,8 @@ namespace supera {
         std::string _preamble;  ///< write this in front of every message
 
         THRESHOLD _thresh;  ///<  current log threshold
-
+        mutable bool _isWriting; ///<  current logging state: writing output or not?
     };
-
 }
 #endif //SUPERA_LOGGER_H
 
