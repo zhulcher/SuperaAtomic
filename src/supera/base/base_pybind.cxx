@@ -3,7 +3,7 @@
 //#include "SuperaEvent.h"
 #include "SuperaType.h"
 
-void init_base(pybind11::module m)
+void init_base(pybind11::module& m)
 {
 /*
   pybind11::class_<supera::ParticleLabel>(m, "ParticleGroup")

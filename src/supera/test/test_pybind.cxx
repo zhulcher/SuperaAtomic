@@ -2,7 +2,7 @@
 #include "test_pybind.h"
 #include "TestEvents.h"
 
-void init_tests(pybind11::module m)
+void init_tests(pybind11::module& m)
 {
   pybind11::class_<supera::test::TestEvent>(m, "TestEvent", "Collection of input & output information for testing machinery")
       .def_readonly("input", &supera::test::TestEvent::input, "Input information as vector of supera::ParticleInputs")
