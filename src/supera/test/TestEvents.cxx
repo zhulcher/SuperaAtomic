@@ -17,5 +17,12 @@ namespace supera
       return false;
     }
 
-  }
-}
+    std::map<std::string, TestEvent> TestEvents()
+    {
+      return {
+//      {"NumuCCIncEvt", NumuCCIncEvt()}
+      };
+    };
+
+  } // namespace test
+} // namespace supera

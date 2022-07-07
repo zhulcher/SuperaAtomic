@@ -28,10 +28,8 @@ namespace supera
 
     TestEvent NumuCCIncEvt();
 
-    const std::map<std::string, TestEvent> kTestEvents
-    {
-//      {"NumuCCIncEvt", NumuCCIncEvt()}
-    };
+    /// Stockpile of test events with known (expected) outputs
+    std::map<std::string, TestEvent> TestEvents();
   }
 }
 
