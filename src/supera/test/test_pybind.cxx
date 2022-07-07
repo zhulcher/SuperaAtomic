@@ -1,5 +1,8 @@
 
 #include "test_pybind.h"
+
+#include "supera/pybind_mkdoc.h"
+
 #include "TestEvents.h"
 
 void init_tests(pybind11::module& m)

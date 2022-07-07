@@ -3,6 +3,8 @@
 //#include "SuperaEvent.h"
 #include "SuperaType.h"
 
+#include "supera/pybind_mkdoc.h"
+
 void init_base(pybind11::module& m)
 {
 /*
