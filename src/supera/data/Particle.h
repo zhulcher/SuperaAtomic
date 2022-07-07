@@ -59,6 +59,9 @@ namespace supera {
     /// Default destructor
     ~Particle() = default;
 
+    bool operator==(const Particle & rhs) const;
+    bool operator!=(const Particle & rhs) const { return !(*this == rhs); }
+
     inline double p() const { return sqrt(pow(px,2)+pow(py,2)+pow(pz,2)); }
     std::string dump() const;
 
@@ -116,6 +119,9 @@ namespace supera {
 
     ParticleLabel & operator=(const ParticleLabel& other) = default;
 
+    bool operator==(const ParticleLabel & rhs) const;
+    bool operator!=(const ParticleLabel & rhs) const { return !(*this == rhs); }
+
     void AddEDep(const EDep& pt);
     void SizeCheck() const;
     size_t Size() const;
@@ -162,6 +168,9 @@ namespace supera {
 
       EventOutput & operator=(const std::vector<ParticleLabel> & other) { Particles() = other; return *this; }
       EventOutput & operator=(std::vector<ParticleLabel> && other) { Particles() = std::move(other); return *this; }
+
+      /// Is this EventOutput the same as \a rhs?
+      bool operator==(const EventOutput & rhs) const;
 
     private:
       /// Helper method to simplify querying the 'dirty' fields

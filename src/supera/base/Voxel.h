@@ -55,6 +55,8 @@ namespace supera {
     //
     inline bool operator == (const Voxel& rhs) const
     { return (_id == rhs._id); }
+    inline bool operator != (const Voxel& rhs) const
+    { return !(*this == rhs); }
     inline bool operator <  (const Voxel& rhs) const
     {
       if ( _id < rhs._id) return true;
@@ -160,8 +162,12 @@ namespace supera {
     /// InstanceID_t setter
     inline void id(const InstanceID_t id) { _id = id; }
 
+    // test operators
+    bool operator==(const VoxelSet & rhs) const;
+    bool operator!=(const VoxelSet & rhs) const { return !(*this == rhs); };
+
     //
-    // Uniry operations
+    // Binary operations
     //
     inline VoxelSet& operator += (float value)
     { for(auto& vox : _voxel_v) vox += value; return (*this); }

@@ -168,6 +168,21 @@ namespace supera {
     return;
   }
 
+  bool VoxelSet::operator==(const VoxelSet &rhs) const
+  {
+    // obviously not the same if they're not the same size
+    if (size() != rhs.size())
+      return false;
+
+    // because VoxelSets are sorted by nature, we can just compare them element by element
+    for (std::size_t idx = 0; idx < size(); idx++)
+    {
+      if (_voxel_v[idx] != rhs._voxel_v[idx])
+        return false;
+    }
+    return true;
+  }
+
   //
   // VoxelSetArray
   //

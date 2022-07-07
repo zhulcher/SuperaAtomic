@@ -1,6 +1,8 @@
 #include "Particle.h"
 
+#include <algorithm>
 #include <iostream>
+#include <map>
 #include <sstream>
 
 namespace supera {
@@ -28,6 +30,38 @@ namespace supera {
 
     return ss.str();
 
+  }
+
+  bool Particle::operator==(const Particle &rhs) const
+  {
+    // Particles are the same if their data is the same...
+    return (id == rhs.id) &&
+           (shape == rhs.shape) &&
+           (trackid == rhs.trackid) &&
+           (pdg == rhs.pdg) &&
+           (px == rhs.px) &&
+           (py == rhs.py) &&
+           (pz == rhs.pz) &&
+           (vtx == rhs.vtx) &&
+           (end_pt == rhs.end_pt) &&
+           (first_step == rhs.first_step) &&
+           (last_step == rhs.last_step) &&
+           (dist_travel == rhs.dist_travel) &&
+           (energy_init == rhs.energy_init) &&
+           (energy_deposit == rhs.energy_deposit) &&
+           (process == rhs.process) &&
+           (parent_trackid == rhs.parent_trackid) &&
+           (parent_pdg == rhs.parent_pdg) &&
+           (parent_vtx == rhs.parent_vtx) &&
+           (ancestor_trackid == rhs.ancestor_trackid) &&
+           (ancestor_pdg == rhs.ancestor_pdg) &&
+           (ancestor_vtx == rhs.ancestor_vtx) &&
+           (ancestor_process == rhs.ancestor_process) &&
+           (parent_process == rhs.parent_process) &&
+           (parent_id == rhs.parent_id) &&
+           (children_id == rhs.children_id) &&
+           (group_id == rhs.group_id) &&
+           (interaction_id == rhs.interaction_id);
   }
 
   // --------------------------------------------------------
@@ -123,6 +157,21 @@ namespace supera {
       return supera::kShapeLEScatter;
     }else
     return supera::kShapeTrack;
+  }
+
+  bool ParticleLabel::operator==(const ParticleLabel &rhs) const
+  {
+    // ParticleLabels equivalent if all their data match...
+    return (part == rhs.part) &&
+           (valid == rhs.valid) &&
+           (add_to_parent == rhs.add_to_parent) &&
+           (type == rhs.type) &&
+           (trackid_v == rhs.trackid_v) &&
+           (energy == rhs.energy) &&
+           (dedx == rhs.dedx) &&
+           (first_pt == rhs.first_pt) &&
+           (last_pt == rhs.last_pt);
+
   }
 
   // --------------------------------------------------------
@@ -221,4 +270,45 @@ namespace supera {
     }
     return a;
   }
+
+  // --------------------------------------------------------
+
+  bool EventOutput::operator==(const EventOutput &rhs) const
+  {
+    // the event outputs are the same if their ParticleLabels are the same.
+
+    // definitely different if different lengths
+    if (_particles.size() != rhs._particles.size())
+      return false;
+
+    // the ParticleLabels might not be in the same order,
+    // but if the *contents* are the same, they're still equivalent.
+    // we'll sort them by GEANT trackID using a map from track id -> vector index
+    // (since maps are inherently sorted).
+    // then we can walk through the track indices, check those first,
+    // and only if they are equal do the actual comparison between ParticleList objects.
+    std::map<supera::TrackID_t, std::size_t> lhs_tracks, rhs_tracks;
+    for (std::size_t idx = 0; idx < _particles.size(); idx++)
+    {
+      lhs_tracks[_particles[idx].part.trackid] = idx;
+      rhs_tracks[rhs._particles[idx].part.trackid] = idx;
+    }
+
+    auto it_lhs = lhs_tracks.begin();
+    auto it_rhs = rhs_tracks.begin();
+    for (; it_lhs != lhs_tracks.end() && it_rhs != rhs_tracks.end(); it_lhs++, it_rhs++ )
+    {
+      // since the map is sorted, any mismatch in track IDs already means they're not equal
+      if (it_lhs->first != it_rhs->first)
+        return false;
+
+      // if we have to, check the objects themselves
+      if (_particles[it_lhs->second] != rhs._particles[it_rhs->second])
+        return false;
+    }
+
+    return true;
+
+  }
+
 } // namespace supera
