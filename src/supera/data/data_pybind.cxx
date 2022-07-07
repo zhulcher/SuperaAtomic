@@ -1,14 +1,62 @@
 
 #include "data_pybind.h"
 
+#include "pybind11/operators.h"
+
 #include "supera/pybind_mkdoc.h"
 
+#include "ImageMeta3D.h"
 #include "Particle.h"
 
 void init_data(pybind11::module& m)
 {
   using namespace pybind11::literals;
 
+  // class from ImageMeta3D.h
+  pybind11::class_<supera::ImageMeta3D, supera::BBox3D>(m, "ImageMeta3D", DOC(supera, ImageMeta3D))
+      .def(pybind11::init<>(), DOC(supera, ImageMeta3D, ImageMeta3D))
+
+      // overloaded operators
+      .def(pybind11::self == pybind11::self)
+      .def(pybind11::self != pybind11::self)
+
+      // other methods
+      .def("update", &supera::ImageMeta3D::update, DOC(supera, ImageMeta3D, update),
+           "xnum"_a, "ynum"_a, "znum"_a)
+      .def("set", &supera::ImageMeta3D::set, DOC(supera, ImageMeta3D, set),
+           "xmin"_a, "ymin"_a, "zmin"_a, "xmax"_a, "ymax"_a, "zmax"_a, "xnum"_a, "ynum"_a, "znum"_a)
+      .def("clear", &supera::ImageMeta3D::clear, DOC(supera, ImageMeta3D, clear))
+      .def("valid", &supera::ImageMeta3D::valid, DOC(supera, ImageMeta3D, valid))
+      .def("size", &supera::ImageMeta3D::size, DOC(supera, ImageMeta3D, size))
+      .def("id", pybind11::overload_cast<const supera::Point3D&>(&supera::ImageMeta3D::id, pybind11::const_),
+           DOC(supera, ImageMeta3D, id), "pt"_a)
+      .def("id", pybind11::overload_cast<double, double, double>(&supera::ImageMeta3D::id, pybind11::const_),
+           DOC(supera, ImageMeta3D, id), "x"_a, "y"_a, "z"_a)
+      .def("index", &supera::ImageMeta3D::index, DOC(supera, ImageMeta3D, index),
+           "i_x"_a, "i_y"_a, "i_z"_a)
+      .def("shift", &supera::ImageMeta3D::shift, DOC(supera, ImageMeta3D, shift),
+           "origin_id"_a, "shift_x"_a, "shift_y"_a, "shift_z"_a)
+      .def("invalid_voxel_id", &supera::ImageMeta3D::invalid_voxel_id, DOC(supera, ImageMeta3D, invalid_voxel_id))
+      .def("position", &supera::ImageMeta3D::position, DOC(supera, ImageMeta3D, position), "id"_a)
+      .def("pos_x", &supera::ImageMeta3D::pos_x, DOC(supera, ImageMeta3D, pos_x), "id"_a)
+      .def("pos_y", &supera::ImageMeta3D::pos_y, DOC(supera, ImageMeta3D, pos_y), "id"_a)
+      .def("pos_z", &supera::ImageMeta3D::pos_z, DOC(supera, ImageMeta3D, pos_z), "id"_a)
+      .def("num_voxel_x", &supera::ImageMeta3D::num_voxel_x, DOC(supera, ImageMeta3D, num_voxel_x))
+      .def("num_voxel_y", &supera::ImageMeta3D::num_voxel_y, DOC(supera, ImageMeta3D, num_voxel_y))
+      .def("num_voxel_z", &supera::ImageMeta3D::num_voxel_z, DOC(supera, ImageMeta3D, num_voxel_z))
+      .def("size_voxel_x", &supera::ImageMeta3D::size_voxel_x, DOC(supera, ImageMeta3D, size_voxel_x))
+      .def("size_voxel_y", &supera::ImageMeta3D::size_voxel_y, DOC(supera, ImageMeta3D, size_voxel_y))
+      .def("size_voxel_z", &supera::ImageMeta3D::num_voxel_z, DOC(supera, ImageMeta3D, size_voxel_z))
+      .def("dump", &supera::ImageMeta3D::dump, DOC(supera, ImageMeta3D, dump))
+      .def("id_to_x_index", &supera::ImageMeta3D::id_to_x_index, DOC(supera, ImageMeta3D, id_to_x_index), "id"_a)
+      .def("id_to_y_index", &supera::ImageMeta3D::id_to_y_index, DOC(supera, ImageMeta3D, id_to_y_index), "id"_a)
+      .def("id_to_z_index", &supera::ImageMeta3D::id_to_z_index, DOC(supera, ImageMeta3D, id_to_z_index), "id"_a)
+      .def("id_to_xyz_index", &supera::ImageMeta3D::id_to_xyz_index, DOC(supera, ImageMeta3D, id_to_xyz_index),
+           "id"_a, "x"_a, "y"_a, "z"_a);
+
+  // ----------------------------------------------------------------------
+
+  // classes from Particle.h
   pybind11::class_<supera::Particle>(m, "Particle", DOC(supera, Particle))
       .def(pybind11::init<supera::SemanticType_t>(), DOC(supera, Particle, Particle), "shape"_a=supera::kShapeUnknown)
       .def("p", &supera::Particle::p, DOC(supera, Particle, p))
