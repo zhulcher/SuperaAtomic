@@ -11,17 +11,24 @@ namespace supera
 {
   namespace test
   {
+    /// Collection of input & expected output information for testing machinery
     struct TestEvent
     {
       supera::EventInput  input;
+
+      /// known expected metadata that should be derived from the input
       supera::ImageMeta3D output_meta;
+
+      /// known expected particle labels (etc.) that will be derived from the input if the labeler is working correctly
       supera::EventOutput output_labels;
     };
 
     // --------------------------------------------
 
+    /// Validate that the computed metadata match expected metadata
     bool VerifyEventMeta(const supera::ImageMeta3D& computedMeta, const supera::ImageMeta3D& expectedMeta);
 
+    /// Validate that the computed event labels match the expected ones
     bool VerifyEventLabels(const supera::EventOutput& computedLabels, const supera::EventOutput& expectedLabels);
 
     // --------------------------------------------
