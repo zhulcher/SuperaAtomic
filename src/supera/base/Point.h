@@ -77,7 +77,7 @@ namespace supera{
     EDep() : Point3D()
     { t = e = dedx = supera::kINVALID_DOUBLE; }
 
-    double x,y,z,t,e,dedx; ///< x, y, z, time, energy, dE/dX in respective order
+    double t,e,dedx; ///< time, energy, dE/dX in respective order
   };
 
   /**
