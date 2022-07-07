@@ -1,20 +1,36 @@
 
+bbox_cfg = {
+    "BBoxSize": "[100, 100, 100]",
+    "VoxelSize": "[1, 1, 1]",
+    "BBoxBottom": "[0, 0, 0]",
+    "WorldBoundBottom": "[0, 0, 0]",
+    "WorldBoundTop": "[100, 100, 100]",
+}
+
+label_cfg = {
+    "LogLevel": "ERROR",
+
+    "UseSimEnergyDeposit":       "True",  # currently unused but required parameter
+    "UseSimEnergyDepositPoints": "False", # ditto
+
+}
+
 def test_events():
     import sys
 
     import supera
 
     driver = supera.Driver()
-    driver.ConfigureBBoxAlgorithm("BBoxInteraction")
-    driver.ConfigureLabelAlgorithm("LArTPCMLReco3D", {"LogLevel", "ERROR"})
+    driver.ConfigureBBoxAlgorithm("BBoxInteraction", bbox_cfg)
+    driver.ConfigureLabelAlgorithm("LArTPCMLReco3D", label_cfg)
 
-    for evnum, (evname, testev) in enumerate(supera.test.kTestEvents.items()):
+    for evnum, (evname, testev) in enumerate(supera.test.TestEvents().items()):
         driver.GenerateImageMeta(testev.input)
         driver.GenerateLabel(testev.inputev)
 
         if not supera.test.VerifyEventMeta(driver.Meta(), testev.output_meta) \
                 or supera.test.VerifyEventLabels(driver.Label(), testev.output_labels):
             print("Event #%d ('%s') failed test!" % (evnum, evname), file=sys.stderr)
-            return 1;
+            return 1
 
-    return 0;
+    return 0
