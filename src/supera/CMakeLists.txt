@@ -4,6 +4,14 @@
 
 set(ALL_HEADERS "")
 
+# this needs to be done before the add_subdirectory() calls
+# for the include_directories() addition to be inherited, it seems
+if(USE_PYBIND11_MKDOC)
+    get_filename_component(curdir ${CMAKE_CURRENT_BINARY_DIR} NAME)
+    message("adding output dir to c++ include path: ${PROJECT_BINARY_DIR}/${curdir}")
+    include_directories(${PROJECT_BINARY_DIR}/${curdir})
+endif()
+
 add_subdirectory(base)
 add_subdirectory(data)
 add_subdirectory(algorithm)
@@ -63,9 +71,6 @@ if(NOT WITHOUT_PYTHON)
             string(REPLACE "\n" ";" mkdoc_includes "${mkdoc_includes}")
             list(TRANSFORM mkdoc_includes PREPEND "-I")
             message("using extra system include path to mkdoc: ${mkdoc_includes}")
-            get_filename_component(curdir ${CMAKE_CURRENT_BINARY_DIR} NAME)
-            message("adding output dir to c++ include path: ${PROJECT_BINARY_DIR}/${curdir}")
-            include_directories(${PROJECT_BINARY_DIR}/${curdir})
         endif()
         add_custom_command(OUTPUT ${PYBIND11_MKDOC_DOCSTRING_FILE}
                            COMMAND "${Python_EXECUTABLE}" -m "pybind11_mkdoc" "-std=c++${CMAKE_CXX_STANDARD}" "${mkdoc_includes}" "-I$<JOIN:$<TARGET_PROPERTY:supera,INCLUDE_DIRECTORIES>,;-I>" -o ${PYBIND11_MKDOC_DOCSTRING_FILE} ${ALL_HEADERS}
