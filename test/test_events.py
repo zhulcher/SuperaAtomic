@@ -3,7 +3,6 @@ def test_events():
     import sys
 
     import supera
-    import supera.test
 
     driver = supera.Driver()
     driver.ConfigureBBoxAlgorithm("BBoxInteraction")
