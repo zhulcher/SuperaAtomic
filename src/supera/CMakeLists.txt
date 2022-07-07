@@ -75,6 +75,7 @@ if(NOT WITHOUT_PYTHON)
         add_custom_command(OUTPUT ${PYBIND11_MKDOC_DOCSTRING_FILE}
                            COMMAND "${Python_EXECUTABLE}" -m "pybind11_mkdoc" "-std=c++${CMAKE_CXX_STANDARD}" "${mkdoc_includes}" "-I$<JOIN:$<TARGET_PROPERTY:supera,INCLUDE_DIRECTORIES>,;-I>" -o ${PYBIND11_MKDOC_DOCSTRING_FILE} ${ALL_HEADERS}
                            COMMENT "Generating pybind header ${PYBIND11_MKDOC_DOCSTRING_FILE} from Doxygen docstrings"
+                           DEPENDS ${ALL_HEADERS}
                            COMMAND_EXPAND_LISTS )
         add_custom_target(mkdoc_docstring_file
                           ALL DEPENDS ${PYBIND11_MKDOC_DOCSTRING_FILE}
