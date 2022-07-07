@@ -76,4 +76,24 @@ void init_data(pybind11::module& m)
       .def_readwrite("first_pt", &supera::ParticleLabel::first_pt, DOC(supera, ParticleLabel, first_pt))
       .def_readwrite("last_pt", &supera::ParticleLabel::last_pt, DOC(supera, ParticleLabel, last_pt));
 
+  pybind11::class_<supera::EventOutput>(m, "EventOutput", DOC(supera, EventOutput))
+      // this is slightly different than the C++ interface:
+      // instead of a method called Particles() that retrieves the inner particles
+      // with a const version (for reading only) and a non-const version (for modifying)
+      // we map it to a Python 'property' that calls the 'const' version of Particles() when reading
+      // and the non-const when setting (so you'll always have to get the particle list out first,
+      // then reassign it after modifying the copy).
+      // I'm not sure if there's a cleaner way to map it.
+      .def_property("particles", pybind11::overload_cast<>(&supera::EventOutput::Particles, pybind11::const_),
+                    pybind11::overload_cast<>(&supera::EventOutput::Particles),
+                    "Particles contained in this Event.  If you need to modify them, "
+                    "read them out first, modify the list, and after that, reassign back to the `particles` member")
+
+      // note: assignment operators not explicitly bound
+
+      // other methods
+      .def("VoxelDeDxs", &supera::EventOutput::VoxelDeDxs, DOC(supera, EventOutput, VoxelDeDxs))
+      .def("VoxelEnergies", &supera::EventOutput::VoxelEnergies, DOC(supera, EventOutput, VoxelEnergies))
+      .def("VoxelLabels", &supera::EventOutput::VoxelLabels, DOC(supera, EventOutput, VoxelLabels), "semanticPriority"_a);
+
 }
