@@ -67,10 +67,15 @@ if(NOT WITHOUT_PYTHON)
             message("adding output dir to c++ include path: ${PROJECT_BINARY_DIR}/${curdir}")
             include_directories(${PROJECT_BINARY_DIR}/${curdir})
         endif()
-        add_custom_target(${PYBIND11_MKDOC_DOCSTRING_FILE}
-                          COMMENT "Generating pybind header ${PYBIND11_MKDOC_DOCSTRING_FILE} from Doxygen docstrings"
-                          COMMAND "${Python_EXECUTABLE}" -m "pybind11_mkdoc" "-std=c++${CMAKE_CXX_STANDARD}" "${mkdoc_includes}" "-I$<JOIN:$<TARGET_PROPERTY:supera,INCLUDE_DIRECTORIES>,;-I>" -o ${PYBIND11_MKDOC_DOCSTRING_FILE} ${ALL_HEADERS}
-                          SOURCES ${ALL_HEADERS} COMMAND_EXPAND_LISTS )
+        add_custom_command(OUTPUT ${PYBIND11_MKDOC_DOCSTRING_FILE}
+                           COMMAND "${Python_EXECUTABLE}" -m "pybind11_mkdoc" "-std=c++${CMAKE_CXX_STANDARD}" "${mkdoc_includes}" "-I$<JOIN:$<TARGET_PROPERTY:supera,INCLUDE_DIRECTORIES>,;-I>" -o ${PYBIND11_MKDOC_DOCSTRING_FILE} ${ALL_HEADERS}
+                           COMMENT "Generating pybind header ${PYBIND11_MKDOC_DOCSTRING_FILE} from Doxygen docstrings"
+                           COMMAND_EXPAND_LISTS )
+        add_custom_target(mkdoc_docstring_file
+                          ALL DEPENDS ${PYBIND11_MKDOC_DOCSTRING_FILE}
+                          SOURCES ${ALL_HEADERS} )
+
+        add_dependencies(pysupera mkdoc_docstring_file)
     endif()
 endif()
 

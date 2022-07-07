@@ -13,7 +13,7 @@ add_library(${name} OBJECT ${SOURCES})
 
 # if the docstring generator is available, use it first
 if(USE_PYBIND11_MKDOC)
-    add_dependencies(${name} ${PYBIND11_MKDOC_DOCSTRING_FILE})
+    add_dependencies(${name} mkdoc_docstring_file)
 endif()
 
 
