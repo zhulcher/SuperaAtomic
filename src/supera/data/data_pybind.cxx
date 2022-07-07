@@ -42,4 +42,38 @@ void init_data(pybind11::module& m)
       .def_readwrite("interaction_id", &supera::Particle::interaction_id, DOC(supera, Particle, interaction_id));
 
 
+  pybind11::class_<supera::ParticleInput>(m, "ParticleInput", DOC(supera, ParticleInput))
+      .def(pybind11::init<>(), DOC(supera, ParticleInput, ParticleInput))
+      .def_readwrite("part", &supera::ParticleInput::part, DOC(supera, ParticleInput, part))
+      .def_readwrite("pcloud", &supera::ParticleInput::pcloud, DOC(supera, ParticleInput, pcloud))
+      .def_readwrite("valid", &supera::ParticleInput::valid, DOC(supera, ParticleInput, valid))
+      .def_readwrite("type", &supera::ParticleInput::type, DOC(supera, ParticleInput, type));
+
+  pybind11::class_<supera::ParticleLabel>(m, "ParticleLabel", DOC(supera, ParticleLabel))
+      // constructors
+      .def(pybind11::init<std::size_t>(), DOC(supera, ParticleLabel, ParticleLabel), "num_planes"_a=0)
+      .def(pybind11::init<const supera::ParticleLabel&>(), DOC(supera, ParticleLabel, ParticleLabel, 2), "other"_a)
+      // note: move constructor is not exposed here
+
+      // note: don't explicitly expose assignment operator either
+
+      // other methods
+      .def("AddEDep", &supera::ParticleLabel::AddEDep, DOC(supera, ParticleLabel, AddEDep), "pt"_a)
+      .def("SizeCheck", &supera::ParticleLabel::SizeCheck, DOC(supera, ParticleLabel, SizeCheck))
+      .def("Size", &supera::ParticleLabel::Size, DOC(supera, ParticleLabel, Size))
+      .def("Merge", &supera::ParticleLabel::Merge, DOC(supera, ParticleLabel, Merge), "child"_a, "verbose"_a)
+      .def("shape", &supera::ParticleLabel::shape, DOC(supera, ParticleLabel, shape))
+
+      // data members
+      .def_readwrite("part", &supera::ParticleLabel::part, DOC(supera, ParticleLabel, part))
+      .def_readwrite("valid", &supera::ParticleLabel::valid, DOC(supera, ParticleLabel, valid))
+      .def_readwrite("valid", &supera::ParticleLabel::valid, DOC(supera, ParticleLabel, valid))
+      .def_readwrite("add_to_parent", &supera::ParticleLabel::add_to_parent, DOC(supera, ParticleLabel, add_to_parent))
+      .def_readwrite("type", &supera::ParticleLabel::type, DOC(supera, ParticleLabel, type))
+      .def_readwrite("trackid_v", &supera::ParticleLabel::trackid_v, DOC(supera, ParticleLabel, trackid_v))
+      .def_readwrite("energy", &supera::ParticleLabel::energy, DOC(supera, ParticleLabel, energy))
+      .def_readwrite("dedx", &supera::ParticleLabel::dedx, DOC(supera, ParticleLabel, dedx))
+      .def_readwrite("first_pt", &supera::ParticleLabel::first_pt, DOC(supera, ParticleLabel, first_pt))
+      .def_readwrite("last_pt", &supera::ParticleLabel::last_pt, DOC(supera, ParticleLabel, last_pt));
+
 }
