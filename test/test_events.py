@@ -8,7 +8,7 @@ bbox_cfg = {
 }
 
 label_cfg = {
-    "LogLevel": "ERROR",
+    "LogLevel": "VERBOSE",
 
     "UseSimEnergyDeposit":       "True",  # currently unused but required parameter
     "UseSimEnergyDepositPoints": "False", # ditto
@@ -16,8 +16,6 @@ label_cfg = {
 }
 
 def test_events():
-    import sys
-
     import supera
 
     driver = supera.Driver()
@@ -26,11 +24,8 @@ def test_events():
 
     for evnum, (evname, testev) in enumerate(supera.test.TestEvents().items()):
         driver.GenerateImageMeta(testev.input)
-        driver.GenerateLabel(testev.inputev)
+        driver.GenerateLabel(testev.input)
 
         if not supera.test.VerifyEventMeta(driver.Meta(), testev.output_meta) \
                 or supera.test.VerifyEventLabels(driver.Label(), testev.output_labels):
-            print("Event #%d ('%s') failed test!" % (evnum, evname), file=sys.stderr)
-            return 1
-
-    return 0
+            raise RuntimeError("Event #%d ('%s') failed test!" % (evnum, evname))
