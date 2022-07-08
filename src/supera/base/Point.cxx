@@ -15,6 +15,26 @@ namespace supera{
     : x(xv), y(yv), z(zv)
   {}
 
+
+  std::string EDep::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    // just do the x, y, z inherited from Point3D manually
+    // (too much trouble to implement those in Point3D
+    //  and do something like slice-assign...)
+    ss << "supera::EDep " << instanceName << ";\n";
+    ss << instanceName << ".x = " << x << ";\n";
+    ss << instanceName << ".y = " << y << ";\n";
+    ss << instanceName << ".z = " << z << ";\n";
+    ss << instanceName << ".t = " << t << ";\n";
+    ss << instanceName << ".e = " << e << ";\n";
+    ss << instanceName << ".dedx = " << dedx << ";\n";
+
+    return ss.str();
+  }
+
+
   Vertex::Vertex() : pos(), time(kINVALID_DOUBLE)
   {}
 
@@ -40,7 +60,6 @@ namespace supera{
     pos.z = (double)( ((double)((signed long long)(pos.z * factor)) / factor ));
     time  = (double)( ((double)((signed long long)(time  * factor)) / factor ));
   }
-
 
 }
 

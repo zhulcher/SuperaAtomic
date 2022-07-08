@@ -4,11 +4,23 @@
 #include "Voxel.h"
 #include <iostream>
 #include <cmath>
+#include <sstream>
 
 namespace supera {
 
   Voxel::Voxel(VoxelID_t id, float value)
   { _id = id; _value = value; }
+
+  std::string Voxel::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    ss << "supera::Voxel " << instanceName << ";\n";
+    ss << instanceName << "._id = static_cast<supera::VoxelID_t>(" << _id << ");\n";
+    ss << instanceName << "._value = " << _value << std::endl;
+
+    return ss.str();
+  }
 
   float VoxelSet::max() const
   {
@@ -181,6 +193,25 @@ namespace supera {
         return false;
     }
     return true;
+  }
+
+  std::string VoxelSet::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    ss << "supera::VoxelSet " << instanceName << ";\n";
+    ss << instanceName << "._id = " << _id << ";\n";
+
+    ss << instanceName << "._voxel_v.reserve(" << _voxel_v.size() << ");\n";
+    for (std::size_t idx = 0; idx < _voxel_v.size(); idx++)
+    {
+      const supera::Voxel & vox = _voxel_v[idx];
+      std::string voxInstance = instanceName + "_vox" + std::to_string(idx);
+      ss << vox.dump2cpp(voxInstance);
+      ss << instanceName << "._voxel_v.emplace_back(std::move(" << voxInstance << "));\n";
+    }
+
+    return ss.str();
   }
 
   //

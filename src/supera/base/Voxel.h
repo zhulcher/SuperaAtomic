@@ -14,7 +14,10 @@
 #define SUPERA_VOXEL_H
 
 #include "SuperaType.h"
+
+#include <string>
 #include <vector>
+
 namespace supera {
 
   /**
@@ -80,6 +83,9 @@ namespace supera {
     { return _value >  rhs; }
     inline bool operator >= (const float& rhs) const
     { return _value >= rhs; }
+
+    // misc.
+    std::string dump2cpp(const std::string & instanceName="voxSet") const;
 
   private:
     VoxelID_t _id; ///< voxel id
@@ -183,6 +189,9 @@ namespace supera {
     // assign & move assign operators
     inline VoxelSet& operator=(const VoxelSet & rhs) = default;
     inline VoxelSet& operator=(VoxelSet && rhs) noexcept { _id = rhs._id; _voxel_v = std::move(rhs._voxel_v); return *this; }
+
+    // misc.
+    std::string dump2cpp(const std::string & instanceName="voxSet") const;
 
   private:
     /// Instance ID

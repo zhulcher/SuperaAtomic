@@ -18,7 +18,7 @@ namespace supera {
 
     ss << buf.str() << "Vertex   (x, y, z, t) = (" << vtx.pos.x << "," << vtx.pos.y << "," << vtx.pos.z << "," << vtx.time << ")" << std::endl
        << buf.str() << "Momentum (px, py, pz) = (" << px << "," << py << "," << pz << ")" << std::endl
-       << buf.str() << "Inittial Energy  = " << energy_init << std::endl
+       << buf.str() << "Initial Energy  = " << energy_init << std::endl
        << buf.str() << "Deposit  Energy  = " << energy_deposit << std::endl
        << buf.str() << "Creation Process = " << process << std::endl
        << buf.str() << "Group ID = " << group_id << std::endl
@@ -31,6 +31,72 @@ namespace supera {
     return ss.str();
 
   }
+
+
+  std::string Particle::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+    
+    ss << "supera::Particle " << instanceName << ";\n";
+
+    ss << instanceName << ".id = " << id << ";\n";
+    ss << instanceName << ".shape = static_cast<supera::SemanticType_t>(" << shape << ");\n";
+    ss << instanceName << ".trackid = " << trackid << ";\n";
+    ss << instanceName << ".pdg = " << pdg << ";\n";
+    ss << instanceName << ".px = " << px << ";\n";
+    ss << instanceName << ".py = " << py << ";\n";
+    ss << instanceName << ".pz = " << pz << ";\n";
+    ss << instanceName << ".vtx = {" << vtx.pos.x << ", "
+                                     << vtx.pos.y << ", "
+                                     << vtx.pos.z << ", "
+                                     << vtx.time << "};\n";
+    ss << instanceName << ".end_pt = {" << end_pt.pos.x << ", "
+                                        << end_pt.pos.y << ", "
+                                        << end_pt.pos.z << ", "
+                                        << end_pt.time << "};\n";
+    ss << instanceName << ".first_step = {" << first_step.pos.x << ", "
+                                            << first_step.pos.y << ", "
+                                            << first_step.pos.z << ", "
+                                            << first_step.time << "};\n";
+    ss << instanceName << ".last_step = {" << last_step.pos.x << ", "
+                                           << last_step.pos.y << ", "
+                                           << last_step.pos.z << ", "
+                                           << last_step.time << "};\n";
+    ss << instanceName << ".dist_travel = " << dist_travel << ";\n";
+    ss << instanceName << ".energy_init = " << energy_init << ";\n";
+    ss << instanceName << ".energy_deposit = " << energy_deposit << ";\n";
+    ss << instanceName << ".process = \"" << process << "\";\n";
+
+    ss << instanceName << ".parent_trackid = " << parent_trackid << ";\n";
+    ss << instanceName << ".parent_pdg = " << parent_pdg << ";\n";
+    ss << instanceName << ".parent_vtx = {" << parent_vtx.pos.x << ", "
+                                            << parent_vtx.pos.y << ", "
+                                            << parent_vtx.pos.z << ", "
+                                            << parent_vtx.time << "};\n";
+
+    // this particle is at the top so it's its own ancestor
+    ss << instanceName << ".ancestor_trackid = " << ancestor_trackid << ";\n";
+    ss << instanceName << ".ancestor_pdg = " << ancestor_pdg << ";\n";
+    ss << instanceName << ".ancestor_vtx = {" << ancestor_vtx.pos.x << ", "
+                                              << ancestor_vtx.pos.y << ", "
+                                              << ancestor_vtx.pos.z << ", "
+                                              << ancestor_vtx.time << "};\n";
+    ss << instanceName << ".ancestor_process = \"" << ancestor_process << "\";\n";
+
+    ss << instanceName << ".parent_process = \"" << parent_process << "\";\n";
+    ss << instanceName << ".parent_id = " << parent_id << ";\n";
+
+    ss << instanceName << ".children_id = { ";
+    for (const supera::InstanceID_t & chid : children_id)
+      ss << chid << (chid != children_id.back() ? ", " : "");
+    ss << " };\n";
+
+    ss << instanceName << ".group_id = " << group_id << ";\n";
+    ss << instanceName << ".interaction_id = " << interaction_id << ";\n";
+
+    return ss.str();
+  }
+
 
   bool Particle::operator==(const Particle &rhs) const
   {
@@ -62,6 +128,33 @@ namespace supera {
            (children_id == rhs.children_id) &&
            (group_id == rhs.group_id) &&
            (interaction_id == rhs.interaction_id);
+  }
+
+  // --------------------------------------------------------
+
+  std::string ParticleInput::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    ss << "supera::ParticleInput " << instanceName << ";\n";
+
+    ss << instanceName << ".pcloud.reserve(" << pcloud.size() << ");\n";
+    for (std::size_t idx = 0; idx < pcloud.size(); idx++)
+    {
+      std::string edepInstance = instanceName + "_edep" + std::to_string(idx);
+      std::string edepCode = pcloud[idx].dump2cpp(edepInstance);
+      ss << edepCode;
+      ss << instanceName << ".pcloud.emplace_back(std::move(" << edepInstance << "));\n";
+    }
+
+    ss << instanceName << ".valid = " << valid << ";\n";
+    ss << instanceName << ".type = static_cast<supera::ProcessType>(" << type << ");\n";
+
+    std::string partInstance = instanceName + "_particle";
+    ss << part.dump2cpp();
+    ss << instanceName << ".part = std::move(" << partInstance << ");\n";
+
+    return ss.str();
   }
 
   // --------------------------------------------------------
@@ -157,6 +250,45 @@ namespace supera {
       return supera::kShapeLEScatter;
     }else
     return supera::kShapeTrack;
+  }
+
+
+  std::string ParticleLabel::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    ss << "supera::ParticleLabel " << instanceName << ";\n";
+
+    std::string partInstance = instanceName + "_part";
+    ss << part.dump2cpp(instanceName);
+    ss << instanceName << ".part = std::move(" << partInstance << ");\n";
+
+    ss << instanceName << ".valid = " << valid << ";\n";
+    ss << instanceName << ".add_to_parent = " << add_to_parent << ";\n";
+    ss << instanceName << ".type = static_cast<supera::ProcessType>(" << type << ");\n";
+
+    ss << instanceName << ".trackid_v = { ";
+    for (std::size_t tkid : trackid_v)
+      ss << tkid << (tkid == trackid_v.back() ? "" : ", ");
+    ss << " };\n";
+
+    std::string energyInstance = instanceName + "_energyVoxSet";
+    ss << energy.dump2cpp(energyInstance);
+    ss << instanceName << ".energy = std::move(" << energyInstance << ");\n";
+
+    std::string dedxInstance = instanceName + "_dedxVoxSet";
+    ss << dedx.dump2cpp(dedxInstance);
+    ss << instanceName << ".dedx = std::move(" << dedxInstance << ");\n";
+
+    std::string firstptInstance = instanceName + "_firstEdep";
+    ss << first_pt.dump2cpp(firstptInstance);
+    ss << instanceName << ".first_pt = std::move(" << firstptInstance << ");\n";
+
+    std::string lastptInstance = instanceName + "_lastEdep";
+    ss << last_pt.dump2cpp(lastptInstance);
+    ss << instanceName << ".last_pt = std::move(" << lastptInstance << ");\n";
+
+    return ss.str();
   }
 
   bool ParticleLabel::operator==(const ParticleLabel &rhs) const
@@ -311,4 +443,23 @@ namespace supera {
 
   }
 
+  // --------------------------------------------------------
+
+  std::string EventOutput::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    ss << "supera::EventOutput " << instanceName << ";\n";
+
+    ss << instanceName << "._particles.reserve(" << _particles.size() << ");\n";
+    for (std::size_t idx = 0; idx < _particles.size(); idx++)
+    {
+      const supera::ParticleLabel & part = _particles[idx];
+      std::string partInstance = instanceName + "_part" + std::to_string(idx);
+      ss << part.dump2cpp(partInstance);
+      ss << instanceName << "._particles.emplace_back(std::move(" << partInstance << "));\n";
+    }
+
+    return ss.str();
+  }
 } // namespace supera

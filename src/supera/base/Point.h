@@ -77,6 +77,8 @@ namespace supera{
     EDep() : Point3D()
     { t = e = dedx = supera::kINVALID_DOUBLE; }
 
+    std::string dump2cpp(const std::string & instanceName = "edep") const;
+
     double t,e,dedx; ///< time, energy, dE/dX in respective order
   };
 

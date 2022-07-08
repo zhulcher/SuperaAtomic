@@ -65,6 +65,9 @@ namespace supera {
     inline double p() const { return sqrt(pow(px,2)+pow(py,2)+pow(pz,2)); }
     std::string dump() const;
 
+    /// Dump this Particle into C++ code that could rebuild it.
+    std::string dump2cpp(const std::string &instanceName = "part") const;
+
   public:
 
     InstanceID_t id; ///< "ID" of this particle in ParticleSet collection
@@ -103,7 +106,9 @@ namespace supera {
 
     ParticleInput() : valid(true), type(supera::kInvalidProcess) {}
 
-    supera::Particle part;         ///< a particle information 
+    std::string dump2cpp(const std::string & instanceName = "partInput") const;
+
+    supera::Particle part;         ///< a particle information
     std::vector<EDep> pcloud;      ///< 3D energy deposition information (raw info)
     bool valid;
     supera::ProcessType type;
@@ -127,6 +132,8 @@ namespace supera {
     size_t Size() const;
     void Merge(ParticleLabel& child,bool verbose=false);
     supera::SemanticType_t shape() const;
+
+    std::string dump2cpp(const std::string & instanceName = "partLabel") const;
 
     supera::Particle part;         ///< a particle information 
     bool valid;                    ///< a state flag whether this particle should be ignored or not
@@ -171,6 +178,9 @@ namespace supera {
 
       /// Is this EventOutput the same as \a rhs?
       bool operator==(const EventOutput & rhs) const;
+
+      /// Dump this \ref EventOutput to a string of C++ code that can be used to reproduce it
+      std::string dump2cpp(const std::string &instanceName = "evtOutput") const;
 
     private:
       /// Helper method to simplify querying the 'dirty' fields
