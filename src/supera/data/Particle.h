@@ -184,7 +184,7 @@ namespace supera {
 
     private:
       /// Helper method to simplify querying the 'dirty' fields
-      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<std::underlying_type_t<DIRTY_FLAG>>(DIRTY_FLAG::kLabel)]; }
+      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<std::underlying_type_t<DIRTY_FLAG>>(field)]; }
 
       /// Helper method to implement the ranking decision between two semantic labels using the priority passed by the caller
       static supera::SemanticType_t _SemanticPriority(supera::SemanticType_t a, supera::SemanticType_t b,
