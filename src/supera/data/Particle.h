@@ -10,8 +10,8 @@
 
 /** \addtogroup base
     @{*/
-#ifndef __PARTICLE_H__
-#define __PARTICLE_H__
+#ifndef __SUPERA_PARTICLE_H__
+#define __SUPERA_PARTICLE_H__
 
 #include <array>
 #include <iostream>
