@@ -31,6 +31,8 @@ namespace supera{
     Point3D(const Point3D& pt) : x(pt.x), y(pt.y), z(pt.z) {}
 
     double x, y, z;
+
+    inline Point3D& operator=(const Point3D & other) = default;
     
     inline bool operator== (const Point3D& rhs) const
     { return (x == rhs.x && y == rhs.y && z == rhs.z); }
