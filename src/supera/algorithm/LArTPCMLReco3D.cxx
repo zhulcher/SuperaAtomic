@@ -830,7 +830,7 @@ namespace supera {
     // ------------------------------------------------------
 
     void LArTPCMLReco3D::FixUnassignedLEScatterGroups(std::vector<supera::ParticleLabel> &inputLabels,
-                                                               const std::vector<TrackID_t> &output2trackid) const
+                                                               const std::vector<TrackID_t> & /*output2trackid*/) const
     {
         LOG.DEBUG() << "Inspecting LEScatter groups for invalid group ids...\n";
         for (auto & label : inputLabels)
