@@ -939,7 +939,7 @@ namespace supera {
             label.part = evtInput[idx].part;
 
             auto mother_index = _mcpl.ParentIndex()[idx];
-            if (mother_index >= 0 && label.part.parent_pdg == supera::kINVALID_PDG)
+            if (mother_index != supera::kINVALID_INDEX && label.part.parent_pdg == supera::kINVALID_PDG)
                 label.part.parent_pdg = _mcpl.ParentPdgCode()[idx];
 
             label.valid = true;
@@ -1437,12 +1437,12 @@ namespace supera {
         auto const &trackid2index = _mcpl.TrackIdToIndex();
         std::vector<unsigned int> result;
 
-        if (trackid >= trackid2index.size() || trackid2index[trackid] < 0)
+        if (trackid >= trackid2index.size() || trackid2index[trackid] != supera::kINVALID_INDEX)
             return result;
 
         unsigned int parent_trackid = _mcpl.ParentTrackId()[trackid2index[trackid]];
         std::set<unsigned int> accessed;
-        while ((size_t) (parent_trackid) < trackid2index.size() && trackid2index[parent_trackid] >= 0)
+        while ((size_t) (parent_trackid) < trackid2index.size() && trackid2index[parent_trackid] != supera::kINVALID_INDEX)
         {
             if (accessed.find(parent_trackid) != accessed.end())
             {
