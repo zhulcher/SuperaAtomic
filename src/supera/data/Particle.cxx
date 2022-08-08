@@ -159,12 +159,11 @@ namespace supera {
 
   // --------------------------------------------------------
 
-  ParticleLabel::ParticleLabel(size_t num_planes)
+  ParticleLabel::ParticleLabel()
   : valid(false)
   , add_to_parent(false)
   , type(supera::kInvalidProcess)
   {}
-  //{ vs2d_v.resize(num_planes); }
 
   void ParticleLabel::AddEDep(const EDep& pt)
   { 

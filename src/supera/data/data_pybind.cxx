@@ -99,7 +99,7 @@ void init_data(pybind11::module& m)
 
   pybind11::class_<supera::ParticleLabel>(m, "ParticleLabel", DOC(supera, ParticleLabel))
       // constructors
-      .def(pybind11::init<std::size_t>(), DOC(supera, ParticleLabel, ParticleLabel), "num_planes"_a=0)
+      .def(pybind11::init<>(), DOC(supera, ParticleLabel, ParticleLabel))
       .def(pybind11::init<const supera::ParticleLabel&>(), DOC(supera, ParticleLabel, ParticleLabel, 2), "other"_a)
       // note: move constructor is not exposed here
 
