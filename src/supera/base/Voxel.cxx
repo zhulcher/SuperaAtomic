@@ -16,8 +16,7 @@ namespace supera {
     std::stringstream ss;
 
     ss << "supera::Voxel " << instanceName << ";\n";
-    ss << instanceName << "._id = static_cast<supera::VoxelID_t>(" << _id << ");\n";
-    ss << instanceName << "._value = " << _value << std::endl;
+    ss << instanceName << ".set(static_cast<supera::VoxelID_t>(" << _id << "), " << _value << ");\n";
 
     return ss.str();
   }
@@ -200,15 +199,18 @@ namespace supera {
     std::stringstream ss;
 
     ss << "supera::VoxelSet " << instanceName << ";\n";
-    ss << instanceName << "._id = " << _id << ";\n";
+    ss << instanceName << ".id(" << _id;
+    if (_id > std::numeric_limits<int>::max())  // can happen if it's, for example, kINVALID_INSTANCE
+      ss << "ul";
+    ss << ");\n";
 
-    ss << instanceName << "._voxel_v.reserve(" << _voxel_v.size() << ");\n";
+    ss << instanceName << ".reserve(" << _voxel_v.size() << ");\n";
     for (std::size_t idx = 0; idx < _voxel_v.size(); idx++)
     {
       const supera::Voxel & vox = _voxel_v[idx];
       std::string voxInstance = instanceName + "_vox" + std::to_string(idx);
       ss << vox.dump2cpp(voxInstance);
-      ss << instanceName << "._voxel_v.emplace_back(std::move(" << voxInstance << "));\n";
+      ss << instanceName << ".emplace(std::move(" << voxInstance << "), false);\n";
     }
 
     return ss.str();

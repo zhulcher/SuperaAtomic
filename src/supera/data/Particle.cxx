@@ -151,7 +151,7 @@ namespace supera {
     ss << instanceName << ".type = static_cast<supera::ProcessType>(" << type << ");\n";
 
     std::string partInstance = instanceName + "_particle";
-    ss << part.dump2cpp();
+    ss << part.dump2cpp(partInstance);
     ss << instanceName << ".part = std::move(" << partInstance << ");\n";
 
     return ss.str();
@@ -259,7 +259,7 @@ namespace supera {
     ss << "supera::ParticleLabel " << instanceName << ";\n";
 
     std::string partInstance = instanceName + "_part";
-    ss << part.dump2cpp(instanceName);
+    ss << part.dump2cpp(partInstance);
     ss << instanceName << ".part = std::move(" << partInstance << ");\n";
 
     ss << instanceName << ".valid = " << valid << ";\n";
@@ -450,13 +450,13 @@ namespace supera {
 
     ss << "supera::EventOutput " << instanceName << ";\n";
 
-    ss << instanceName << "._particles.reserve(" << _particles.size() << ");\n";
+    ss << instanceName << ".Particles().reserve(" << _particles.size() << ");\n";
     for (std::size_t idx = 0; idx < _particles.size(); idx++)
     {
       const supera::ParticleLabel & part = _particles[idx];
-      std::string partInstance = instanceName + "_part" + std::to_string(idx);
+      std::string partInstance = instanceName + "_part" + std::to_string(idx) + "_label";
       ss << part.dump2cpp(partInstance);
-      ss << instanceName << "._particles.emplace_back(std::move(" << partInstance << "));\n";
+      ss << instanceName << ".Particles().push_back(std::move(" << partInstance << "));\n";
     }
 
     return ss.str();
