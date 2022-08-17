@@ -305,6 +305,23 @@ namespace supera {
 
   }
 
+  std::string ParticleLabel::dump() const
+  {
+    std::stringstream st;
+
+    st << "ParticleLabel object:\n";
+    st << "  valid = " << valid << "; add_to_parent = " << add_to_parent << "; type = " << type << "\n";
+    st << "  descendant trackIDs = ";
+    for (const TrackID_t tk : trackid_v)
+      st << tk << " ";
+    st << "\n";
+    st << "  Particle:\n";
+    st << part.dump() << "\n";
+    st << "  num voxels: " << energy.size() << "\n";
+
+    return st.str();
+  }
+
   // --------------------------------------------------------
 
   const supera::VoxelSet &EventOutput::VoxelDeDxs() const

@@ -2,6 +2,7 @@
 #include "data_pybind.h"
 
 #include "pybind11/operators.h"
+#include "pybind11/stl.h"
 
 #include "supera/pybind_mkdoc.h"
 
@@ -111,6 +112,7 @@ void init_data(pybind11::module& m)
       .def("Size", &supera::ParticleLabel::Size, DOC(supera, ParticleLabel, Size))
       .def("Merge", &supera::ParticleLabel::Merge, DOC(supera, ParticleLabel, Merge), "child"_a, "verbose"_a)
       .def("shape", &supera::ParticleLabel::shape, DOC(supera, ParticleLabel, shape))
+      .def("dump", &supera::ParticleLabel::dump, DOC(supera, ParticleLabel, dump))
 
       // data members
       .def_readwrite("part", &supera::ParticleLabel::part, DOC(supera, ParticleLabel, part))
