@@ -12,8 +12,8 @@ namespace supera {
   {
     std::stringstream ss;
     std::stringstream buf;
-    ss  << "      \033[95m" << "Particle " << " (PdgCode,TrackID) = (" << pdg << "," << trackid << ")\033[00m "
-        << "... with Parent (" << parent_pdg << "," << parent_trackid << ")" << std::endl;
+    ss  << "      \033[95m" << "Particle " << " (PdgCode,TrackID) = (" << pdg << "," << StringifyTrackID(trackid) << ")\033[00m "
+        << "... with Parent (" << parent_pdg << "," << StringifyTrackID(parent_trackid) << ")" << std::endl;
     buf << "      ";
 
     ss << buf.str() << "Vertex   (x, y, z, t) = (" << vtx.pos.x << "," << vtx.pos.y << "," << vtx.pos.z << "," << vtx.time << ")" << std::endl
@@ -21,11 +21,11 @@ namespace supera {
        << buf.str() << "Initial Energy  = " << energy_init << std::endl
        << buf.str() << "Deposit  Energy  = " << energy_deposit << std::endl
        << buf.str() << "Creation Process = " << process << std::endl
-       << buf.str() << "Group ID = " << group_id << std::endl
+       << buf.str() << "Group ID = " << StringifyInstanceID(group_id) << std::endl
        << buf.str() << "Shape = " << shape << std::endl;
     ss << buf.str() << "Children =  ";
     for (const auto & child :  children_id)
-      ss << " " << child;
+      ss << " " << StringifyInstanceID(child);
     ss << std::endl;
 
     return ss.str();
@@ -41,7 +41,7 @@ namespace supera {
 
     ss << instanceName << ".id = " << id << ";\n";
     ss << instanceName << ".shape = static_cast<supera::SemanticType_t>(" << shape << ");\n";
-    ss << instanceName << ".trackid = " << trackid << ";\n";
+    ss << instanceName << ".trackid = " << StringifyTrackID(trackid) << ";\n";
     ss << instanceName << ".pdg = " << pdg << ";\n";
     ss << instanceName << ".px = " << px << ";\n";
     ss << instanceName << ".py = " << py << ";\n";
@@ -67,7 +67,7 @@ namespace supera {
     ss << instanceName << ".energy_deposit = " << energy_deposit << ";\n";
     ss << instanceName << ".process = \"" << process << "\";\n";
 
-    ss << instanceName << ".parent_trackid = " << parent_trackid << ";\n";
+    ss << instanceName << ".parent_trackid = " << StringifyTrackID(parent_trackid) << ";\n";
     ss << instanceName << ".parent_pdg = " << parent_pdg << ";\n";
     ss << instanceName << ".parent_vtx = {" << parent_vtx.pos.x << ", "
                                             << parent_vtx.pos.y << ", "
@@ -75,7 +75,7 @@ namespace supera {
                                             << parent_vtx.time << "};\n";
 
     // this particle is at the top so it's its own ancestor
-    ss << instanceName << ".ancestor_trackid = " << ancestor_trackid << ";\n";
+    ss << instanceName << ".ancestor_trackid = " << StringifyTrackID(ancestor_trackid) << ";\n";
     ss << instanceName << ".ancestor_pdg = " << ancestor_pdg << ";\n";
     ss << instanceName << ".ancestor_vtx = {" << ancestor_vtx.pos.x << ", "
                                               << ancestor_vtx.pos.y << ", "
@@ -88,11 +88,11 @@ namespace supera {
 
     ss << instanceName << ".children_id = { ";
     for (const supera::InstanceID_t & chid : children_id)
-      ss << chid << (chid != children_id.back() ? ", " : "");
+      ss << StringifyInstanceID(chid) << (chid != children_id.back() ? ", " : "");
     ss << " };\n";
 
-    ss << instanceName << ".group_id = " << group_id << ";\n";
-    ss << instanceName << ".interaction_id = " << interaction_id << ";\n";
+    ss << instanceName << ".group_id = " << StringifyInstanceID(group_id) << ";\n";
+    ss << instanceName << ".interaction_id = " << StringifyInstanceID(interaction_id) << ";\n";
 
     return ss.str();
   }
