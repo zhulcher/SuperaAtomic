@@ -30,6 +30,11 @@ namespace supera {
     /// Default dtor
     ~ImageMeta3D() = default;
 
+    ImageMeta3D(const ImageMeta3D&)  = default;
+    ImageMeta3D(ImageMeta3D&&)  = default;
+    ImageMeta3D& operator=(const ImageMeta3D&) = default;
+    ImageMeta3D& operator=(ImageMeta3D&&) = default;
+
     /// Update voxel count
     void update(size_t xnum,size_t ynum,size_t znum);
     /// Define dimensions
