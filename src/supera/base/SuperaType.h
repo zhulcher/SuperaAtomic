@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <cstddef>
+#include <string>
 
 namespace supera {
 
@@ -53,6 +54,11 @@ namespace supera {
     kShapeGhost,     ///< ghost 3d point
     kShapeUnknown    ///< LArbys
   };
+
+  inline std::string StringifyIndex(supera::Index_t idx) { return (idx == kINVALID_INDEX ? "kINVALID_INDEX" : std::to_string(idx)); }
+  inline std::string StringifyTrackID(supera::TrackID_t id) { return (id == kINVALID_TRACKID ? "kINVALID_TRACKID" : std::to_string(id)); }
+  inline std::string StringifyVoxelID(supera::VoxelID_t id) { return (id == kINVALID_VOXELID ? "kINVALID_VOXELID" : std::to_string(id)); }
+  inline std::string StringifyInstanceID(supera::InstanceID_t id) { return (id == kINVALID_INSTANCEID ? "kINVALID_INSTANCEID" : std::to_string(id)); }
 }
 
 #endif
