@@ -218,20 +218,20 @@ namespace supera {
         {
             auto &inputLabel = inputLabels[trackid];
             LOG.VERBOSE() << "  Group for trackid=" << trackid
-                          << " (pdg = " << inputLabel.part.pdg << ", particle id=" << inputLabel.part.id << ")\n";
+                          << " (pdg = " << inputLabel.part.pdg << ", particle id=" << StringifyInstanceID(inputLabel.part.id) << ")\n";
             if (std::abs(inputLabel.part.pdg) != 11 && std::abs(inputLabel.part.pdg) != 22)
             {
-                LOG.VERBOSE() << "    ---> not EM, leaving alone (parent id=" << inputLabel.part.parent_id
-                              << " and group id=" << inputLabel.part.group_id << ")\n";
+                LOG.VERBOSE() << "    ---> not EM, leaving alone (parent id=" << StringifyInstanceID(inputLabel.part.parent_id)
+                              << " and group id=" << StringifyInstanceID(inputLabel.part.group_id) << ")\n";
                 continue;
             }
 
-            unsigned int parent_trackid = inputLabel.part.parent_trackid;
-            LOG.VERBOSE() << "   initial parent track id:" << parent_trackid << "\n";
+            supera::TrackID_t parent_trackid = inputLabel.part.parent_trackid;
+            LOG.VERBOSE() << "   initial parent track id:" << StringifyTrackID(parent_trackid) << "\n";
 
-            if (parent_trackid != supera::kINVALID_UINT && trackid2output[parent_trackid] >= 0)
+            if (parent_trackid != supera::kINVALID_TRACKID && trackid2output[parent_trackid] >= 0)
             {
-                LOG.VERBOSE() << "   --> assigning group for trackid " << trackid << " to parent trackid: " << parent_trackid << "\n";
+                LOG.VERBOSE() << "   --> assigning group for trackid " << StringifyTrackID(trackid) << " to parent trackid: " << StringifyTrackID(parent_trackid) << "\n";
                 /*
                 if(trackid2output[parent_trackid] < 0)
             grp.part.parent_id(grp.part.id());
@@ -242,11 +242,11 @@ namespace supera {
                 TrackID_t parent_id = output2trackid[parent_output_id];
                 if (inputLabels[parent_id].valid)
                     inputLabels[parent_id].part.children_id.push_back(inputLabel.part.id);
-            } // if (parent_trackid != larcv::kINVALID_UINT)
+            } // if (parent_trackid != larcv::kINVALID_TRACKID)
             else
             {
                 LOG.VERBOSE() << "     --> no valid ancestor.  Assigning this particle's parent IDs to itself.  "
-                              << " (group id=" << inputLabel.part.group_id << ")\n";
+                              << " (group id=" << StringifyInstanceID(inputLabel.part.group_id) << ")\n";
                 // otherwise checks in CheckParticleValidity() will fail (parent ID will point to something not in output)
                 inputLabel.part.parent_id = inputLabel.part.id;
             }
@@ -256,7 +256,7 @@ namespace supera {
         for (auto &grp : inputLabels)
         {
             auto &part = grp.part;
-            if (part.parent_trackid != supera::kINVALID_UINT)
+            if (part.parent_trackid != supera::kINVALID_TRACKID)
                 continue;
             part.group_id = part.id;
             part.parent_id = part.id;
@@ -379,7 +379,7 @@ namespace supera {
             LOG.VERBOSE() << "\n" << parent.part.dump() << "\n";
             if (parent_trackid == parent.part.parent_trackid)
                 break;
-            if (parent_trackid == supera::kINVALID_UINT)
+            if (parent_trackid == supera::kINVALID_TRACKID)
                 break;
             parent_trackid = parent.part.parent_trackid;
         }
@@ -437,9 +437,9 @@ namespace supera {
             LOG.DEBUG() << "Analyzing particle id " << out_index << " trackid " << trackid << "\n"
                         << grp.part.dump() << "\n";
             int parent_partid = -1;
-            unsigned int parent_trackid;
+            supera::TrackID_t parent_trackid;
             auto parent_trackid_v = ParentTrackIDs(trackid);
-            for (unsigned int idx : parent_trackid_v)
+            for (supera::TrackID_t idx : parent_trackid_v)
             {
                 parent_trackid = idx;
                 if (trackid2output[parent_trackid] < 0 || !inputLabels[parent_trackid].valid)
@@ -840,7 +840,7 @@ namespace supera {
             if (label.shape() != kShapeLEScatter)
                 continue;
 
-            LOG.VERBOSE() << "   trackid=" << label.part.trackid << " group=" << label.part.group_id << "\n";
+            LOG.VERBOSE() << "   trackid=" << StringifyTrackID(label.part.trackid) << " group=" << StringifyInstanceID(label.part.group_id) << "\n";
             if (label.part.group_id != kINVALID_INSTANCEID)
             {
                 LOG.VERBOSE() << "     --> group is valid; don't update.\n";
@@ -864,8 +864,8 @@ namespace supera {
                                              });
             if (parent_part.part.group_id != supera::kINVALID_INSTANCEID)
             {
-                LOG.VERBOSE() << "     --> rewrote group id to parent (trackid=" << parent_part.part.trackid
-                              << ")'s group id = " << parent_part.part.group_id << "\n";
+                LOG.VERBOSE() << "     --> rewrote group id to parent (trackid=" << StringifyTrackID(parent_part.part.trackid)
+                              << ")'s group id = " << StringifyInstanceID(parent_part.part.group_id) << "\n";
                 label.part.group_id = parent_part.part.group_id;
             }
             else
@@ -890,16 +890,16 @@ namespace supera {
             auto parent_trackid = grp.part.parent_trackid;
             auto parent_id = grp.part.parent_id;
             LOG.VERBOSE() << "  index=" << output_index
-                          << "  id=" << grp.part.id
-                          << "  track id=" << grp.part.trackid
-                          << "  parent trackid=" << parent_trackid
-                          << "  parent id=" << parent_id
+                          << "  id=" << StringifyInstanceID(grp.part.id)
+                          << "  track id=" << StringifyTrackID(grp.part.trackid)
+                          << "  parent trackid=" << StringifyTrackID(parent_trackid)
+                          << "  parent id=" << StringifyInstanceID(parent_id)
                           << "\n";
 
             auto &parent = inputLabels[parent_trackid].part;
             // if parent_id is invalid, try if parent_trackid can help out
             if (parent_id == supera::kINVALID_INSTANCEID &&
-                parent_trackid != supera::kINVALID_UINT &&
+                parent_trackid != supera::kINVALID_TRACKID &&
                 trackid2output[parent_trackid] >= 0)
             {
                 parent_id = trackid2output[parent_trackid];
@@ -1034,7 +1034,7 @@ namespace supera {
                         supera::TrackID_t ancestor_index = parent.part.parent_trackid;
                         if (ancestor_index == parent_trackid)
                         {
-                            LOG.INFO() << "Particle " << parent_index << " is root and invalid particle...\n";
+                            LOG.INFO() << "Trackid " << StringifyTrackID(parent_trackid) << " is root and invalid particle...\n";
                             LOG.INFO() << "PDG " << parent.part.pdg << " " << parent.part.process << "\n";
                             break;
                         }
@@ -1083,7 +1083,7 @@ namespace supera {
             if (label.energy.size() < _delta_size || UniqueVoxelCount(label, parent) < _delta_size)
             {
                 // if parent is found, merge
-                LOG.VERBOSE() << "Merging delta " << label.part.trackid << " PDG " << label.part.pdg
+                LOG.VERBOSE() << "Merging delta trackid " << StringifyTrackID(label.part.trackid) << " PDG " << label.part.pdg
                               << " " << label.part.process << " vox count " << label.energy.size() << "\n"
                               << " ... parent found " << parent.part.trackid
                               << " PDG " << parent.part.pdg << " " << parent.part.process << "\n";
@@ -1092,7 +1092,7 @@ namespace supera {
             }
             else
             {
-                LOG.VERBOSE() << "NOT merging delta " << label.part.trackid << " PDG " << label.part.pdg
+                LOG.VERBOSE() << "NOT merging delta " << StringifyTrackID(label.part.trackid) << " PDG " << label.part.pdg
                               << " " << label.part.process << " vox count " << label.energy.size() << "\n"
                               <<" ... parent found " << parent.part.trackid
                               << " PDG " << parent.part.pdg << " " << parent.part.process << "\n";
@@ -1118,8 +1118,8 @@ namespace supera {
                 // search for a possible parent
                 supera::TrackID_t parent_trackid = kINVALID_TRACKID;
                 LOG.VERBOSE() << "   Found particle group with shape 'shower', PDG=" << label.part.pdg
-                              << "\n    track id=" << label.part.trackid
-                              << ", and alleged parent track id=" << label.part.parent_trackid << "\n";
+                              << "\n    track id=" << StringifyTrackID(label.part.trackid)
+                              << ", and alleged parent track id=" << StringifyTrackID(label.part.parent_trackid) << "\n";
                 // a direct parent ?
                 if (labels[label.part.parent_trackid].valid)
                     parent_trackid = label.part.parent_trackid;
@@ -1149,7 +1149,7 @@ namespace supera {
                 if (this->IsTouching(meta, label.energy, parent.energy)) {
                     // if parent is found, merge
                     parent.Merge(label);
-                    LOG.VERBOSE() << "   Merged to group w/ track id=" << parent.part.trackid << "\n";
+                    LOG.VERBOSE() << "   Merged to group w/ track id=" << StringifyTrackID(parent.part.trackid) << "\n";
                     merge_ctr++;
                 }
             }
@@ -1182,12 +1182,12 @@ namespace supera {
                     //std::cout<< "Inspecting: " << StringifyTrackID(label.part.trackid) << " => " << parent_index << std::endl;
                     if (parent_trackid == supera::kINVALID_TRACKID)
                     {
-                        LOG.ERROR() << "Invalid parent track id " << parent_index
-                                  << " Could not find a parent for " << label.part.trackid << " PDG " << label.part.pdg
-                                  << " " << label.part.process << " E = " << label.part.energy_init
-                                  << " (" << label.part.energy_deposit << ") MeV\n";
-                        auto const &parent = labels[parent_index_before].part;
-                        std::cout << "Previous parent: " << parent.trackid << " PDG " << parent.pdg
+                        LOG.ERROR() << "Invalid parent track id " << parent_trackid
+                                    << " Could not find a parent for trackid " << StringifyTrackID(label.part.trackid) << " PDG " << label.part.pdg
+                                    << " " << label.part.process << " E = " << label.part.energy_init
+                                    << " (" << label.part.energy_deposit << ") MeV\n";
+                        auto const &parent = labels[parent_trackid_before].part;
+                        std::cout << "Previous parent: trackid " << StringifyTrackID(parent.trackid) << " PDG " << parent.pdg
                                       << " " << parent.process << "\n";
                         parent_found = false;
                         invalid_ctr++;
@@ -1201,8 +1201,8 @@ namespace supera {
                         supera::TrackID_t ancestor_index = parent.part.parent_trackid;
                         if (ancestor_index == parent_trackid)
                         {
-                            LOG.INFO() << "Particle " << parent_index << " is root and invalid particle...\n"
-                                         << "PDG " << parent.part.pdg << " " << parent.part.process << "\n";
+                            LOG.INFO() << "Particle w/ trackid " << StringifyTrackID(parent_trackid) << " is root and invalid particle...\n"
+                                       << "PDG " << parent.part.pdg << " " << parent.part.process << "\n";
                             break;
                         }
                       parent_trackid_before = parent_trackid;
@@ -1341,12 +1341,12 @@ namespace supera {
 
                 auto const &parents = this->ParentTrackIDs(label.part.trackid);
 
-                LOG.VERBOSE() << "Inspecting LEScatter Track ID " << label.part.trackid
+                LOG.VERBOSE() << "Inspecting LEScatter Track ID " << StringifyTrackID(label.part.trackid)
                             << " PDG " << label.part.pdg
                             << " " << label.part.process << "\n";
                 LOG.VERBOSE() << "  ... parents:\n";
                 for(auto const& parent_trackid : parents)
-                    LOG.VERBOSE() << "     "<< parent_trackid << "\n";
+                    LOG.VERBOSE() << "     "<< StringifyTrackID(parent_trackid) << "\n";
 
                 for (auto const &parent_trackid : parents)
                 {
@@ -1354,9 +1354,9 @@ namespace supera {
                     if (!parent.valid || parent.energy.size() < 1) continue;
                     if (this->IsTouching(meta, label.energy, parent.energy))
                     {
-                        LOG.VERBOSE() << "Merging LEScatter track id = " << label.part.trackid
-                                    << " into touching parent shower group (id=" << parent.part.group_id << ")"
-                                    << " with track id = " << parent.part.trackid << "\n";
+                        LOG.VERBOSE() << "Merging LEScatter track id = " << StringifyTrackID(label.part.trackid)
+                                    << " into touching parent shower group (id=" << StringifyInstanceID(parent.part.group_id) << ")"
+                                    << " with track id = " << StringifyTrackID(parent.part.trackid) << "\n";
                         parent.Merge(label);
                         merge_ctr++;
                         break;
@@ -1446,15 +1446,15 @@ namespace supera {
         {
             if (accessed.find(parent_trackid) != accessed.end())
             {
-                LOG.FATAL() << "LOOP-LOGIC-ERROR for ParentTrackIDs for track id " << trackid << ": repeated ancestor!\n";
+                LOG.FATAL() << "LOOP-LOGIC-ERROR for ParentTrackIDs for track id " << StringifyTrackID(trackid) << ": repeated ancestor!\n";
                 LOG.FATAL() << "Ancestors found:\n";
                 for (size_t parent_cand_idx = 0; parent_cand_idx < result.size(); ++parent_cand_idx)
                 {
                     auto const &parent_cand_trackid = result[parent_cand_idx];
                     LOG.FATAL() << "Ancestor #" << parent_cand_idx
-                                << " Track ID " << parent_cand_trackid
+                                << " Track ID " << StringifyTrackID(parent_cand_trackid)
                                 << " PDG " << _mcpl.PdgCode()[trackid2index[parent_cand_trackid]]
-                                << " Its mother " << _mcpl.ParentTrackId()[trackid2index[parent_cand_trackid]]
+                                << " Its mother " << StringifyTrackID(_mcpl.ParentTrackId()[trackid2index[parent_cand_trackid]])
                                 << "\n";
                 }
                 throw meatloaf();
