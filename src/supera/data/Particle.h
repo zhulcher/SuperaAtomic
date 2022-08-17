@@ -133,17 +133,18 @@ namespace supera {
     void Merge(ParticleLabel& child,bool verbose=false);
     supera::SemanticType_t shape() const;
 
+    std::string dump() const;
     std::string dump2cpp(const std::string & instanceName = "partLabel") const;
 
-    supera::Particle part;         ///< a particle information 
-    bool valid;                    ///< a state flag whether this particle should be ignored or not
-    bool add_to_parent;            ///< a state flag whether this particle should be merged into its parent
-    ProcessType type;              ///< type of this particle for ML reco chain
-    std::vector<size_t> trackid_v; ///< track ID of descendent particles
-    supera::VoxelSet energy;       ///< 3D voxels (energy deposition)
-    supera::VoxelSet dedx;         ///< 3D voxels (dE/dX)
-    EDep first_pt;                 ///< first energy deposition point (not voxel)
-    EDep last_pt;                  ///< last energy deposition point (not voxel)
+    supera::Particle part;            ///< a particle information
+    bool valid;                       ///< a state flag whether this particle should be ignored or not
+    bool add_to_parent;               ///< a state flag whether this particle should be merged into its parent
+    ProcessType type;                 ///< type of this particle for ML reco chain
+    std::vector<TrackID_t> trackid_v; ///< track ID of descendent particles
+    supera::VoxelSet energy;          ///< 3D voxels (energy deposition)
+    supera::VoxelSet dedx;            ///< 3D voxels (dE/dX)
+    EDep first_pt;                    ///< first energy deposition point (not voxel)
+    EDep last_pt;                     ///< last energy deposition point (not voxel)
   };
 
   /// Class to store the labeled particles of an event & their associated hit voxels (if any).
@@ -184,7 +185,7 @@ namespace supera {
 
     private:
       /// Helper method to simplify querying the 'dirty' fields
-      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<std::underlying_type_t<DIRTY_FLAG>>(field)]; }
+      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<std::underlying_type<DIRTY_FLAG>::type>(field)]; }
 
       /// Helper method to implement the ranking decision between two semantic labels using the priority passed by the caller
       static supera::SemanticType_t _SemanticPriority(supera::SemanticType_t a, supera::SemanticType_t b,
