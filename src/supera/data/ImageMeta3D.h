@@ -90,6 +90,9 @@ namespace supera {
     /// text dumper
     std::string  dump() const;
 
+    /// dump to text that could be used to create this instance of ImageMeta3D from C++ code
+    std::string dump2cpp(const std::string & instanceName="meta") const;
+
 
     // Find x index that corresponds to a specified index
     size_t id_to_x_index(VoxelID_t id) const;
