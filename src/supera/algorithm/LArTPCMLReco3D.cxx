@@ -167,6 +167,7 @@ namespace supera {
         for (auto & inputLabel : inputLabels)
         {
             LOG.VERBOSE() << " Particle ID=" << inputLabel.part.id << " Track ID=" << inputLabel.part.trackid << "\n";
+            LOG.VERBOSE() << "     PDG=" << inputLabel.part.pdg << "\n";
             LOG.VERBOSE() << "     Edep=" << inputLabel.part.energy_deposit << "\n";
             size_t output_counter = output2trackid.size();
             if (!inputLabel.valid)
