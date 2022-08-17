@@ -62,7 +62,7 @@ namespace supera {
 
         // Assign the initial labels for each particle.
         // They will be grouped together in various ways in the subsequent steps.
-        std::vector<supera::ParticleLabel> labels = this->InitializeLabels(data);
+        std::vector<supera::ParticleLabel> labels = this->InitializeLabels(data, meta);
 
         // Now group the labels together in certain cases
         // (e.g.: electromagnetic showers, neutron clusters, ...)
@@ -928,7 +928,8 @@ namespace supera {
 
     // ------------------------------------------------------
 
-    std::vector<supera::ParticleLabel> LArTPCMLReco3D::InitializeLabels(const std::vector<ParticleInput> & evtInput) const
+    std::vector<supera::ParticleLabel>
+    LArTPCMLReco3D::InitializeLabels(const EventInput &evtInput, const supera::ImageMeta3D &meta) const
     {
         // this default-constructs the whole lot of them, which fills their values with defaults/invalid values
         std::vector<supera::ParticleLabel> labels(evtInput.size());
@@ -983,6 +984,14 @@ namespace supera {
                 label.type = supera::kTrack;
                 if (label.part.pdg == 2112)
                     label.type = supera::kNeutron;
+            }
+
+            // copy over the edeps.
+            // todo: is there some way of checking that the EDeps aren't bigger than the VoxelSet we're cramming them into?...
+            for (const supera::EDep & edep : evtInput[idx].pcloud)
+            {
+              label.energy.emplace(meta.id(edep), edep.e, true);
+              label.dedx.emplace(meta.id(edep), edep.dedx, true);
             }
 
         }  // for (idx)

@@ -17,7 +17,8 @@ namespace supera {
 
 	private:
         // ----- label making -----
-        std::vector<supera::ParticleLabel> InitializeLabels(const EventInput& evtInput) const;
+        std::vector<supera::ParticleLabel>
+        InitializeLabels(const EventInput &evtInput, const supera::ImageMeta3D &meta) const;
 
         EventOutput BuildOutputLabels(std::vector<supera::ParticleLabel> &groupedInputLabels,
                                       const std::vector<TrackID_t> &output2trackid,
