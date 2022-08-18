@@ -46,3 +46,7 @@ def test_events():
 
         if not same:
             raise RuntimeError("Event #%d ('%s') failed test!" % (evnum, evname))
+
+
+if __name__ == "__main__":
+    test_events()
