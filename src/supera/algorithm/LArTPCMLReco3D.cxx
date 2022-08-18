@@ -935,6 +935,7 @@ namespace supera {
         // this default-constructs the whole lot of them, which fills their values with defaults/invalid values
         std::vector<supera::ParticleLabel> labels(evtInput.size());
 
+        LOG.DEBUG() << "Initializing labels with incoming particles...\n";
         for (std::size_t idx = 0; idx < evtInput.size(); idx++)
         {
             auto & label = labels[idx];
@@ -994,6 +995,8 @@ namespace supera {
               label.energy.emplace(meta.id(edep), edep.e, true);
               label.dedx.emplace(meta.id(edep), edep.dedx, true);
             }
+
+            LOG.VERBOSE() << label.dump() << "\n";
 
         }  // for (idx)
 
