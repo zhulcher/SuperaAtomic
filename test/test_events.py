@@ -25,6 +25,24 @@ def test_events():
         driver.GenerateImageMeta(testev.input)
         driver.GenerateLabel(testev.input)
 
-        if not supera.test.VerifyEventMeta(driver.Meta(), testev.output_meta) \
-                or supera.test.VerifyEventLabels(driver.Label(), testev.output_labels):
+        same = True
+        if not supera.test.VerifyEventMeta(driver.Meta(), testev.output_meta):
+            same = False
+            print("Metadata for test event '%s' disagrees with expectation." % evname)
+            print("Expected metadata:")
+            print(testev.output_meta.dump())
+            print("Metadata received:")
+            print(driver.Meta().dump())
+
+        if not supera.test.VerifyEventLabels(driver.Label(), testev.output_labels):
+            same = False
+            print("Labels for test event '%s' disagree with expectation." % evname)
+            print("Expected particle content:")
+            for label in testev.output_labels.particles:
+                print(label.dump())
+            print("Received particle content:")
+            for label in driver.Label().particles:
+                print(label.dump())
+
+        if not same:
             raise RuntimeError("Event #%d ('%s') failed test!" % (evnum, evname))
