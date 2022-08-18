@@ -1,15 +1,14 @@
 
 bbox_cfg = {
-    "BBoxSize": "[100, 100, 100]",
-    "VoxelSize": "[1, 1, 1]",
-    "BBoxBottom": "[0, 0, 0]",
-    "WorldBoundBottom": "[0, 0, 0]",
-    "WorldBoundTop": "[100, 100, 100]",
+    "BBoxSize": "[ 740,  320,  530]",
+    "VoxelSize": "[0.4,   0.4,  0.4]",
+    "BBoxBottom": "[-370, -160,  400]",
 }
 
 label_cfg = {
     "LogLevel": "VERBOSE",
 
+    "EnergyDepositThreshold":  "0",
     "UseSimEnergyDeposit":       "True",  # currently unused but required parameter
     "UseSimEnergyDepositPoints": "False", # ditto
 
