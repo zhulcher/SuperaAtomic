@@ -144,6 +144,7 @@ void init_data(pybind11::module& m)
       // other methods
       .def("VoxelDeDxs", &supera::EventOutput::VoxelDeDxs, DOC(supera, EventOutput, VoxelDeDxs))
       .def("VoxelEnergies", &supera::EventOutput::VoxelEnergies, DOC(supera, EventOutput, VoxelEnergies))
-      .def("VoxelLabels", &supera::EventOutput::VoxelLabels, DOC(supera, EventOutput, VoxelLabels), "semanticPriority"_a);
+      .def("VoxelLabels", &supera::EventOutput::VoxelLabels, DOC(supera, EventOutput, VoxelLabels), "semanticPriority"_a)
+      .def("dump2cpp", &supera::EventOutput::dump2cpp, DOC(supera, EventOutput, dump2cpp), "instanceName"_a="evtOutput");
 
 }
