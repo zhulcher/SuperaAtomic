@@ -34,6 +34,7 @@ namespace supera
     // --------------------------------------------
 
     TestEvent NumuCCIncEvt();
+    TestEvent PCMuonEvt();
 
     /// Stockpile of test events with known (expected) outputs
     std::map<std::string, TestEvent> TestEvents();

@@ -20,7 +20,8 @@ namespace supera
     std::map<std::string, TestEvent> TestEvents()
     {
       return {
-          {"NumuCCIncEvt", NumuCCIncEvt()}
+//          {"NumuCCIncEvt", NumuCCIncEvt()}
+          {"PCMuonEvt", PCMuonEvt()}
       };
     };
 
