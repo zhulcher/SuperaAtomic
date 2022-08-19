@@ -347,7 +347,9 @@ namespace supera {
 
             orphan.Merge(groupedInputLabels[trackid2index[trkid]]);
         } // for (idx)
-        outputLabels.Particles().push_back(std::move(orphan));
+        // only create an "orphan" particle if there was actually anything there
+        if (orphan.trackid_v.size() > 0)
+          outputLabels.Particles().push_back(std::move(orphan));
 
         return outputLabels;
     } // LArTPCMLReco3D::BuildOutputClusters
