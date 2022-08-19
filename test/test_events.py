@@ -1,8 +1,9 @@
 
 bbox_cfg = {
-    "BBoxSize": "[ 740,  320,  530]",
     "VoxelSize": "[0.4,   0.4,  0.4]",
-    "BBoxBottom": "[-370, -160,  400]",
+    "BBoxSize":   "[ 1000,  1000,  1000 ]",   # cm
+    "BBoxTop":    "[ 500,  500,  500 ]",   # cm
+    "BBoxBottom": "[ -500, -500,  -500 ]"   # cm
 }
 
 label_cfg = {
@@ -43,6 +44,9 @@ def test_events():
             print("Received particle content:")
             for label in driver.Label().particles:
                 print(label.dump())
+
+        with open("/tmp/%s.ixx" % evname, "w") as outf:
+            outf.write(driver.Label().dump2cpp())
 
         if not same:
             raise RuntimeError("Event #%d ('%s') failed test!" % (evnum, evname))
