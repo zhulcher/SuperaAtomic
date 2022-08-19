@@ -80,6 +80,9 @@ namespace supera{
     { t = e = dedx = supera::kINVALID_DOUBLE; }
 
     std::string dump2cpp(const std::string & instanceName = "edep") const;
+    std::string dump() const;
+
+    inline bool operator==(const EDep& rhs) const { return t == rhs.t && e == rhs.e && dedx == rhs.dedx && Point3D::operator==(rhs); }
 
     double t,e,dedx; ///< time, energy, dE/dX in respective order
   };

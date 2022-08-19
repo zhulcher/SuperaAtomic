@@ -34,6 +34,13 @@ namespace supera{
     return ss.str();
   }
 
+  std::string EDep::dump() const
+  {
+    std::stringstream out("(x,y,z,t,e,dedx) = (");
+    out << x << "," << y << "," << z << "," << t << "," << e << "," << dedx;
+    return out.str();
+  }
+
 
   Vertex::Vertex() : pos(), time(kINVALID_DOUBLE)
   {}
