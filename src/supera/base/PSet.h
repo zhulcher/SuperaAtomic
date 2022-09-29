@@ -33,6 +33,9 @@ namespace supera {
         PSet() {}
         ~PSet() {}
 
+        /// Check for existence
+        bool exists(const std::string& key) const { return data.count(key) > 0; }
+
         /// Template getter
         template <class T>
         T get(const std::string& key) const{

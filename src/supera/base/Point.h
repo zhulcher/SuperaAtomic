@@ -31,6 +31,8 @@ namespace supera{
     Point3D(const Point3D& pt) : x(pt.x), y(pt.y), z(pt.z) {}
 
     double x, y, z;
+
+    inline Point3D& operator=(const Point3D & other) = default;
     
     inline bool operator== (const Point3D& rhs) const
     { return (x == rhs.x && y == rhs.y && z == rhs.z); }
@@ -77,7 +79,12 @@ namespace supera{
     EDep() : Point3D()
     { t = e = dedx = supera::kINVALID_DOUBLE; }
 
-    double x,y,z,t,e,dedx; ///< x, y, z, time, energy, dE/dX in respective order
+    std::string dump2cpp(const std::string & instanceName = "edep") const;
+    std::string dump() const;
+
+    inline bool operator==(const EDep& rhs) const { return t == rhs.t && e == rhs.e && dedx == rhs.dedx && Point3D::operator==(rhs); }
+
+    double t,e,dedx; ///< time, energy, dE/dX in respective order
   };
 
   /**

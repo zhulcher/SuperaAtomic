@@ -196,6 +196,21 @@ namespace supera {
     return std::string(ss.str());
   }
 
+  std::string ImageMeta3D::dump2cpp(const std::string &instanceName) const
+  {
+     std::stringstream ss;
+
+     ss << "supera::ImageMeta3D " << instanceName << ";\n";
+     ss << instanceName << ".set("
+        << min_x() << ", " << min_y() << ", " << min_z() << ", "
+        << max_x() << ", " << max_y() << ", " << max_z() << ", "
+        << num_voxel_x() << ", " << num_voxel_y() << ", " << num_voxel_z()
+        << ");\n";
+
+    return ss.str();
+
+  }
+
 };
 
 #endif

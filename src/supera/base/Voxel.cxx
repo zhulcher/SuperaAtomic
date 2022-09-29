@@ -4,11 +4,22 @@
 #include "Voxel.h"
 #include <iostream>
 #include <cmath>
+#include <sstream>
 
 namespace supera {
 
   Voxel::Voxel(VoxelID_t id, float value)
   { _id = id; _value = value; }
+
+  std::string Voxel::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    ss << "supera::Voxel " << instanceName << ";\n";
+    ss << instanceName << ".set(static_cast<supera::VoxelID_t>(" << _id << "), " << _value << ");\n";
+
+    return ss.str();
+  }
 
   float VoxelSet::max() const
   {
@@ -166,6 +177,43 @@ namespace supera {
       }
     }
     return;
+  }
+
+  bool VoxelSet::operator==(const VoxelSet &rhs) const
+  {
+    // obviously not the same if they're not the same size
+    if (size() != rhs.size())
+      return false;
+
+    // because VoxelSets are sorted by nature, we can just compare them element by element
+    for (std::size_t idx = 0; idx < size(); idx++)
+    {
+      if (_voxel_v[idx] != rhs._voxel_v[idx])
+        return false;
+    }
+    return true;
+  }
+
+  std::string VoxelSet::dump2cpp(const std::string &instanceName) const
+  {
+    std::stringstream ss;
+
+    ss << "supera::VoxelSet " << instanceName << ";\n";
+    ss << instanceName << ".id(" << _id;
+    if (_id > std::numeric_limits<int>::max())  // can happen if it's, for example, kINVALID_INSTANCE
+      ss << "ul";
+    ss << ");\n";
+
+    ss << instanceName << ".reserve(" << _voxel_v.size() << ");\n";
+    for (std::size_t idx = 0; idx < _voxel_v.size(); idx++)
+    {
+      const supera::Voxel & vox = _voxel_v[idx];
+      std::string voxInstance = instanceName + "_vox" + std::to_string(idx);
+      ss << vox.dump2cpp(voxInstance);
+      ss << instanceName << ".emplace(std::move(" << voxInstance << "), false);\n";
+    }
+
+    return ss.str();
   }
 
   //

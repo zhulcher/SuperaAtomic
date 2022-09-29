@@ -3,8 +3,13 @@
 
 //#include "LArCVBaseUtilFunc.h"
 //#include "larbys.h"
-#include "meatloaf.h"
 #include "Parser.h"
+
+#include <algorithm>
+
+#include "supera/base/meatloaf.h"
+
+
 namespace supera {
   namespace parser{
     
@@ -48,8 +53,8 @@ namespace supera {
     {
       std::string tmp=value;
       std::transform(tmp.begin(),tmp.end(),tmp.begin(),::tolower);
-      if( value == "true"  || value == "1" ) return true;
-      if( value == "false" || value == "0" ) return false;
+      if( tmp == "true"  || tmp == "1" ) return true;
+      if( tmp == "false" || tmp == "0" ) return false;
       tmp = "Invalid bool expression: " + tmp;
       throw supera::meatloaf(tmp);
       return false;
@@ -176,4 +181,3 @@ namespace supera {
   }
 }
 #endif
-  

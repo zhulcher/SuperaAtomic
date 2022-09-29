@@ -16,7 +16,6 @@
 
 #include <string>
 #include <vector>
-#include <algorithm>
 
 namespace supera {
   namespace parser {

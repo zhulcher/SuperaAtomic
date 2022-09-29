@@ -28,7 +28,13 @@ namespace supera {
     /// Default ctor
     ImageMeta3D();
     /// Default dtor
-    ~ImageMeta3D(){}
+    ~ImageMeta3D() = default;
+
+    ImageMeta3D(const ImageMeta3D&)  = default;
+    ImageMeta3D(ImageMeta3D&&)  = default;
+    ImageMeta3D& operator=(const ImageMeta3D&) = default;
+    ImageMeta3D& operator=(ImageMeta3D&&) = default;
+
     /// Update voxel count
     void update(size_t xnum,size_t ynum,size_t znum);
     /// Define dimensions
@@ -88,6 +94,9 @@ namespace supera {
     inline double size_voxel_z() const { return _zlen; }
     /// text dumper
     std::string  dump() const;
+
+    /// dump to text that could be used to create this instance of ImageMeta3D from C++ code
+    std::string dump2cpp(const std::string & instanceName="meta") const;
 
 
     // Find x index that corresponds to a specified index

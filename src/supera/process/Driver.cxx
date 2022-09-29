@@ -15,6 +15,9 @@ namespace supera {
             PSet cfg;
             cfg.data = params;
             _algo_bbox->Configure(cfg);
+
+            if (cfg.exists("LogLevel") > 0)
+                _algo_bbox->SetLogConfig(Logger::parseStringThresh(cfg.get<std::string>("LogLevel")));
         }
         else{
             std::string msg = name + " is not known to Supera...";
@@ -31,6 +34,10 @@ namespace supera {
             PSet cfg;
             cfg.data = params;
             _algo_label->Configure(cfg);
+
+            if (cfg.exists("LogLevel") > 0)
+                _algo_label->SetLogConfig(Logger::parseStringThresh(cfg.get<std::string>("LogLevel")));
+
         }
         else{
             std::string msg = name + " is not known to Supera...";

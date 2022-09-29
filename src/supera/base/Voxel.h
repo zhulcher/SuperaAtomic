@@ -14,7 +14,10 @@
 #define SUPERA_VOXEL_H
 
 #include "SuperaType.h"
+
+#include <string>
 #include <vector>
+
 namespace supera {
 
   /**
@@ -28,7 +31,7 @@ namespace supera {
     /// Default constructor
     Voxel(VoxelID_t id = kINVALID_VOXELID, float value = kINVALID_FLOAT);
     /// Default destructor
-    ~Voxel() {}
+    ~Voxel() = default;
 
     /// ID getter
     inline VoxelID_t id() const { return _id; }
@@ -55,6 +58,8 @@ namespace supera {
     //
     inline bool operator == (const Voxel& rhs) const
     { return (_id == rhs._id); }
+    inline bool operator != (const Voxel& rhs) const
+    { return !(*this == rhs); }
     inline bool operator <  (const Voxel& rhs) const
     {
       if ( _id < rhs._id) return true;
@@ -79,6 +84,9 @@ namespace supera {
     inline bool operator >= (const float& rhs) const
     { return _value >= rhs; }
 
+    // misc.
+    std::string dump2cpp(const std::string & instanceName="voxSet") const;
+
   private:
     VoxelID_t _id; ///< voxel id
     float  _value; ///< Pixel Value
@@ -93,9 +101,16 @@ namespace supera {
   class VoxelSet {
   public:
     /// Default ctor
-  VoxelSet() : _id(supera::kINVALID_INSTANCEID) {}
+    VoxelSet() : _id(supera::kINVALID_INSTANCEID) {}
+
+    /// Copy constructor
+    VoxelSet(const VoxelSet & rhs) = default;
+
+      /// Move constructor
+    VoxelSet(VoxelSet && rhs) = default;  //{ _id = rhs._id; _voxel_v = std::move(rhs._voxel_v); return *this; }
+
     /// Default dtor
-    virtual ~VoxelSet() {}
+    virtual ~VoxelSet() = default;
 
     //
     // Read-access
@@ -153,8 +168,12 @@ namespace supera {
     /// InstanceID_t setter
     inline void id(const InstanceID_t id) { _id = id; }
 
+    // test operators
+    bool operator==(const VoxelSet & rhs) const;
+    bool operator!=(const VoxelSet & rhs) const { return !(*this == rhs); };
+
     //
-    // Uniry operations
+    // Binary operations
     //
     inline VoxelSet& operator += (float value)
     { for(auto& vox : _voxel_v) vox += value; return (*this); }
@@ -166,6 +185,13 @@ namespace supera {
     { for(auto& vox : _voxel_v) vox /= factor; return (*this); }
     inline VoxelSet& operator =  (float value)
     { paint(value); return (*this); }
+
+    // assign & move assign operators
+    inline VoxelSet& operator=(const VoxelSet & rhs) = default;
+    inline VoxelSet& operator=(VoxelSet && rhs) noexcept { _id = rhs._id; _voxel_v = std::move(rhs._voxel_v); return *this; }
+
+    // misc.
+    std::string dump2cpp(const std::string & instanceName="voxSet") const;
 
   private:
     /// Instance ID
@@ -181,9 +207,9 @@ namespace supera {
   class VoxelSetArray {
   public:
     /// Default ctor
-    VoxelSetArray() {}
+    VoxelSetArray() = default;
     /// Default dtor
-    virtual ~VoxelSetArray() {}
+    virtual ~VoxelSetArray() = default;
 
     //
     // Read-access
