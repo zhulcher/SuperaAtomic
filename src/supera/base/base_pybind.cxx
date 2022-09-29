@@ -1,4 +1,4 @@
-
+#ifdef BUILD_PYTHON_BINDINGS
 #include "base_pybind.h"
 #include "SuperaType.h"
 #include "Point.h"
@@ -243,3 +243,4 @@ void init_base(pybind11::module& m)
 
 
  }
+#endif

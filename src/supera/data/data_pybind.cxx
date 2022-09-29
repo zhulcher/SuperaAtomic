@@ -1,3 +1,4 @@
+#ifdef BUILD_PYTHON_BINDINGS
 
 #include "data_pybind.h"
 
@@ -148,3 +149,4 @@ void init_data(pybind11::module& m)
       .def("dump2cpp", &supera::EventOutput::dump2cpp, DOC(supera, EventOutput, dump2cpp), "instanceName"_a="evtOutput");
 
 }
+#endif
