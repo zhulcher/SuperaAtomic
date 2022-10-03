@@ -33,7 +33,7 @@ namespace supera{
     for(size_t index=0; index<larmcp_v.size(); ++index) {
       auto const& mcpart = larmcp_v[index].part;  // pull off the GEANT4 track information component
       _trackid_v[index] = mcpart.trackid;
-      _pdgcode_v[index] = mcpart.pdg;
+      _pdgcode_v[index] = abs(mcpart.pdg);
       _parent_trackid_v[index] = mcpart.parent_trackid;
       if(mcpart.trackid >= _trackid2index.size()) _trackid2index.resize(mcpart.trackid+1, supera::kINVALID_INDEX);
       _trackid2index[mcpart.trackid] = index;
