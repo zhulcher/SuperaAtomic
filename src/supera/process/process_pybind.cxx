@@ -1,4 +1,4 @@
-
+#ifdef BUILD_PYTHON_BINDINGS
 #include "process_pybind.h"
 
 // needed so the std::map<> in the Driver::ConfigureBBoxAlgorithm() (etc.) signature gets handled right
@@ -21,3 +21,4 @@ void init_process(pybind11::module& m)
       .def("Meta", &supera::Driver::Meta, DOC(supera, Driver, Meta));
 
 }
+#endif
