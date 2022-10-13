@@ -32,9 +32,9 @@ namespace supera {
   public:
 
     /// Default constructor
-    Particle(supera::SemanticType_t shape=supera::kShapeUnknown)
+    Particle(supera::SemanticType_t shape_=supera::kShapeUnknown)
       : id               (kINVALID_INSTANCEID)
-      , shape            (shape)
+      , shape            (shape_)
       , trackid          (kINVALID_TRACKID)
       , pdg              (kINVALID_PDG)
       , px               (0.)
@@ -112,6 +112,9 @@ namespace supera {
     std::vector<EDep> pcloud;      ///< 3D energy deposition information (raw info)
     bool valid;
     supera::ProcessType type;
+
+    supera::Point3D edep_bottom_left=Point3D(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+    supera::Point3D edep_top_right=Point3D(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
   };
 
   typedef std::vector<ParticleInput> EventInput;
@@ -185,7 +188,7 @@ namespace supera {
 
     private:
       /// Helper method to simplify querying the 'dirty' fields
-      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<std::underlying_type<DIRTY_FLAG>::type>(field)]; }
+      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<unsigned short>(field)]; }
 
       /// Helper method to implement the ranking decision between two semantic labels using the priority passed by the caller
       static supera::SemanticType_t _SemanticPriority(supera::SemanticType_t a, supera::SemanticType_t b,

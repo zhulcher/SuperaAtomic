@@ -50,6 +50,7 @@ namespace supera {
     /// Default destructor
     ~BBoxInteraction() {}
 
+    int bbox_bottom_set=false;
   private:
     double _xlen, _ylen, _zlen;
     double _xvox, _yvox, _zvox;

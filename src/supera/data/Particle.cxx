@@ -190,13 +190,13 @@ namespace supera {
   }
 
   void ParticleLabel::Merge(ParticleLabel& child,bool verbose) {
-
+    std::cout << "Got here PL1"<<std::endl;
     for(auto const& vox : child.energy.as_vector())
       this->energy.emplace(vox.id(),vox.value(),true);
-
+    std::cout << "Got here PL2" << std::endl;
     for(auto const& vox : child.dedx.as_vector())
       this->dedx.emplace(vox.id(),vox.value(),true);
-    
+    std::cout << "Got here PL3" << std::endl;
     if(verbose) {
       /*
       std::cout<<"Parent track id " << this->part.track_id() 
@@ -205,13 +205,16 @@ namespace supera {
       << " PDG " << child.part.pdg << " " << child.part.creation_process() << std::endl;
       */
     }
-
+    std::cout << "Got here PL4" << std::endl;
     this->AddEDep(child.last_pt);
+    std::cout << "Got here PL5" << std::endl;
     this->AddEDep(child.first_pt);
+    std::cout << "Got here PL6" << std::endl;
     //this->trackid_v.push_back(child.part.track_id());
 
     for(auto const& trackid : child.trackid_v)
       this->trackid_v.push_back(trackid);
+    std::cout << "Got here PL7" << std::endl;
     /*
     for(size_t plane_id=0; plane_id < vs2d_v.size(); ++plane_id) {
       auto& vs2d = vs2d_v[plane_id];
@@ -222,8 +225,10 @@ namespace supera {
     }
     */
     child.energy.clear_data();
+    std::cout << "Got here PL8" << std::endl;
     child.dedx.clear_data();
-    
+    std::cout << "Got here PL9" << std::endl;
+
     child.valid=false;
   }
 

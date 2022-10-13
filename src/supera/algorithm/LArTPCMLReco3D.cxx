@@ -58,6 +58,7 @@ namespace supera {
 
         // fill in the working structures that link the list of particles and its genealogy
         _mcpl.InferParentage(data);
+        std::cout<<"data length "<<data.size()<<std::endl;
         std::vector<supera::Index_t> const& trackid2index = _mcpl.TrackIdToIndex();
 
         // Assign the initial labels for each particle.
@@ -282,7 +283,7 @@ namespace supera {
             auto &groupedInputLabel = groupedInputLabels[_mcpl.TrackIdToIndex()[trackid]];
 
             LOG.VERBOSE() << "Creating output cluster for group " << groupedInputLabel.part.id << " (" << groupedInputLabel.energy.size() << " voxels)\n";
-
+            LOG.VERBOSE() << "Got here 1\n";
             // set semantic type
             supera::SemanticType_t semantic = groupedInputLabel.shape();
             if (semantic == kShapeUnknown)
@@ -320,7 +321,7 @@ namespace supera {
                             << " (voxel count " << groupedInputLabel.energy.size() << " < " << _compton_size << ")\n";
                 semantic = kShapeLEScatter;
             }
-
+            LOG.VERBOSE() << "Got here 2\n";
             // store the shape (semantic) type in particle
             groupedInputLabel.part.shape = semantic;
             // store the voxel count and energy deposit
@@ -328,29 +329,36 @@ namespace supera {
 
             // duplicate the particle to the output container
             outputLabels.Particles()[index] = groupedInputLabel;
+            LOG.VERBOSE() << "Got here 3\n";
 
             // set the particle in the original container to 'invalid' so we don't accidentally use it again
             groupedInputLabel.valid = false;
+            LOG.VERBOSE() << "Got here 4\n";
         } // for (index)
-
+        LOG.VERBOSE() << "Got here 5\n";
         // now vacuum up any orphan particles into a top-level orphan particle
         // (anything that is still not grouped after all the cleanup steps).
         // the others *should* have gotten absorbed by the Merge() calls
         // in the various LArTPCMLReco3D::Merge...() methods...
         supera::ParticleLabel orphan;
         orphan.part.pdg = 0;
+        LOG.VERBOSE() << "Got here 6\n";
         for (std::size_t trkid = 0; trkid < trackid2output.size(); trkid++)
         {
+            LOG.VERBOSE() << "Got here 7\n";
             int outputIdx = trackid2output[trkid];
+            LOG.VERBOSE() << "Got here 8\n";
             if (outputIdx >= 0)
                 continue;
-
+            LOG.VERBOSE() << "Got here 9" << trkid <<"   "<< trackid2index[trkid] <<"  " << groupedInputLabels.size() << "\n";
             orphan.Merge(groupedInputLabels[trackid2index[trkid]]);
+            LOG.VERBOSE() << "Got here 10\n";
         } // for (idx)
         // only create an "orphan" particle if there was actually anything there
+        LOG.VERBOSE() << "Got here last-1\n";
         if (orphan.trackid_v.size() > 0)
           outputLabels.Particles().push_back(std::move(orphan));
-
+        LOG.VERBOSE() << "Got here last\n";
         return outputLabels;
     } // LArTPCMLReco3D::BuildOutputClusters
 
