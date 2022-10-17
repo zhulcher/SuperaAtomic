@@ -14,6 +14,7 @@
 #define __PARTICLEINDEX_H__
 
 #include "supera/data/Particle.h"
+#include "Loggable.h"
 
 namespace supera {
   
@@ -21,7 +22,7 @@ namespace supera {
      \class ParticleIndex
      \brief Workhorse class encapsulating the logic for tying together a list of GEANT4 particles and their genealogy information
   */
-  class ParticleIndex{
+  class ParticleIndex : public Loggable {
     
   public:
     

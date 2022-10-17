@@ -58,7 +58,6 @@ namespace supera {
 
         // fill in the working structures that link the list of particles and its genealogy
         _mcpl.InferParentage(data);
-        std::cout<<"data length "<<data.size()<<std::endl;
         std::vector<supera::Index_t> const& trackid2index = _mcpl.TrackIdToIndex();
 
         // Assign the initial labels for each particle.
@@ -68,13 +67,13 @@ namespace supera {
         // Now group the labels together in certain cases
         // (e.g.: electromagnetic showers, neutron clusters, ...)
         // There are lots of edge cases so the logic is spread out over many methods.
-        this->MergeShowerIonizations(labels);
-        this->MergeShowerTouchingLEScatter(meta, labels);  //todo: this was *also* being run at the *end* of the 'MergeShower...()' bunch.  which is right?
-        this->ApplyEnergyThreshold(labels);
-        this->MergeShowerConversion(labels);
-        this->MergeShowerFamilyTouching(meta, labels);
-        this->MergeShowerTouching(meta, labels);
-        this->MergeDeltas(labels);
+        this->MergeShowerIonizations(labels); // merge supera::kIonization type into parents
+        this->MergeShowerTouchingLEScatter(meta, labels); // merge larcv::kShapeLEScatter to touching shower
+        this->ApplyEnergyThreshold(labels);  
+        this->MergeShowerConversion(labels); // merge supera::kConversion a photon merged to a parent photon
+        this->MergeShowerFamilyTouching(meta, labels); // merge supera::kShapeShower to touching parent shower/delta/michel
+        this->MergeShowerTouching(meta, labels); // merge supera::kShapeShower to touching shower in the same family tree
+        this->MergeDeltas(labels); // merge supera::kDelta to a parent if too small
 
         // Now that we have grouped the true particles together,
         // at this point we're ready to build a new set of labels
@@ -83,6 +82,8 @@ namespace supera {
         // from the original GEANT4 trackids to the new groups.
         std::vector<int> trackid2output(trackid2index.size(), -1);  // index: original GEANT4 trackid.  stored value: output group index.
         std::vector<supera::TrackID_t> output2trackid;  // reverse of above.
+        output2trackid.reserve(trackid2index.size());
+        
         this->AssignParticleGroupIDs(trackid2index, labels, output2trackid, trackid2output);
 
         // Next, we need to clean up a number of edge cases that don't always get assigned correctly.
@@ -118,23 +119,22 @@ namespace supera {
         for (auto &label : labels)
         {
             supera::VoxelSet energies, dEdXs;
-            energies.reserve(label.energy.size());
-            dEdXs.reserve(label.dedx.size());
-            if (energies.size() != dEdXs.size())
-                throw meatloaf("Inconsistent energy (" + std::to_string(energies.size()) + ") & dE/dX (" + std::to_string(dEdXs.size()) + ") voxel counts in voxel set");
+            energies.reserve (label.energy.size() );
+            dEdXs.reserve    (label.dedx.size()   );
 
             const auto energy_vec =  label.energy.as_vector();
-            const auto dedx_vec =  label.dedx.as_vector();
+            const auto dedx_vec   =  label.dedx.as_vector();
             for (std::size_t idx = 0; idx < energy_vec.size(); idx++)
             {
                 const auto & vox = energy_vec[idx];
                 if (vox.value() < _edep_threshold)
-                {
-                    LOG.VERBOSE() << "  Dropping below-threshold voxel " << vox.id() << " with edep = " << vox.value() << "\n";
                     continue;
+                if (dedx_vec[idx].id() != vox.id()) {
+                    LOG.FATAL() << "Unmatched voxel ID between dE/dX and energy voxels \n";
+                    throw meatloaf();
                 }
-                energies.emplace(vox.id(), vox.value(), true);
-                dEdXs.emplace(dedx_vec[idx].id(), dedx_vec[idx].value(), true);
+                energies.emplace (vox.id(), vox.value(),           true);
+                dEdXs.emplace    (vox.id(), dedx_vec[idx].value(), true);
             }
             label.energy = std::move(energies);
             label.dedx = std::move(dEdXs);
@@ -948,31 +948,25 @@ namespace supera {
         LOG.DEBUG() << "Initializing labels with incoming particles...\n";
         for (std::size_t idx = 0; idx < evtInput.size(); idx++)
         {
-            auto & label = labels[idx];
-            label.part = evtInput[idx].part;
+            auto const& mcpart = evtInput[idx];
 
-            auto mother_index = _mcpl.ParentIndex()[idx];
-            if (mother_index != supera::kINVALID_INDEX && label.part.parent_pdg == supera::kINVALID_PDG)
-                label.part.parent_pdg = _mcpl.ParentPdgCode()[idx];
+            // ignore nuclei
+            if(mcpart.part.pdg > 1000000) continue;
 
-            label.valid = true;
+            auto& label = labels[idx];
+            label.part  = evtInput[idx].part;
+            label.part.parent_pdg = _mcpl.ParentPdgCode()[idx];
+
+            if(label.part.parent_pdg != supera::kINVALID_PDG)
+                label.valid = true;
 
             auto pdg_code = label.part.pdg;
-            if (pdg_code == 22) {
-                // photon:
-                // reset first, last, and end position, since the photon presumably has traveled
-                // and they won't be useful.
-                // (set them to a guaranteed
-                label.type = supera::kPhoton;
-                const supera::Vertex invalidVertex(supera::kINVALID_DOUBLE, supera::kINVALID_DOUBLE,
-                                                   supera::kINVALID_DOUBLE, supera::kINVALID_DOUBLE);
-                label.part.first_step = invalidVertex;
-                label.part.last_step = invalidVertex;
-                label.part.end_pt = invalidVertex;
-            }
+            if (pdg_code == 22)
+            { label.type = supera::kPhoton; }
             else if (pdg_code == 11)
             {
-
+                label.type = mcpart.type;
+                /*
                 const std::string & prc = label.part.process;
                 if (prc == "muIoni" || prc == "hIoni" || prc == "muPairProd")
                     label.type = supera::kDelta;
@@ -990,6 +984,7 @@ namespace supera {
                     label.type = supera::kPrimary;
                 else
                     label.type = supera::kOtherShower;
+                */
             }
             else
             {
@@ -998,12 +993,19 @@ namespace supera {
                     label.type = supera::kNeutron;
             }
 
-            // copy over the edeps.
-            // todo: is there some way of checking that the EDeps aren't bigger than the VoxelSet we're cramming them into?...
             for (const supera::EDep & edep : evtInput[idx].pcloud)
             {
-              label.energy.emplace(meta.id(edep), edep.e, true);
-              label.dedx.emplace(meta.id(edep), edep.dedx, true);
+                auto vox_id = meta.id(edep);
+                if(vox_id == supera::kINVALID_VOXELID || !_world_bounds.contains(edep)) {
+                    LOG.DEBUG() << "Skipping EDep from track ID " << label.part.trackid
+                    << " E=" << edep.e
+                    << " pos=" << edep.x << "," << edep.y << "," << edep.z << ")\n";
+                    continue;
+                }
+
+                label.energy.emplace (vox_id, edep.e,    true);
+                label.dedx.emplace   (vox_id, edep.dedx, true);
+                label.AddEDep(edep);
             }
 
             LOG.VERBOSE() << label.dump() << "\n";
@@ -1030,11 +1032,11 @@ namespace supera {
                 if (label.type != supera::kConversion) continue;
                 // merge to a valid "parent"
                 bool parent_found = false;
-                supera::TrackID_t parent_trackid = label.part.parent_trackid;
-                supera::TrackID_t parent_trackid_before = label.part.trackid;
+                auto parent_trackid = label.part.parent_trackid;
+                auto parent_trackid_before = label.part.trackid;
                 while (true)
                 {
-                    LOG.VERBOSE() << "Inspecting: trackid " << StringifyTrackID(label.part.trackid) << " => parent trackid " << StringifyTrackID(parent_trackid) << "\n";
+                    LOG.DEBUG() << "Inspecting: trackid " << StringifyTrackID(label.part.trackid) << " => parent trackid " << StringifyTrackID(parent_trackid) << "\n";
                     if (parent_trackid == supera::kINVALID_TRACKID)
                     {
                         LOG.VERBOSE() << "Invalid parent track id " << StringifyTrackID(parent_trackid)
@@ -1054,7 +1056,7 @@ namespace supera {
                     if (parent_found) break;
                     else
                     {
-                        supera::TrackID_t ancestor_index = parent.part.parent_trackid;
+                        auto ancestor_index = parent.part.parent_trackid;
                         if (ancestor_index == parent_trackid)
                         {
                             LOG.INFO() << "Trackid " << StringifyTrackID(parent_trackid) << " is root and invalid particle...\n";
@@ -1168,7 +1170,10 @@ namespace supera {
                 auto& parent = labels[parent_trackid];
                 //auto parent_type = labels[parent_trackid].type;
                 //if(parent_type == supera::kTrack || parent_type == supera::kNeutron) continue;
-                if (parent.shape() != supera::kShapeShower && parent.shape() != supera::kShapeDelta && parent.shape() != supera::kShapeMichel) continue;
+                if (parent.shape() != supera::kShapeShower && 
+                    parent.shape() != supera::kShapeDelta && 
+                    parent.shape() != supera::kShapeMichel)
+                    continue;
                 if (this->IsTouching(meta, label.energy, parent.energy)) {
                     // if parent is found, merge
                     parent.Merge(label);
@@ -1197,9 +1202,9 @@ namespace supera {
                 if (!label.valid) continue;
                 if (label.type != supera::kIonization) continue;
                 // merge to a valid "parent"
-                bool parent_found = false;
-                supera::TrackID_t parent_trackid = label.part.parent_trackid;
-                supera::TrackID_t parent_trackid_before = label.part.trackid;
+                bool parent_found          = false;
+                auto parent_trackid        = label.part.parent_trackid;
+                auto parent_trackid_before = label.part.trackid;
                 while (true)
                 {
                     //std::cout<< "Inspecting: " << StringifyTrackID(label.part.trackid) << " => " << parent_index << std::endl;
@@ -1221,7 +1226,7 @@ namespace supera {
                     if (parent_found) break;
                     else
                     {
-                        supera::TrackID_t ancestor_index = parent.part.parent_trackid;
+                        auto ancestor_index = parent.part.parent_trackid;
                         if (ancestor_index == parent_trackid)
                         {
                             LOG.INFO() << "Particle w/ trackid " << StringifyTrackID(parent_trackid) << " is root and invalid particle...\n"
@@ -1258,15 +1263,15 @@ namespace supera {
             merge_ctr = 0;
             for (size_t i = 0; i < labels.size(); ++i)
             {
-                auto &lbl_a = labels[i];
-                if (!lbl_a.valid) continue;
-                if (lbl_a.shape() != supera::kShapeShower) continue;
+                auto &label_a = labels[i];
+                if (!label_a.valid) continue;
+                if (label_a.shape() != supera::kShapeShower) continue;
                 for (size_t j = 0; j < labels.size(); ++j)
                 {
                     if (i == j) continue;
-                    auto &lbl_b = labels[j];
-                    if (!lbl_b.valid) continue;
-                    if (lbl_b.shape() != supera::kShapeShower) continue;
+                    auto &label_b = labels[j];
+                    if (!label_b.valid) continue;
+                    if (label_b.shape() != supera::kShapeShower) continue;
 
                     // check if these showers share the parentage
                     // list a's parents
@@ -1335,17 +1340,17 @@ namespace supera {
                         if (merge) break;
                     }
 
-                    if (merge && this->IsTouching(meta, lbl_a.energy, lbl_b.energy))
+                    if (merge && this->IsTouching(meta, label_a.energy, label_b.energy))
                     {
-                        if (lbl_a.energy.size() < lbl_b.energy.size())
-                            lbl_b.Merge(lbl_a);
+                        if (label_a.energy.size() < label_b.energy.size())
+                            label_b.Merge(label_a);
                         else
-                            lbl_a.Merge(lbl_b);
+                            label_a.Merge(label_b);
                         merge_ctr++;
                     }
                 }
             }
-            LOG.DEBUG() << "Merge counter: " << merge_ctr << "\n";
+            LOG.INFO() << "Merge counter: " << merge_ctr << "\n";
         } while (merge_ctr > 0);
     } // LArTPCMLReco3D::MergeShowerTouching()
 
@@ -1408,7 +1413,7 @@ namespace supera {
                 if (ix1 > ix2) diffx = ix1 - ix2; else diffx = ix2 - ix1;
                 if (iy1 > iy2) diffy = iy1 - iy2; else diffy = iy2 - iy1;
                 if (iz1 > iz2) diffz = iz1 - iz2; else diffz = iz2 - iz1;
-                touching = diffx <= 1 && diffy <= 1 && diffz <= 1;
+                touching = diffx <= _touch_threshold && diffy <= _touch_threshold && diffz <= _touch_threshold;
                 if (touching)
                 {
                     LOG.VERBOSE()<<"Touching ("<<ix1<<","<<iy1<<","<<iz1<<") ("<<ix2<<","<<iy2<<","<<iz2<<")\n";
@@ -1460,12 +1465,13 @@ namespace supera {
         auto const &trackid2index = _mcpl.TrackIdToIndex();
         std::vector<supera::TrackID_t> result;
 
-        if (trackid >= trackid2index.size() || trackid2index[trackid] != supera::kINVALID_INDEX)
+        if (trackid >= trackid2index.size() || trackid2index[trackid] == supera::kINVALID_INDEX)
             return result;
 
-        supera::TrackID_t parent_trackid = _mcpl.ParentTrackId()[trackid2index[trackid]];
+        auto parent_trackid = _mcpl.ParentTrackId()[trackid2index[trackid]];
         std::set<supera::TrackID_t> accessed;
-        while (parent_trackid < trackid2index.size() && trackid2index[parent_trackid] != supera::kINVALID_INDEX)
+        while (parent_trackid < trackid2index.size() && 
+            trackid2index[parent_trackid] != supera::kINVALID_INDEX)
         {
             if (accessed.find(parent_trackid) != accessed.end())
             {
@@ -1474,10 +1480,10 @@ namespace supera {
                 for (size_t parent_cand_idx = 0; parent_cand_idx < result.size(); ++parent_cand_idx)
                 {
                     auto const &parent_cand_trackid = result[parent_cand_idx];
-                    LOG.FATAL() << "Ancestor #" << parent_cand_idx
+                    LOG.FATAL() << "Parent idx " << parent_cand_idx
                                 << " Track ID " << StringifyTrackID(parent_cand_trackid)
                                 << " PDG " << _mcpl.PdgCode()[trackid2index[parent_cand_trackid]]
-                                << " Its mother " << StringifyTrackID(_mcpl.ParentTrackId()[trackid2index[parent_cand_trackid]])
+                                << " Mother " << StringifyTrackID(_mcpl.ParentTrackId()[trackid2index[parent_cand_trackid]])
                                 << "\n";
                 }
                 throw meatloaf();
@@ -1485,8 +1491,9 @@ namespace supera {
 
             result.push_back(parent_trackid);
             accessed.insert(parent_trackid);
-            if (_mcpl.ParentTrackId()[trackid2index[parent_trackid]] == parent_trackid) break;
-            parent_trackid = _mcpl.ParentTrackId()[trackid2index[parent_trackid]];
+            auto parent_parent_trackid = _mcpl.ParentTrackId()[trackid2index[parent_trackid]];
+            if (parent_parent_trackid == parent_trackid) break;
+            parent_trackid = parent_parent_trackid;
         }
         return result;
     }

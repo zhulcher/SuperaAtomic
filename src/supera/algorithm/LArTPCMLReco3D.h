@@ -128,7 +128,6 @@ namespace supera {
         bool _use_ture_pos;
         bool _check_particle_validity;
         BBox3D _world_bounds;
-
         ParticleIndex _mcpl;
 	};
 }

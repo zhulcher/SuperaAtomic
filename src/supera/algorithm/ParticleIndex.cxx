@@ -2,11 +2,17 @@
 #define __PARTICLEINDEX_CXX__
 
 #include "ParticleIndex.h"
+#include "supera/base/meatloaf.h"
 
 namespace supera{ 
 
   void ParticleIndex::InferParentage(const EventInput& larmcp_v)
   {
+    /*
+      Assumptions
+        - track and parent id are valid for all particles
+        - for primary particles in G4, its parent and own track id should be identical
+    */
     _trackid_v.resize(larmcp_v.size());
     _pdgcode_v.resize(larmcp_v.size());
     _parent_index_v.resize(larmcp_v.size());
@@ -23,7 +29,7 @@ namespace supera{
       _trackid_v[i] = _parent_trackid_v[i] = _ancestor_trackid_v[i] = supera::kINVALID_TRACKID;
     }
 
-    
+    _trackid2index.resize(std::max(_trackid2index.size(),larmcp_v.size()));
     for(auto& v : _trackid2index) v = supera::kINVALID_INDEX;
 
     // fill in the ParticleIndex's working structures.
@@ -33,25 +39,31 @@ namespace supera{
     //       + any associated energy deposits)
     for(size_t index=0; index<larmcp_v.size(); ++index) {
       auto const& mcpart = larmcp_v[index].part;  // pull off the GEANT4 track information component
+      if(mcpart.trackid == supera::kINVALID_TRACKID) {
+        LOG.FATAL() << "Track ID cannot be invalid\n";
+        throw supera::meatloaf();
+      }
       _trackid_v[index] = mcpart.trackid;
       _pdgcode_v[index] = abs(mcpart.pdg);
       _parent_trackid_v[index] = mcpart.parent_trackid;
       if(mcpart.trackid >= _trackid2index.size()) _trackid2index.resize(mcpart.trackid+1, supera::kINVALID_INDEX);
       _trackid2index[mcpart.trackid] = index;
-      std::cout<<"test "<<mcpart.trackid<<"  "<<_trackid2index[mcpart.trackid]<<std::endl;
     }
+
+
     // now fill in the mapping between the index in the particle array <-> Parent/Ancestor info.
     // (note that for our purposes here, 'ancestor' is the *primary* particle that sits
     //  at the top of the hierarchy containing this particle.  if this particle is itself primary,
     //  it's its own ancestor.)
     for(size_t index=0; index<larmcp_v.size(); ++index) {
       auto const& mcpart = larmcp_v[index].part;
-      supera::TrackID_t mother_id      = mcpart.parent_trackid;
-      supera::Index_t mother_index   = supera::kINVALID_INDEX;
+      if(mcpart.parent_trackid == supera::kINVALID_TRACKID) {
+        LOG.FATAL() << "Parent ID cannot be invalid\n";
+        throw supera::meatloaf();
+      }
+      supera::TrackID_t mother_id  = mcpart.parent_trackid;
+      supera::Index_t mother_index = supera::kINVALID_INDEX;
       
-      // If mother ID is zero, interpret it as a primary particle
-      // if(mother_id == 0) mother_id = mcpart.trackid;
-      if(mother_id == -1) mother_id = mcpart.trackid;
 
       // Otherwise search if a mother particle is available
       if(mother_id < _trackid2index.size()) {
@@ -62,14 +74,12 @@ namespace supera{
         }
       }
 
-      supera::TrackID_t subject_track_id = mcpart.trackid;
-      supera::TrackID_t parent_track_id  = mcpart.parent_trackid;
-      supera::Index_t ancestor_index = supera::kINVALID_INDEX;
-      supera::Index_t ancestor_track_id = supera::kINVALID_TRACKID;
-      while(true) {
-        if((size_t)(parent_track_id) >= _trackid2index.size())
-          break;
-        if(parent_track_id == 0 || parent_track_id == subject_track_id) {
+      auto subject_track_id = mcpart.trackid;
+      auto parent_track_id  = mcpart.parent_trackid;
+      auto ancestor_index = supera::kINVALID_INDEX;
+      auto ancestor_track_id = supera::kINVALID_TRACKID;
+      while(parent_track_id<_trackid2index.size()) {
+        if(parent_track_id == subject_track_id) {
           ancestor_index = _trackid2index[subject_track_id];
           ancestor_track_id = subject_track_id;
           break;
