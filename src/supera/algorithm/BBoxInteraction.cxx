@@ -18,7 +18,7 @@ namespace supera {
       gettimeofday(&time,NULL);
       _seed = (size_t)(time.tv_sec * 100 + time.tv_usec / 100);
     }else
-      _seed = (size_t)(seed);
+    _seed = (size_t)(seed);
 
     auto bbox_size = cfg.get<std::vector<double> >("BBoxSize");
     assert(bbox_size.size() == 3);
@@ -66,7 +66,7 @@ namespace supera {
       LOG.ERROR() << "Voxel length for BBox (_xvox) not set in config" << "\n";
       throw meatloaf("Voxel length for BBox (_xvox) not set in config");
     }
-        if (_xlen==kINVALID_DOUBLE||_ylen==kINVALID_DOUBLE||_zlen==kINVALID_DOUBLE)
+    if (_xlen==kINVALID_DOUBLE||_ylen==kINVALID_DOUBLE||_zlen==kINVALID_DOUBLE)
     {
       LOG.ERROR() << "length for BBox (_xlen) not set in config" << "\n";
       throw meatloaf("length for BBox (_xlen) not set in config");
@@ -100,22 +100,28 @@ namespace supera {
     // Step 1: define the active region
       std::cout<<"generating bbox from edep information"<<std::endl;
       Point3D active_min_pt, active_max_pt;
+      active_min_pt.x = active_min_pt.y = active_min_pt.z = std::numeric_limits< double >::max();
+      active_max_pt.x = active_max_pt.y = active_max_pt.z = std::numeric_limits< double >::min();
 
-      active_min_pt.x = data[0].edep_bottom_left.x;
-      active_min_pt.y = data[0].edep_bottom_left.y;
-      active_min_pt.z = data[0].edep_bottom_left.z;
-      active_max_pt.x = data[0].edep_top_right.x;
-      active_max_pt.y = data[0].edep_top_right.y;
-      active_max_pt.z = data[0].edep_top_right.z;
+      for(auto const& label : data) {
+        for(auto const& pt : label.pcloud ) {
+          active_min_pt.x = std::min(active_min_pt.x, pt.x);
+          active_min_pt.y = std::min(active_min_pt.y, pt.y);
+          active_min_pt.z = std::min(active_min_pt.z, pt.z);
+          active_max_pt.x = std::max(active_max_pt.x, pt.x);
+          active_max_pt.y = std::max(active_max_pt.y, pt.y);
+          active_max_pt.z = std::max(active_max_pt.z, pt.z);
+        }
+      }
 
       // Step 2: define the overlap
       Point3D min_pt, max_pt;
-        min_pt.x = std::max(_world_min.x, active_min_pt.x);
-        min_pt.y = std::max(_world_min.y, active_min_pt.y);
-        min_pt.z = std::max(_world_min.z, active_min_pt.z);
-        max_pt.x = std::min(_world_max.x, active_max_pt.x);
-        max_pt.y = std::min(_world_max.y, active_max_pt.y);
-        max_pt.z = std::min(_world_max.z, active_max_pt.z);
+      min_pt.x = std::max(_world_min.x, active_min_pt.x);
+      min_pt.y = std::max(_world_min.y, active_min_pt.y);
+      min_pt.z = std::max(_world_min.z, active_min_pt.z);
+      max_pt.x = std::min(_world_max.x, active_max_pt.x);
+      max_pt.y = std::min(_world_max.y, active_max_pt.y);
+      max_pt.z = std::min(_world_max.z, active_max_pt.z);
       assert(min_pt.x <= max_pt.x && min_pt.y <= max_pt.y && min_pt.z <= max_pt.z);
 
       Point3D box_center;
@@ -150,8 +156,8 @@ namespace supera {
 
       std::cout << "           " << _xlen << " " << _ylen << " " << _zlen << " lengths " << std::endl;
       std::cout << "meta set" << box_center.x - _xlen / 2. << " " << box_center.y - _ylen / 2. << " " << box_center.z - _zlen / 2. << " "
-                << box_center.x + _xlen / 2. << " " << box_center.y + _ylen / 2. << " " << box_center.z + _zlen / 2.<<" "
-                << xnum << " " << ynum << " " << znum<<std::endl;
+      << box_center.x + _xlen / 2. << " " << box_center.y + _ylen / 2. << " " << box_center.z + _zlen / 2.<<" "
+      << xnum << " " << ynum << " " << znum<<std::endl;
       meta.set(box_center.x - _xlen/2., box_center.y - _ylen/2., box_center.z - _zlen/2.,
         box_center.x + _xlen/2., box_center.y + _ylen/2., box_center.z + _zlen/2.,
         xnum, ynum, znum);

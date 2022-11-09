@@ -21,7 +21,7 @@
     const Logger & threshold() const \
     { \
         _isWriting = (THRESHOLD::threshold >= _thresh);      \
-        (*this) << (_preamble.empty() ? "" : _preamble) << (!_preamble.empty() ? " " : "") << #threshold << ": "; \
+        (*this) << (_preamble.empty() ? "" : _preamble) << (!_preamble.empty() ? " " : "") << #threshold << ": " << __FILE__ << ":"<<__LINE__<<" "; \
         return *this;                         \
     }
 

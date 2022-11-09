@@ -20,10 +20,9 @@ namespace supera {
         std::vector<supera::ParticleLabel>
         InitializeLabels(const EventInput &evtInput, const supera::ImageMeta3D &meta) const;
 
-        EventOutput BuildOutputLabels(std::vector<supera::ParticleLabel> &groupedInputLabels,
-                                      const std::vector<TrackID_t> &output2trackid,
-                                      const std::vector<int> &trackid2output,
-                                      const std::vector<TrackID_t> &trackid2index) const;
+	    void BuildOutputLabels(std::vector<supera::ParticleLabel>& labels,
+	        supera::EventOutput& result, 
+	        const std::vector<TrackID_t>& output2trackid) const;
 
         // ----- internal label merging methods -----
         /// Merge deltas into their parents if they have fewer than threshold voxels
@@ -43,14 +42,25 @@ namespace supera {
         void MergeShowerTouching(const supera::ImageMeta3D& meta, std::vector<supera::ParticleLabel>& labels) const;
 
         /// Combine 'LE scatter' type particles that are touching their parents with them
-        void MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
-                                          std::vector<supera::ParticleLabel>& labels) const;
+        void MergeShowerTouchingElectron(const supera::ImageMeta3D& meta,
+                                         std::vector<supera::ParticleLabel>& labels) const;
 
-        // -----  internal particle-group-building method -----
-        void AssignParticleGroupIDs(const std::vector<TrackID_t> &trackid2index,
-                                    std::vector<supera::ParticleLabel> &inputLabels,
-                                    std::vector<TrackID_t> &output2trackid,
-                                    std::vector<int> &trackid2output) const;
+	    void MergeShowerTouchingLEScatter(const supera::ImageMeta3D& meta,
+    	                                  std::vector<supera::ParticleLabel>& labels) const;
+
+        /// Identify and register a set of particles to be stored in the output
+        void RegisterOutputParticles(const std::vector<TrackID_t> &trackid2index,
+        	std::vector<supera::ParticleLabel> &inputLabels,
+        	std::vector<TrackID_t> &output2trackid,
+        	std::vector<Index_t> &trackid2output) const;
+
+        /// Assign Group ID: this only 
+    	void SetGroupID(std::vector<supera::ParticleLabel>& labels) const;
+
+    	void SetInteractionID(std::vector<supera::ParticleLabel>& labels) const;
+
+	    void SetAncestorAttributes(std::vector<supera::ParticleLabel>& labels) const;
+
 
 
         // -----  internal group-sanitizing methods -----
@@ -96,28 +106,41 @@ namespace supera {
         /// filter out any voxels voxels that have energy below the given threshold
         void ApplyEnergyThreshold(std::vector<supera::ParticleLabel>& labels) const;
 
+	    void MergeParticleLabel(std::vector<supera::ParticleLabel>& labels,
+	    	TrackID_t dest_trackid,
+	    	TrackID_t target_trackid) const;
+
+	    void SetSemanticType(std::vector<supera::ParticleLabel>& labels) const;
+
+	    void SetSemanticPriority(std::vector<size_t>& order);
+
         /// write the full ancestry of true particle with specified GEANT4 track id to the debug stream
         void DumpHierarchy(size_t trackid, const std::vector<supera::ParticleLabel>& inputLabels) const;
 
         /// Do the two given VoxelSets overlap at all?
         bool IsTouching(const ImageMeta3D& meta, const VoxelSet& vs1, const VoxelSet& vs2) const;
 
+        /// Return the input index from the track id
+        Index_t InputIndex(const TrackID_t& tid) const
+        { return tid >= _mcpl.TrackIdToIndex().size() ? kINVALID_INDEX : _mcpl.TrackIdToIndex()[tid]; }
+
         /// Get a list of all the GEANT4 tracks that are in the ancestry chain of the given one,
         /// constrained to staying within the same EM shower.
         std::vector<supera::TrackID_t>
-        ParentShowerTrackIDs(size_t trackid,
+        ParentShowerTrackIDs(TrackID_t trackid,
                              const std::vector<supera::ParticleLabel>& labels,
                              bool include_lescatter=false) const;
 
         /// Get a list of all the GEANT4 tracks that are in the ancestry chain of the given one.
         /// Most recent ancestor at index 0.
-        std::vector<supera::TrackID_t> ParentTrackIDs(size_t trackid) const;
+        //std::vector<supera::TrackID_t> ParentTrackIDs(size_t trackid) const;
 
 
         size_t _debug;
 		std::vector<size_t> _semantic_priority;
         size_t _touch_threshold;
         size_t _delta_size;
+        size_t _lescatter_size;
         size_t _eioni_size;
         size_t _compton_size;
         double _edep_threshold;
@@ -127,6 +150,7 @@ namespace supera {
         bool _store_dedx;
         bool _use_ture_pos;
         bool _check_particle_validity;
+        bool _store_lescatter;
         BBox3D _world_bounds;
         ParticleIndex _mcpl;
 	};

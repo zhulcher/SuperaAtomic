@@ -27,20 +27,18 @@ namespace supera {
   const VoxelID_t    kINVALID_VOXELID    = kINVALID_ULONG;
   const InstanceID_t kINVALID_INSTANCEID = kINVALID_ULONG;
 
-  enum ProcessType {
+  enum ProcessType_t {
     kTrack,
     kNeutron,
     kPhoton,
     kPrimary,
-    kCompton,    // detach low E shower
-    kComptonHE,  // detach high E shower
-    kDelta,      // attach-mu low E special
-    kConversion, // detach high E gamma
-    kIonization, // attach-e low E 
-    kPhotoElectron, // detatch low E
-    kDecay,      // attach high E
-    kOtherShower,   // anything else (low E)
-    kOtherShowerHE, // anything else (high E)
+    kCompton,       // compton shower
+    kDelta,         // knocked-off electron
+    kConversion,    // gamma pair-production 
+    kIonization,    // ionization electron, same as DeltaRay but too low energy to be on its own
+    kPhotoElectron, // photoelectron
+    kDecay,         // decay particle
+    kOtherShower,   // any other shower
     kInvalidProcess
   };
 
@@ -59,6 +57,7 @@ namespace supera {
   inline std::string StringifyTrackID(supera::TrackID_t id) { return (id == kINVALID_TRACKID ? "kINVALID_TRACKID" : std::to_string(id)); }
   inline std::string StringifyVoxelID(supera::VoxelID_t id) { return (id == kINVALID_VOXELID ? "kINVALID_VOXELID" : std::to_string(id)); }
   inline std::string StringifyInstanceID(supera::InstanceID_t id) { return (id == kINVALID_INSTANCEID ? "kINVALID_INSTANCEID" : std::to_string(id)); }
+
 }
 
 #endif

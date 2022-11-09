@@ -34,6 +34,7 @@ namespace supera {
 
     void InferParentage(const EventInput& larmcp_v);   ///< Fill in the ParticleIndex working structures with information about particle parents
     void SetParentInfo(EventInput& larmcp_v);
+    //std::vector<supera::TrackID_t> ParentTrackIDs(const TrackID_t trackid) const;
 
     const std::vector< PdgCode_t >& PdgCode()          const { return _pdgcode_v;          }
     const std::vector< Index_t   >& ParentIndex()      const { return _parent_index_v;     }
@@ -42,6 +43,7 @@ namespace supera {
     const std::vector< Index_t   >& TrackIdToIndex()   const { return _trackid2index;      }
     const std::vector< Index_t   >& AncestorIndex()    const { return _ancestor_index_v;   }
     const std::vector< TrackID_t >& AncestorTrackId()  const { return _ancestor_trackid_v; }
+    const std::vector< TrackID_t >& ParentTrackIdArray(const TrackID_t) const;
 
   private:
     std::vector< TrackID_t > _trackid_v;          ///< Track ID, index = std::vector<supera::ParticleInput> index
@@ -53,6 +55,8 @@ namespace supera {
     std::vector< TrackID_t > _ancestor_trackid_v; ///< Ancestor track ID, index = std::vector<supera::ParticleInput> index
     std::vector< PdgCode_t > _ancestor_pdg_v;     ///< Ancestor PDG, index = std::vector<supera::ParticleInput> index
     std::vector< Index_t   > _trackid2index;      ///< TrackID => std::vector<supera::ParticleInput> index converter
+    std::vector<std::vector< TrackID_t > > _parent_history_v;   ///< TrackID => std::vector<supera::TrackID_t> 
+    std::vector< TrackID_t > _empty_trackid_v;    ///< Empty list of TrackID 
   };
 }
 
