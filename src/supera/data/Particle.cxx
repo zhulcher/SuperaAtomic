@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include "supera/base/meatloaf.h"
 
 namespace supera {
 
@@ -28,7 +29,6 @@ namespace supera {
        << buf.str() << "Interaction ID   = " << StringifyInstanceID(interaction_id) << std::endl
        << buf.str() << "Type     = " << type << std::endl
        << buf.str() << "Shape    = " << shape << std::endl;
-    ss << buf.str() << "Parents  = ";
     ss << buf.str() << "Children = ";
     for (const auto & child :  children_id)
       ss << " " << StringifyInstanceID(child);
@@ -166,6 +166,7 @@ namespace supera {
 
   ParticleLabel::ParticleLabel()
   : valid(false)
+  , merge_id(supera::kINVALID_TRACKID)
   {}
 
   void ParticleLabel::AddEDep(const EDep& pt)
@@ -193,6 +194,14 @@ namespace supera {
   }
 
   void ParticleLabel::Merge(ParticleLabel& child,bool verbose) {
+    
+    if(!(this->valid)) {
+      std::cerr<<"Cannot merge into an invalid parent!" << std::endl;
+      std::cerr<<"Parent info..."<<std::endl<<this->dump()<<std::endl;
+      std::cerr<<"Child info..."<<std::endl<<child.dump()<<std::endl;
+      throw meatloaf();
+    }
+    
     for(auto const& vox : child.energy.as_vector())
       this->energy.emplace(vox.id(),vox.value(),true);
     for(auto const& vox : child.dedx.as_vector())

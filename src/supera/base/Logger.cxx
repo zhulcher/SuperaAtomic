@@ -1,26 +1,59 @@
 #include <algorithm>
 
-#include "supera/base/Logger.h"
+#include "Logger.h"
+#include <mutex>
 #include "supera/base/meatloaf.h"
+std::mutex __logger_mtx;
 
 namespace supera {
-    Logger::THRESHOLD Logger::parseStringThresh(std::string threshStr)
+
+    Logger *Logger::_shared_logger = nullptr;
+    std::map<std::string,Logger> *Logger::_logger_m = nullptr;
+    msg::Level_t Logger::_level_default = msg::kINFO;
+
+    std::ostream& Logger::send(const msg::Level_t level) const
     {
-        std::for_each(threshStr.begin(), threshStr.end(), [](char &ch){ch = ::toupper(ch); });
+        __logger_mtx.lock();
+        (*_ostrm)  << msg::kStringPrefix[level].c_str()
+        << "\033[0m ";
+        __logger_mtx.unlock();
+        return (*_ostrm);
+    }
 
-        if (threshStr == "VERBOSE")
-            return THRESHOLD::VERBOSE;
-        else if (threshStr == "DEBUG")
-            return THRESHOLD::DEBUG;
-        else if (threshStr == "INFO")
-            return THRESHOLD::INFO;
-        else if (threshStr == "WARNING")
-            return THRESHOLD::WARNING;
-        else if (threshStr == "ERROR")
-            return THRESHOLD::ERROR;
-        else if (threshStr == "FATAL")
-            return THRESHOLD::FATAL;
+    std::ostream& Logger::send(const msg::Level_t level,
+       const std::string& function ) const
+    {
+        auto& strm(send(level));
+        strm << "\033[94m<" << _name << "::" << function.c_str() << ">\033[00m ";
+        return strm;
+    }
 
-        throw meatloaf("Unrecognized log threshold: " + threshStr);
+    std::ostream& Logger::send(const msg::Level_t level,
+       const std::string& function,
+       const unsigned int line_num ) const
+    {
+        auto& strm(send(level));
+        strm << "\033[94m<" << _name << "::" << function.c_str() << "::L" << line_num << ">\033[00m ";
+        return strm;
+    }
+
+    std::ostream& Logger::send(const msg::Level_t level,
+       const std::string& function,
+       const unsigned int line_num,
+       const std::string& file_name) const
+    {
+        auto& strm(send(level,function));
+    // FIXME temporary operation to fetch file name from full path
+        strm << file_name.substr(file_name.rfind("/")+1,file_name.size()).c_str() << "::L" << line_num << " ";
+        return strm;
+    }
+
+    Logger& Logger::get_shared()
+    {
+        __logger_mtx.lock();
+        if(!_shared_logger) _shared_logger = new Logger("SHARED");
+        __logger_mtx.unlock();
+        return *_shared_logger;
+
     }
 }

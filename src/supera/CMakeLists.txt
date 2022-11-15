@@ -28,6 +28,7 @@ add_library(supera SHARED
 
 target_link_libraries(supera 
     ${PYTHON_LIBRARIES}
+    yaml-cpp
     #-L${LARCV_LIB_DIR} -llarcv3
     )
 

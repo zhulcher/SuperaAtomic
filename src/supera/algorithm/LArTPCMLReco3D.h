@@ -3,6 +3,7 @@
 
 #include "LabelBase.h"
 #include "ParticleIndex.h"
+
 namespace supera {
 
 	/**
@@ -11,11 +12,15 @@ namespace supera {
 	*/
 	class LArTPCMLReco3D : public LabelAlgorithm {
 	public:
-		LArTPCMLReco3D();
-		void Configure(const PSet& p) override;
+		LArTPCMLReco3D(std::string name="LArTPCMLReco3D");
 		EventOutput Generate(const EventInput& data, const ImageMeta3D& meta) override;
 
+	protected:
+		
+		void _configure(const YAML::Node& cfg) override;
+
 	private:
+
         // ----- label making -----
         std::vector<supera::ParticleLabel>
         InitializeLabels(const EventInput &evtInput, const supera::ImageMeta3D &meta) const;
@@ -61,46 +66,12 @@ namespace supera {
 
 	    void SetAncestorAttributes(std::vector<supera::ParticleLabel>& labels) const;
 
-
-
         // -----  internal group-sanitizing methods -----
         /// The first step of the true trajectory is important, and sometimes winds up unset.
         /// If so, clean it up using the first voxel attached to the label group.
         static void FixFirstStepInfo(std::vector<supera::ParticleLabel> &inputLabels,
                                      const supera::ImageMeta3D &meta,
                                      const std::vector<TrackID_t> &output2trackid);
-
-        /// Occasionally shower-type particles may be marked as merged to a parent, but have the wrong parent ID stored.
-        /// Search for the right parent to try to fix it.
-        void FixInvalidParentShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
-                                          std::vector<TrackID_t> &output2trackid,
-                                          std::vector<int> &trackid2output) const;
-
-       /// Sometimes non-shower types that aren't the top of their own group don't get connected to the closest particle that is.  Try to fix that.
-        void FixOrphanNonShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
-                                      const std::vector<TrackID_t> &output2trackid,
-                                      std::vector<int> &trackid2output) const;
-
-        ///  Sometimes shower type groups don't get fully connected all the way back to their primary particle.  Fix those.
-        void FixOrphanShowerGroups(std::vector<supera::ParticleLabel> &inputLabels,
-                                   std::vector<supera::TrackID_t> &output2trackid,
-                                   std::vector<int> &trackid2output) const;
-
-        /// Sometimes there are labels that aren't the top of a label group but have lost their association to any other.
-        /// Rescue them by reattaching to their parent.
-        /// (LEScatter type labels need their own treatment; see \ref FixUnassignedLEScatterGroups.)
-        void FixUnassignedGroups(std::vector<supera::ParticleLabel> &inputLabels,
-                                 std::vector<TrackID_t> &output2trackid) const;
-
-        /// Rescue any LEScatter type labels that wind up unassociated.
-        /// (See also \ref FixUnassignedGroups.)
-        void FixUnassignedLEScatterGroups(std::vector<supera::ParticleLabel> &inputLabels,
-                                          const std::vector<TrackID_t> &output2trackid) const;
-
-        /// Usually there are some label groups that wind up with no parents at all.  Clean those up too.
-        void FixUnassignedParentGroups(std::vector<supera::ParticleLabel> &inputLabels,
-                                       std::vector<TrackID_t> &output2trackid,
-                                       std::vector<int> &trackid2output) const;
 
         // -----  utility methods -----
         /// filter out any voxels voxels that have energy below the given threshold
@@ -141,15 +112,8 @@ namespace supera {
         size_t _touch_threshold;
         size_t _delta_size;
         size_t _lescatter_size;
-        size_t _eioni_size;
         size_t _compton_size;
         double _edep_threshold;
-        bool _use_true_pos;
-        bool _use_sed;
-        bool _use_sed_points;
-        bool _store_dedx;
-        bool _use_ture_pos;
-        bool _check_particle_validity;
         bool _store_lescatter;
         BBox3D _world_bounds;
         ParticleIndex _mcpl;

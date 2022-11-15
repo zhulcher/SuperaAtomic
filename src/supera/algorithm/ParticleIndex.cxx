@@ -6,6 +6,19 @@
 
 namespace supera{ 
 
+  void ParticleIndex::_configure(const YAML::Node& cfg)
+  {
+        for (auto const &item: cfg) {
+            std::cout << item.first.as<std::string>() << std::endl
+            << item.second.IsDefined() << " "
+            << item.second.IsNull() << " ... "
+            << item.second.IsScalar() << " "
+            << item.second.IsSequence() << " "
+            << item.second.IsMap()
+            << std::endl;
+        } 
+  }
+
   void ParticleIndex::InferParentage(const EventInput& larmcp_v)
   {
     /*
@@ -43,7 +56,7 @@ namespace supera{
     for(size_t index=0; index<larmcp_v.size(); ++index) {
       auto const& mcpart = larmcp_v[index].part;  // pull off the GEANT4 track information component
       if(mcpart.trackid == supera::kINVALID_TRACKID) {
-        LOG.FATAL() << "Track ID cannot be invalid\n";
+        LOG_FATAL() << "Track ID cannot be invalid\n";
         throw supera::meatloaf();
       }
       _trackid_v[index] = mcpart.trackid;
@@ -64,7 +77,7 @@ namespace supera{
 
       // Sanity check: all particle should have its parent track id
       if(mcpart.parent_trackid == supera::kINVALID_TRACKID) {
-        LOG.FATAL() << "Parent ID cannot be invalid\n";
+        LOG_FATAL() << "Parent ID cannot be invalid\n";
         throw supera::meatloaf();
       }
 
@@ -110,7 +123,7 @@ namespace supera{
   ParticleIndex::ParentTrackIdArray(const TrackID_t trackid) const
   {
     if(trackid >= _parent_history_v.size()) {
-      LOG.ERROR() << "Track ID " << trackid << " is not valid. Returning an empty list.\n";
+      LOG_ERROR() << "Track ID " << trackid << " is not valid. Returning an empty list.\n";
       return _empty_trackid_v;
     }
     return _parent_history_v[trackid];
@@ -145,12 +158,12 @@ namespace supera{
       {
           if (accessed.find(parent_trackid) != accessed.end())
           {
-              LOG.FATAL() << "LOOP-LOGIC-ERROR for ParentTrackIDs for track id " << StringifyTrackID(trackid) << ": repeated ancestor!\n";
-              LOG.FATAL() << "Ancestors found:\n";
+              LOG_FATAL() << "LOOP-LOGIC-ERROR for ParentTrackIDs for track id " << StringifyTrackID(trackid) << ": repeated ancestor!\n";
+              LOG_FATAL() << "Ancestors found:\n";
               for (size_t parent_cand_idx = 0; parent_cand_idx < result.size(); ++parent_cand_idx)
               {
                   auto const &parent_cand_trackid = result[parent_cand_idx];
-                  LOG.FATAL() << "Parent idx " << parent_cand_idx
+                  LOG_FATAL() << "Parent idx " << parent_cand_idx
                               << " Track ID " << StringifyTrackID(parent_cand_trackid)
                               << " PDG " << _mcpl.PdgCode()[trackid2index[parent_cand_trackid]]
                               << " Mother " << StringifyTrackID(this->ParentTrackId()[trackid2index[parent_cand_trackid]])

@@ -4,14 +4,16 @@
 #include <sys/time.h>
 #include <assert.h>
 #include "BBoxInteraction.h"
+#include "supera/base/PSet.h"
 
 namespace supera {
 
 
-  void BBoxInteraction::Configure(const PSet& cfg)
+  void BBoxInteraction::_configure(const YAML::Node& cfg)
   {
 
-    int seed = cfg.get<int>("Seed",-1);
+    int seed = -1;
+    if(cfg["Seed"]) seed = cfg["Seed"].as<int>();
     if(seed < 0) {
       // use time seed
       struct timeval time; 
@@ -20,20 +22,21 @@ namespace supera {
     }else
     _seed = (size_t)(seed);
 
-    auto bbox_size = cfg.get<std::vector<double> >("BBoxSize");
+    auto bbox_size = cfg["BBoxSize"].as<std::vector<double> >();
     assert(bbox_size.size() == 3);
     _xlen = bbox_size.at(0);
     _ylen = bbox_size.at(1);
     _zlen = bbox_size.at(2);
 
-    auto voxel_size = cfg.get<std::vector<double> >("VoxelSize");
+    auto voxel_size = cfg["VoxelSize"].as<std::vector<double> >();
     assert(voxel_size.size() == 3);
     _xvox = voxel_size.at(0);
     _yvox = voxel_size.at(1);
     _zvox = voxel_size.at(2);
 
     std::vector<double> bbox_bottom;
-    bbox_bottom = cfg.get<std::vector<double>>("BBoxBottom", bbox_bottom);
+    if(cfg["BBoxBottom"])
+      bbox_bottom = cfg["BBoxBottom"].as<std::vector<double>>();
     assert(bbox_bottom.size()<1 || bbox_bottom.size() == 3);
     if(bbox_bottom.size()==3) {
       _bbox_bottom.x = bbox_bottom[0];
@@ -44,8 +47,11 @@ namespace supera {
 
     std::vector<double> world_min(3, -std::numeric_limits<double>::max());
     std::vector<double> world_max(3, std::numeric_limits<double>::max());
-    world_min = cfg.get<std::vector<double> >("WorldBoundBottom", world_min);
-    world_max = cfg.get<std::vector<double> >("WorldBoundTop",    world_max);
+    if(cfg["WorldBoundBottom"])
+      world_min = cfg["WorldBoundMin"].as<std::vector<double> >();
+    if(cfg["WorldBoundTop"])
+      world_max = cfg["WorldBoundMax"].as<std::vector<double> >();
+
     assert(world_min.size() == 3);
     assert(world_max.size() == 3);
 
@@ -58,17 +64,17 @@ namespace supera {
   ImageMeta3D BBoxInteraction::Generate(const EventInput& data) const
   {
 
-    std::cout<<"starting bbox"<<std::endl;
+    LOG_DEBUG() << "starting" << std::endl;
     ImageMeta3D meta;
 
     if (_xvox==kINVALID_DOUBLE||_yvox==kINVALID_DOUBLE||_zvox==kINVALID_DOUBLE)
     {
-      LOG.ERROR() << "Voxel length for BBox (_xvox) not set in config" << "\n";
+      LOG_ERROR() << "Voxel length for BBox (_xvox) not set in config" << "\n";
       throw meatloaf("Voxel length for BBox (_xvox) not set in config");
     }
     if (_xlen==kINVALID_DOUBLE||_ylen==kINVALID_DOUBLE||_zlen==kINVALID_DOUBLE)
     {
-      LOG.ERROR() << "length for BBox (_xlen) not set in config" << "\n";
+      LOG_ERROR() << "length for BBox (_xlen) not set in config" << "\n";
       throw meatloaf("length for BBox (_xlen) not set in config");
     }
 
@@ -78,8 +84,8 @@ namespace supera {
 
   // If using fixed bounding box, set as specified
     if(_bbox_bottom.x != kINVALID_DOUBLE) {
-      std::cout<<_xvox<<" "<<_yvox<<" "<<_zvox<<"   setting size of voxels"<<std::endl;
-      std::cout<<"set meta with cfg bbox"<<std::endl;
+      LOG_DEBUG() << _xvox << " " << _yvox << " " << _zvox << "   setting size of voxels" << std::endl
+      << "set meta with cfg bbox" << std::endl;
       meta.set(_bbox_bottom.x, _bbox_bottom.y, _bbox_bottom.z,
         _bbox_bottom.x+_xlen, _bbox_bottom.y+_ylen, _bbox_bottom.z+_zlen,
         xnum, ynum, znum
@@ -98,7 +104,7 @@ namespace supera {
     //    draw to decide the box center location.
 
     // Step 1: define the active region
-      std::cout<<"generating bbox from edep information"<<std::endl;
+      LOG_DEBUG() << "generating bbox from edep information" << std::endl;
       Point3D active_min_pt, active_max_pt;
       active_min_pt.x = active_min_pt.y = active_min_pt.z = std::numeric_limits< double >::max();
       active_max_pt.x = active_max_pt.y = active_max_pt.z = std::numeric_limits< double >::min();
@@ -154,8 +160,8 @@ namespace supera {
         box_center.z += dis(mt);
       }
 
-      std::cout << "           " << _xlen << " " << _ylen << " " << _zlen << " lengths " << std::endl;
-      std::cout << "meta set" << box_center.x - _xlen / 2. << " " << box_center.y - _ylen / 2. << " " << box_center.z - _zlen / 2. << " "
+      LOG_DEBUG() << "           " << _xlen << " " << _ylen << " " << _zlen << " lengths " << std::endl
+      << "meta set" << box_center.x - _xlen / 2. << " " << box_center.y - _ylen / 2. << " " << box_center.z - _zlen / 2. << " "
       << box_center.x + _xlen / 2. << " " << box_center.y + _ylen / 2. << " " << box_center.z + _zlen / 2.<<" "
       << xnum << " " << ynum << " " << znum<<std::endl;
       meta.set(box_center.x - _xlen/2., box_center.y - _ylen/2., box_center.z - _zlen/2.,
