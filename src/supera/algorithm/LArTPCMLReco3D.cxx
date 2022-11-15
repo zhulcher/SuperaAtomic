@@ -2,7 +2,6 @@
 #define __LARTPCMLRECO3D_CXX__
 
 #include "LArTPCMLReco3D.h"
-#include "supera/base/PSet.h"
 #include <algorithm>
 #include <cassert>
 #include <set>
