@@ -7,10 +7,13 @@ this_directory = os.path.abspath(os.path.dirname(__file__))
 with io.open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-if 'SUPERA_WITHOUT_PYTHON' in os.environ and os.environ['SUPERA_WITHOUT_PYTHON']:
-    pybind_value='ON'
-else:
-    pybind_value='OFF'
+# default no pybind
+nopybind_value='ON'
+if 'SUPERA_WITHOUT_PYTHON' in os.environ and eval(os.environ['SUPERA_WITHOUT_PYTHON']):
+    nopybind_value='ON'
+if 'SUPERA_WITH_PYTHON' in os.environ and eval(os.environ['SUPERA_WITH_PYTHON']):
+    nopybind_value='OFF'
+    
 
 
 setup(
@@ -21,7 +24,7 @@ setup(
     cmake_args=[
         #'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON',
         '-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9',
-        '-DWITHOUT_PYTHON={}'.format(pybind_value),
+        '-DWITHOUT_PYTHON={}'.format(nopybind_value),
     ],
     author=['Corey Adams', 'Kazuhiro Terao', 'Taritree Wongjirad', 'Marco Del Tutto', 'Jeremy Wolcott'],
     author_email='kterao@slac.stanford.edu',
