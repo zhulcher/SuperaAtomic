@@ -1,4 +1,4 @@
-
+#ifdef BUILD_PYTHON_BINDINGS
 #include "base_pybind.h"
 #include "SuperaType.h"
 #include "Point.h"
@@ -23,21 +23,19 @@ void init_base(pybind11::module& m)
       .value("Unknown", supera::kShapeUnknown, DOC(supera, SemanticType_t, kShapeUnknown))
       .export_values();
 
-  pybind11::enum_<supera::ProcessType>(m, "ProcessType", DOC(supera, ProcessType))
-      .value("kTrack", supera::kTrack, DOC(supera, ProcessType, kTrack))
-      .value("kNeutron", supera::kNeutron, DOC(supera, ProcessType, kNeutron))
-      .value("kPhoton", supera::kPhoton, DOC(supera, ProcessType, kPhoton))
-      .value("kPrimary", supera::kPrimary, DOC(supera, ProcessType, kPrimary))
-      .value("kCompton", supera::kCompton, DOC(supera, ProcessType, kCompton))
-      .value("kComptonHE", supera::kComptonHE, DOC(supera, ProcessType, kComptonHE))
-      .value("kDelta", supera::kDelta, DOC(supera, ProcessType, kDelta))
-      .value("kConversion", supera::kConversion, DOC(supera, ProcessType, kConversion))
-      .value("kIonization", supera::kIonization, DOC(supera, ProcessType, kIonization))
-      .value("kPhotoElectron", supera::kPhotoElectron, DOC(supera, ProcessType, kPhotoElectron))
-      .value("kDecay", supera::kDecay, DOC(supera, ProcessType, kDecay))
-      .value("kOtherShower", supera::kOtherShower, DOC(supera, ProcessType, kOtherShower))
-      .value("kOtherShowerHE", supera::kOtherShowerHE, DOC(supera, ProcessType, kOtherShowerHE))
-      .value("kInvalidProcess", supera::kInvalidProcess, DOC(supera, ProcessType, kInvalidProcess))
+  pybind11::enum_<supera::ProcessType_t>(m, "ProcessType_t", DOC(supera, ProcessType_t))
+      .value("kTrack", supera::kTrack, DOC(supera, ProcessType_t, kTrack))
+      .value("kNeutron", supera::kNeutron, DOC(supera, ProcessType_t, kNeutron))
+      .value("kPhoton", supera::kPhoton, DOC(supera, ProcessType_t, kPhoton))
+      .value("kPrimary", supera::kPrimary, DOC(supera, ProcessType_t, kPrimary))
+      .value("kCompton", supera::kCompton, DOC(supera, ProcessType_t, kCompton))
+      .value("kDelta", supera::kDelta, DOC(supera, ProcessType_t, kDelta))
+      .value("kConversion", supera::kConversion, DOC(supera, ProcessType_t, kConversion))
+      .value("kIonization", supera::kIonization, DOC(supera, ProcessType_t, kIonization))
+      .value("kPhotoElectron", supera::kPhotoElectron, DOC(supera, ProcessType_t, kPhotoElectron))
+      .value("kDecay", supera::kDecay, DOC(supera, ProcessType_t, kDecay))
+      .value("kOtherShower", supera::kOtherShower, DOC(supera, ProcessType_t, kOtherShower))
+      .value("kInvalidProcess", supera::kInvalidProcess, DOC(supera, ProcessType_t, kInvalidProcess))
       .export_values();
 
 
@@ -243,3 +241,4 @@ void init_base(pybind11::module& m)
 
 
  }
+#endif

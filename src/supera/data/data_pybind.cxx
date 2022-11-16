@@ -1,3 +1,4 @@
+#ifdef BUILD_PYTHON_BINDINGS
 
 #include "data_pybind.h"
 
@@ -59,10 +60,11 @@ void init_data(pybind11::module& m)
 
   // classes from Particle.h
   pybind11::class_<supera::Particle>(m, "Particle", DOC(supera, Particle))
-      .def(pybind11::init<supera::SemanticType_t>(), DOC(supera, Particle, Particle), "shape"_a=supera::kShapeUnknown)
+      .def(pybind11::init<>(), DOC(supera, Particle, Particle))
       .def("p", &supera::Particle::p, DOC(supera, Particle, p))
       .def("dump", &supera::Particle::dump, DOC(supera, Particle, dump))
       .def_readwrite("id", &supera::Particle::id, DOC(supera, Particle, id))
+      .def_readwrite("type", &supera::Particle::type, DOC(supera, Particle, type))
       .def_readwrite("shape", &supera::Particle::shape, DOC(supera, Particle, shape))
       .def_readwrite("trackid", &supera::Particle::trackid, DOC(supera, Particle, trackid))
       .def_readwrite("pdg", &supera::Particle::pdg, DOC(supera, Particle, pdg))
@@ -95,8 +97,7 @@ void init_data(pybind11::module& m)
       .def(pybind11::init<>(), DOC(supera, ParticleInput, ParticleInput))
       .def_readwrite("part", &supera::ParticleInput::part, DOC(supera, ParticleInput, part))
       .def_readwrite("pcloud", &supera::ParticleInput::pcloud, DOC(supera, ParticleInput, pcloud))
-      .def_readwrite("valid", &supera::ParticleInput::valid, DOC(supera, ParticleInput, valid))
-      .def_readwrite("type", &supera::ParticleInput::type, DOC(supera, ParticleInput, type));
+      .def_readwrite("valid", &supera::ParticleInput::valid, DOC(supera, ParticleInput, valid));
 
   pybind11::class_<supera::ParticleLabel>(m, "ParticleLabel", DOC(supera, ParticleLabel))
       // constructors
@@ -111,16 +112,12 @@ void init_data(pybind11::module& m)
       .def("SizeCheck", &supera::ParticleLabel::SizeCheck, DOC(supera, ParticleLabel, SizeCheck))
       .def("Size", &supera::ParticleLabel::Size, DOC(supera, ParticleLabel, Size))
       .def("Merge", &supera::ParticleLabel::Merge, DOC(supera, ParticleLabel, Merge), "child"_a, "verbose"_a)
-      .def("shape", &supera::ParticleLabel::shape, DOC(supera, ParticleLabel, shape))
       .def("dump", &supera::ParticleLabel::dump, DOC(supera, ParticleLabel, dump))
 
       // data members
       .def_readwrite("part", &supera::ParticleLabel::part, DOC(supera, ParticleLabel, part))
       .def_readwrite("valid", &supera::ParticleLabel::valid, DOC(supera, ParticleLabel, valid))
       .def_readwrite("valid", &supera::ParticleLabel::valid, DOC(supera, ParticleLabel, valid))
-      .def_readwrite("add_to_parent", &supera::ParticleLabel::add_to_parent, DOC(supera, ParticleLabel, add_to_parent))
-      .def_readwrite("type", &supera::ParticleLabel::type, DOC(supera, ParticleLabel, type))
-      .def_readwrite("trackid_v", &supera::ParticleLabel::trackid_v, DOC(supera, ParticleLabel, trackid_v))
       .def_readwrite("energy", &supera::ParticleLabel::energy, DOC(supera, ParticleLabel, energy))
       .def_readwrite("dedx", &supera::ParticleLabel::dedx, DOC(supera, ParticleLabel, dedx))
       .def_readwrite("first_pt", &supera::ParticleLabel::first_pt, DOC(supera, ParticleLabel, first_pt))
@@ -148,3 +145,4 @@ void init_data(pybind11::module& m)
       .def("dump2cpp", &supera::EventOutput::dump2cpp, DOC(supera, EventOutput, dump2cpp), "instanceName"_a="evtOutput");
 
 }
+#endif

@@ -4,6 +4,11 @@ set(name process)
 file(GLOB SOURCES *.cxx)
 file(GLOB HEADERS *.h)
 
+if(WITHOUT_PYTHON)
+    list(FILTER SOURCES EXCLUDE REGEX ".*_pybind\\.cxx$")
+    list(FILTER HEADERS EXCLUDE REGEX ".*_pybind\\.h$")
+endif()
+
 # update the list inherited from src/supera
 list(APPEND ALL_HEADERS ${HEADERS})
 set(ALL_HEADERS "${ALL_HEADERS}" PARENT_SCOPE)

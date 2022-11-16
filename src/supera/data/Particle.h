@@ -32,9 +32,10 @@ namespace supera {
   public:
 
     /// Default constructor
-    Particle(supera::SemanticType_t shape=supera::kShapeUnknown)
+    Particle()
       : id               (kINVALID_INSTANCEID)
-      , shape            (shape)
+      , type             (kInvalidProcess)
+      , shape            (kShapeUnknown)
       , trackid          (kINVALID_TRACKID)
       , pdg              (kINVALID_PDG)
       , px               (0.)
@@ -50,10 +51,11 @@ namespace supera {
       , ancestor_pdg     (kINVALID_PDG)
       , ancestor_process ("")
       , parent_process   ("")
-      , parent_id(kINVALID_INSTANCEID)
-      , children_id()
-      , group_id(kINVALID_INSTANCEID)
-      , interaction_id(kINVALID_INSTANCEID)
+      , parent_id        (kINVALID_INSTANCEID)
+      , ancestor_id      (kINVALID_INSTANCEID)
+      , children_id      ()
+      , group_id         (kINVALID_INSTANCEID)
+      , interaction_id   (kINVALID_INSTANCEID)
     {}
 
     /// Default destructor
@@ -70,11 +72,12 @@ namespace supera {
 
   public:
 
-    InstanceID_t id; ///< "ID" of this particle in ParticleSet collection
-    SemanticType_t shape;     ///< shows if it is (e+/e-/gamma) or other particle types
+    InstanceID_t id;            ///< "ID" of this particle in ParticleSet collection
+    ProcessType_t  type;        ///< Creation process type
+    SemanticType_t shape;       ///< Semantic type info
     TrackID_t      trackid;     ///< Geant4 track id
     PdgCode_t      pdg;         ///< PDG code
-    double         px,py,pz;  ///< (x,y,z) component of particle's initial momentum
+    double         px,py,pz;    ///< (x,y,z) component of particle's initial momentum
     Vertex         vtx;         ///< (x,y,z,t) of particle's vertex information
     Vertex         end_pt;      ///< (x,y,z,t) at which particle disappeared from G4WorldVolume
     Vertex         first_step;  ///< (x,y,z,t) of the first energy deposition point in the detector
@@ -95,23 +98,53 @@ namespace supera {
 
     std::string   parent_process; ///< string identifier of the parent particle's creation process from Geant4
     InstanceID_t  parent_id;      ///< "ID" of the parent particle in ParticleSet collection
+    InstanceID_t  ancestor_id;    ///< "ID" of the ancestor particle in ParticleSet collection
     std::vector<supera::InstanceID_t> children_id; ///< "ID" of the children particles in ParticleSet collection
     InstanceID_t  group_id;       ///< "ID" to group multiple particles together (for clustering purpose)
     InstanceID_t  interaction_id; ///< "ID" to group multiple particles per interaction
   };
 
+  /// ProcessType => SemanticType conversion
+  /*
+  SemanticType_t Process2Semantic(const PdgCode_t& pdg,
+    const ProcessType_t& proc)
+  {
+    SemanticType_t res(kShapeUnknown);
+    switch(proc) {
+      case kPhoton:
+      case kCompton:
+      case kConversion:
+      case kOtherShower:
+        res = SemanticType_t::kShapeShower;
+        break;
+      case kDelta:
+        res = SemanticType_t::kShapeDelta;
+        break;
+      case k
+      case kDecay:
+        if(std::abs(pdg)==11){
+          res = SemanticType_t::kShapeMichel;
+          break;
+        }
+      case kTrack:
+      case kNeutron:
+        res = SemanticType_t::kShapeTrack;
+        break;
+    }
+    return res;
+  }
+  */
 
   class ParticleInput {
   public:
 
-    ParticleInput() : valid(true), type(supera::kInvalidProcess) {}
+    ParticleInput() : valid(true) {}
 
     std::string dump2cpp(const std::string & instanceName = "partInput") const;
 
     supera::Particle part;         ///< a particle information
     std::vector<EDep> pcloud;      ///< 3D energy deposition information (raw info)
     bool valid;
-    supera::ProcessType type;
   };
 
   typedef std::vector<ParticleInput> EventInput;
@@ -131,16 +164,16 @@ namespace supera {
     void SizeCheck() const;
     size_t Size() const;
     void Merge(ParticleLabel& child,bool verbose=false);
-    supera::SemanticType_t shape() const;
+    //supera::SemanticType_t shape() const;
 
     std::string dump() const;
     std::string dump2cpp(const std::string & instanceName = "partLabel") const;
 
     supera::Particle part;            ///< a particle information
     bool valid;                       ///< a state flag whether this particle should be ignored or not
-    bool add_to_parent;               ///< a state flag whether this particle should be merged into its parent
-    ProcessType type;                 ///< type of this particle for ML reco chain
-    std::vector<TrackID_t> trackid_v; ///< track ID of descendent particles
+    std::vector<TrackID_t> merged_v;  ///< track ID of descendent particles that are merged
+    std::vector<TrackID_t> parent_trackid_v; ///< track ID of parent particles in the history
+    TrackID_t merge_id;               ///< a track ID of the particle to which this one is merged
     supera::VoxelSet energy;          ///< 3D voxels (energy deposition)
     supera::VoxelSet dedx;            ///< 3D voxels (dE/dX)
     EDep first_pt;                    ///< first energy deposition point (not voxel)
@@ -183,18 +216,31 @@ namespace supera {
       /// Dump this \ref EventOutput to a string of C++ code that can be used to reproduce it
       std::string dump2cpp(const std::string &instanceName = "evtOutput") const;
 
-    private:
+    //private:
       /// Helper method to simplify querying the 'dirty' fields
-      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<std::underlying_type<DIRTY_FLAG>::type>(field)]; }
+      bool IsDirty(DIRTY_FLAG field) const { return _dirty[static_cast<unsigned short>(field)]; }
 
       /// Helper method to implement the ranking decision between two semantic labels using the priority passed by the caller
       static supera::SemanticType_t _SemanticPriority(supera::SemanticType_t a, supera::SemanticType_t b,
                                                       const std::vector<supera::SemanticType_t> & semanticPriority);
 
+      /// Helper function that generates a vector of vector of voxel id and value
+      void FillClustersEnergy(std::vector<std::vector<supera::VoxelID_t> >& ids,
+        std::vector<std::vector<float> >& values) const;
+
+      void FillClustersdEdX(std::vector<std::vector<supera::VoxelID_t> >& ids,
+        std::vector<std::vector<float> >& values) const;
+
+      void FillTensorSemantic(std::vector<VoxelID_t>& ids,
+        std::vector<float>& values) const;
+
+      void FillTensorEnergy(std::vector<VoxelID_t>& ids,
+        std::vector<float>& values) const;
 
       std::vector<ParticleLabel> _particles;
+      
       mutable supera::VoxelSet _energies;       ///< the total energy deposits in each voxel over all the contained particles contributing to the voxel
-      mutable supera::VoxelSet _dEdXs;          ///< the dE/dxs for each voxel taken as an energy-weighted mean over all the contained particles contributing to the voxel
+      //mutable supera::VoxelSet _dEdXs;          ///< the dE/dxs for each voxel taken as an energy-weighted mean over all the contained particles contributing to the voxel
       mutable supera::VoxelSet _semanticLabels; ///< semantic labels for each energy deposit, determined by \ref SemanticPriority()
 
       mutable std::array<bool, sizeof(DIRTY_FLAG)> _dirty = {};  ///< flag to signal when the internal sum fields need to be recalculated

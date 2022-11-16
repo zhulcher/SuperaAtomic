@@ -4,7 +4,8 @@
 #include <limits>
 #include <cstddef>
 #include <string>
-
+#include <algorithm>
+#include "meatloaf.h"
 namespace supera {
 
 
@@ -27,20 +28,18 @@ namespace supera {
   const VoxelID_t    kINVALID_VOXELID    = kINVALID_ULONG;
   const InstanceID_t kINVALID_INSTANCEID = kINVALID_ULONG;
 
-  enum ProcessType {
+  enum ProcessType_t {
     kTrack,
     kNeutron,
     kPhoton,
     kPrimary,
-    kCompton,    // detach low E shower
-    kComptonHE,  // detach high E shower
-    kDelta,      // attach-mu low E special
-    kConversion, // detach high E gamma
-    kIonization, // attach-e low E 
-    kPhotoElectron, // detatch low E
-    kDecay,      // attach high E
-    kOtherShower,   // anything else (low E)
-    kOtherShowerHE, // anything else (high E)
+    kCompton,       // compton shower
+    kDelta,         // knocked-off electron
+    kConversion,    // gamma pair-production 
+    kIonization,    // ionization electron, same as DeltaRay but too low energy to be on its own
+    kPhotoElectron, // photoelectron
+    kDecay,         // decay particle
+    kOtherShower,   // any other shower
     kInvalidProcess
   };
 
@@ -59,6 +58,44 @@ namespace supera {
   inline std::string StringifyTrackID(supera::TrackID_t id) { return (id == kINVALID_TRACKID ? "kINVALID_TRACKID" : std::to_string(id)); }
   inline std::string StringifyVoxelID(supera::VoxelID_t id) { return (id == kINVALID_VOXELID ? "kINVALID_VOXELID" : std::to_string(id)); }
   inline std::string StringifyInstanceID(supera::InstanceID_t id) { return (id == kINVALID_INSTANCEID ? "kINVALID_INSTANCEID" : std::to_string(id)); }
+
+  /// Namespace for supera message related types
+  namespace msg {
+
+    /// Message level
+    enum Level_t { kVERBOSE, kDEBUG, kINFO, kWARNING, kERROR, kFATAL, kMSG_TYPE_MAX };
+
+    /// Formatted message prefix per message level
+    const std::string kStringPrefix[kMSG_TYPE_MAX] =
+      {
+        "   \033[94m[VERBOSE]\033[00m ",  ///< kVERBOSE message prefix
+        "     \033[92m[DEBUG]\033[00m ",  ///< kDEBUG message prefix
+        "      \033[95m[INFO]\033[00m ",  ///< kINFO message prefix
+        "   \033[93m[WARNING]\033[00m ", ///< kWARNING message prefix
+        "     \033[91m[ERROR]\033[00m ", ///< kERROR message prefix
+        "     \033[5;1;33;41m[FATAL]\033[00m "  ///< kFATAL message prefix
+      };
+    ///< Prefix of message
+    inline Level_t parseStringThresh(std::string threshStr)
+    {
+        std::for_each(threshStr.begin(), threshStr.end(), [](char &ch){ch = ::toupper(ch); });
+
+        if (threshStr == "VERBOSE")
+            return msg::Level_t::kVERBOSE;
+        else if (threshStr == "DEBUG")
+            return msg::Level_t::kDEBUG;
+        else if (threshStr == "INFO")
+            return msg::Level_t::kINFO;
+        else if (threshStr == "WARNING")
+            return msg::Level_t::kWARNING;
+        else if (threshStr == "ERROR")
+            return msg::Level_t::kERROR;
+        else if (threshStr == "FATAL")
+            return msg::Level_t::kFATAL;
+
+        throw meatloaf("Unrecognized log threshold: " + threshStr);
+    }
+  }
 }
 
 #endif

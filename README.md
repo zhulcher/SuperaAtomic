@@ -9,11 +9,15 @@ C++ software to generate true labels for `lartpc_mlreco3d` ([repository](https:/
 ```
 > git clone https://github.com/DeepLearnPhysics/SuperaAtomic
 ```
-3. Build 
+3. Pull pybind subpackage https://github.com/pybind/pybind11.
+```
+> git submodule update --init
+```
+4. Build 
 ```
 > python3 setup.py build
 ```
-4. Install (the example below installs under your `$HOME/.local` path)
+5. Install (the example below installs under your `$HOME/.local` path)
 ```
 > python3 setup.py install --user
 ```

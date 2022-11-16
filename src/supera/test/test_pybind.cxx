@@ -1,3 +1,4 @@
+#ifdef BUILD_PYTHON_BINDINGS
 
 #include "test_pybind.h"
 
@@ -23,3 +24,4 @@ void init_tests(pybind11::module& m)
   m.def("VerifyEventMeta", &supera::test::VerifyEventMeta, DOC(supera, test, VerifyEventMeta),
         "computedMeta"_a, "expectedMeta"_a);
 }
+#endif

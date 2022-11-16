@@ -16,18 +16,19 @@ add_subdirectory(base)
 add_subdirectory(data)
 add_subdirectory(algorithm)
 add_subdirectory(process)
-add_subdirectory(test)
+#add_subdirectory(test)
 
 add_library(supera SHARED
     $<TARGET_OBJECTS:base>
     $<TARGET_OBJECTS:data>
     $<TARGET_OBJECTS:algorithm>
     $<TARGET_OBJECTS:process>
-    $<TARGET_OBJECTS:test>
+#    $<TARGET_OBJECTS:test>
 )
 
 target_link_libraries(supera 
     ${PYTHON_LIBRARIES}
+    yaml-cpp
     #-L${LARCV_LIB_DIR} -llarcv3
     )
 
@@ -85,22 +86,23 @@ if(NOT WITHOUT_PYTHON)
     endif()
 endif()
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 ###########
 # Install
 ###########
-
 install(TARGETS supera
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+    LIBRARY DESTINATION supera/lib
+    ARCHIVE DESTINATION supera/lib
+    RUNTIME DESTINATION supera/bin
+    INCLUDES DESTINATION supera/include
     )
 
 if(NOT WITHOUT_PYTHON)
     install(TARGETS pysupera
-        LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}
-        )
+        LIBRARY DESTINATION supera
+        ARCHIVE DESTINATION supera
+        INCLUDES DESTINATION supera/include
+    )
 endif()
 
