@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include "supera/base/meatloaf.h"
 
 namespace supera {
 
@@ -12,18 +13,23 @@ namespace supera {
   {
     std::stringstream ss;
     std::stringstream buf;
-    ss  << "      \033[95m" << "Particle " << " (PdgCode,TrackID) = (" << pdg << "," << StringifyTrackID(trackid) << ")\033[00m "
-        << "... with Parent (" << parent_pdg << "," << StringifyTrackID(parent_trackid) << ")" << std::endl;
+    ss  << "      \033[95m" << "Particle " << " (PdgCode,TrackID) = (" << pdg << "," << StringifyTrackID(trackid) << ")\033[00m " << std::endl
+        << "      ... with Parent (" << parent_pdg << "," << StringifyTrackID(parent_trackid) << ")" << std::endl
+        << "      ... + Ancestor  (" << ancestor_pdg << "," << StringifyTrackID(ancestor_trackid) << ")" << std::endl;
+
     buf << "      ";
 
     ss << buf.str() << "Vertex   (x, y, z, t) = (" << vtx.pos.x << "," << vtx.pos.y << "," << vtx.pos.z << "," << vtx.time << ")" << std::endl
        << buf.str() << "Momentum (px, py, pz) = (" << px << "," << py << "," << pz << ")" << std::endl
-       << buf.str() << "Initial Energy  = " << energy_init << std::endl
+       << buf.str() << "Initial  Energy  = " << energy_init << std::endl
        << buf.str() << "Deposit  Energy  = " << energy_deposit << std::endl
        << buf.str() << "Creation Process = " << process << std::endl
-       << buf.str() << "Group ID = " << StringifyInstanceID(group_id) << std::endl
-       << buf.str() << "Shape = " << shape << std::endl;
-    ss << buf.str() << "Children =  ";
+       << buf.str() << "Instance ID      = " << StringifyInstanceID(id) << std::endl
+       << buf.str() << "Group ID         = " << StringifyInstanceID(group_id) << std::endl
+       << buf.str() << "Interaction ID   = " << StringifyInstanceID(interaction_id) << std::endl
+       << buf.str() << "Type     = " << type << std::endl
+       << buf.str() << "Shape    = " << shape << std::endl;
+    ss << buf.str() << "Children = ";
     for (const auto & child :  children_id)
       ss << " " << StringifyInstanceID(child);
     ss << std::endl;
@@ -148,7 +154,6 @@ namespace supera {
     }
 
     ss << instanceName << ".valid = " << valid << ";\n";
-    ss << instanceName << ".type = static_cast<supera::ProcessType>(" << type << ");\n";
 
     std::string partInstance = instanceName + "_particle";
     ss << part.dump2cpp(partInstance);
@@ -161,8 +166,7 @@ namespace supera {
 
   ParticleLabel::ParticleLabel()
   : valid(false)
-  , add_to_parent(false)
-  , type(supera::kInvalidProcess)
+  , merge_id(supera::kINVALID_TRACKID)
   {}
 
   void ParticleLabel::AddEDep(const EDep& pt)
@@ -190,13 +194,18 @@ namespace supera {
   }
 
   void ParticleLabel::Merge(ParticleLabel& child,bool verbose) {
-    std::cout << "Got here PL1"<<std::endl;
+    
+    if(!(this->valid)) {
+      std::cerr<<"Cannot merge into an invalid parent!" << std::endl;
+      std::cerr<<"Parent info..."<<std::endl<<this->dump()<<std::endl;
+      std::cerr<<"Child info..."<<std::endl<<child.dump()<<std::endl;
+      throw meatloaf();
+    }
+    
     for(auto const& vox : child.energy.as_vector())
       this->energy.emplace(vox.id(),vox.value(),true);
-    std::cout << "Got here PL2" << std::endl;
     for(auto const& vox : child.dedx.as_vector())
       this->dedx.emplace(vox.id(),vox.value(),true);
-    std::cout << "Got here PL3" << std::endl;
     if(verbose) {
       /*
       std::cout<<"Parent track id " << this->part.track_id() 
@@ -205,16 +214,11 @@ namespace supera {
       << " PDG " << child.part.pdg << " " << child.part.creation_process() << std::endl;
       */
     }
-    std::cout << "Got here PL4" << std::endl;
     this->AddEDep(child.last_pt);
-    std::cout << "Got here PL5" << std::endl;
     this->AddEDep(child.first_pt);
-    std::cout << "Got here PL6" << std::endl;
-    //this->trackid_v.push_back(child.part.track_id());
-
-    for(auto const& trackid : child.trackid_v)
-      this->trackid_v.push_back(trackid);
-    std::cout << "Got here PL7" << std::endl;
+    this->merged_v.push_back(child.part.trackid);
+    for(auto const& trackid : child.merged_v)
+      this->merged_v.push_back(trackid);
     /*
     for(size_t plane_id=0; plane_id < vs2d_v.size(); ++plane_id) {
       auto& vs2d = vs2d_v[plane_id];
@@ -225,25 +229,23 @@ namespace supera {
     }
     */
     child.energy.clear_data();
-    std::cout << "Got here PL8" << std::endl;
     child.dedx.clear_data();
-    std::cout << "Got here PL9" << std::endl;
-
     child.valid=false;
+    child.merge_id=this->part.trackid;
   }
 
   // semantic classification (supera::SemanticType_t)
   
+  /*
   supera::SemanticType_t ParticleLabel::shape() const
   {
 
-    // identify delta ray
     if(type == kInvalidProcess) return supera::kShapeUnknown;
     if(type == kDelta) return supera::kShapeDelta;
     if(type == kNeutron) //return supera::kShapeUnknown;
-    return supera::kShapeLEScatter;
+
     if(part.pdg == 11 || part.pdg == 22 || part.pdg == -11) {
-      if(type == kComptonHE || type == kPhoton || type == kPrimary || type == kConversion || type==kOtherShowerHE)
+      if(type == kCompton || type == kPhoton || type == kPrimary || type == kConversion || type==kOtherShower)
         return supera::kShapeShower;
       if(type == kDecay) {
         if(part.parent_pdg == 13 || part.parent_pdg == -13)
@@ -255,7 +257,7 @@ namespace supera {
     }else
     return supera::kShapeTrack;
   }
-
+*/
 
   std::string ParticleLabel::dump2cpp(const std::string &instanceName) const
   {
@@ -266,14 +268,10 @@ namespace supera {
     std::string partInstance = instanceName + "_part";
     ss << part.dump2cpp(partInstance);
     ss << instanceName << ".part = std::move(" << partInstance << ");\n";
-
     ss << instanceName << ".valid = " << valid << ";\n";
-    ss << instanceName << ".add_to_parent = " << add_to_parent << ";\n";
-    ss << instanceName << ".type = static_cast<supera::ProcessType>(" << type << ");\n";
-
-    ss << instanceName << ".trackid_v = { ";
-    for (std::size_t tkid : trackid_v)
-      ss << tkid << (tkid == trackid_v.back() ? "" : ", ");
+    ss << instanceName << ".merged_v = { ";
+    for (std::size_t tkid : merged_v)
+      ss << tkid << (tkid == merged_v.back() ? "" : ", ");
     ss << " };\n";
 
     std::string energyInstance = instanceName + "_energyVoxSet";
@@ -300,9 +298,7 @@ namespace supera {
     // ParticleLabels equivalent if all their data match...
     return (part == rhs.part) &&
            (valid == rhs.valid) &&
-           (add_to_parent == rhs.add_to_parent) &&
-           (type == rhs.type) &&
-           (trackid_v == rhs.trackid_v) &&
+           (merged_v == rhs.merged_v) &&
            (energy == rhs.energy) &&
            (dedx == rhs.dedx) &&
            (first_pt == rhs.first_pt) &&
@@ -315,20 +311,21 @@ namespace supera {
     std::stringstream st;
 
     st << "ParticleLabel object:\n";
-    st << "  valid = " << valid << "; add_to_parent = " << add_to_parent << "; type = " << type << "\n";
-    st << "  descendant trackIDs = ";
-    for (const TrackID_t tk : trackid_v)
+    st << "  valid = " << valid << "; \n";
+    st << "  num voxels: " << energy.size() << "\n";
+    st << "  merged into track ID: " << merge_id << "\n";
+    st << "  merged track IDs: ";
+    for (const TrackID_t tk : merged_v)
       st << tk << " ";
     st << "\n";
     st << "  Particle:\n";
     st << part.dump() << "\n";
-    st << "  num voxels: " << energy.size() << "\n";
 
     return st.str();
   }
 
   // --------------------------------------------------------
-
+  /*
   const supera::VoxelSet &EventOutput::VoxelDeDxs() const
   {
     // recompute only if particle list has changed under us
@@ -356,7 +353,7 @@ namespace supera {
 
     return _dEdXs;
   }
-
+  
   // --------------------------------------------------------
 
   const supera::VoxelSet &EventOutput::VoxelEnergies() const
@@ -374,7 +371,7 @@ namespace supera {
   }
 
   // --------------------------------------------------------
-
+  
   const supera::VoxelSet &
   EventOutput::VoxelLabels(const std::vector<supera::SemanticType_t> &semanticPriority) const
   {
@@ -385,7 +382,7 @@ namespace supera {
       for (const supera::ParticleLabel & part : Particles())
       {
         auto const &vs = part.energy;
-        SemanticType_t semantic = part.shape();
+        SemanticType_t semantic = part.part.shape;
         for (auto const &vox : vs.as_vector())
         {
           auto const &prev = semantics.find(vox.id());
@@ -406,7 +403,7 @@ namespace supera {
 
     return _semanticLabels;
   }
-
+*/
   // --------------------------------------------------------
 
   supera::SemanticType_t EventOutput::_SemanticPriority(supera::SemanticType_t a, supera::SemanticType_t b,
@@ -483,4 +480,76 @@ namespace supera {
 
     return ss.str();
   }
+
+  /// Helper function that generates a vector of vector of voxel id and value
+  void EventOutput::FillClustersEnergy(std::vector<std::vector<supera::VoxelID_t> >& ids,
+    std::vector<std::vector<float> >& values) const
+  {
+    ids.resize(_particles.size());
+    values.resize(_particles.size());
+
+    for(size_t i=0; i<_particles.size(); ++i) {
+      auto const& target = _particles[i].energy;
+      auto& id_v = ids[i];
+      auto& value_v = values[i];
+      id_v.clear();
+      value_v.clear();
+      id_v.reserve(target.size());
+      value_v.reserve(target.size());
+      for(auto const& vox : target.as_vector()) {
+        id_v.push_back(vox.id());
+        value_v.push_back(vox.value());
+      }
+    }
+  }
+
+  void EventOutput::FillClustersdEdX(std::vector<std::vector<supera::VoxelID_t> >& ids,
+    std::vector<std::vector<float> >& values) const
+  {
+    ids.resize(_particles.size());
+    values.resize(_particles.size());
+
+    for(size_t i=0; i<_particles.size(); ++i) {
+      auto const& target = _particles[i].dedx;
+      auto& id_v = ids[i];
+      auto& value_v = values[i];
+      id_v.clear();
+      value_v.clear();
+      id_v.reserve(target.size());
+      value_v.reserve(target.size());
+      for(auto const& vox : target.as_vector()) {
+        id_v.push_back(vox.id());
+        value_v.push_back(vox.value());
+      }
+    }
+  }
+
+  void EventOutput::FillTensorSemantic(std::vector<VoxelID_t>& ids,
+    std::vector<float>& values) const
+  {
+    ids.clear();
+    values.clear();
+    ids.reserve(_semanticLabels.size());
+    values.reserve(_semanticLabels.size());
+    for(auto const& vox : _semanticLabels.as_vector())
+    {
+      ids.push_back(vox.id());
+      values.push_back(vox.value());
+    }
+  }
+
+  void EventOutput::FillTensorEnergy(std::vector<VoxelID_t>& ids,
+    std::vector<float>& values) const
+  {
+    ids.clear();
+    values.clear();
+    ids.reserve(_energies.size());
+    values.reserve(_energies.size());
+    for(auto const& vox : _energies.as_vector())
+    {
+      ids.push_back(vox.id());
+      values.push_back(vox.value());
+    }
+  }
+
 } // namespace supera

@@ -36,27 +36,29 @@ namespace supera {
            a particular part of an imaging detector. For instance, you can use this to avoid sampling outside the detector \n
            volume where energy deposition may still happen and therefore the algorithm may recognize an "active region".
     */
-  class BBoxInteraction : public BBoxAlgorithm {
+   class BBoxInteraction : public BBoxAlgorithm {
+   public:
 
-  public:
+      /// Default constructor
+      BBoxInteraction(std::string name="BBoxInteraction") : BBoxAlgorithm(name) {}
 
-    /// Default constructor
-    BBoxInteraction() {}
+      ImageMeta3D Generate(const EventInput& data) const;
 
-    void Configure(const PSet& p);
+      /// Default destructor
+      ~BBoxInteraction() {}
 
-    ImageMeta3D Generate(const EventInput& data) const;
+      int bbox_bottom_set=false;
 
-    /// Default destructor
-    ~BBoxInteraction() {}
+   protected:
 
-    int bbox_bottom_set=false;
-  private:
-    double _xlen, _ylen, _zlen;
-    double _xvox, _yvox, _zvox;
-    supera::Point3D _world_min, _world_max, _bbox_bottom;
-    size_t _seed;
-  };
+      void _configure(const YAML::Node& p) override;
+
+   private:
+      double _xlen, _ylen, _zlen;
+      double _xvox, _yvox, _zvox;
+      supera::Point3D _world_min, _world_max, _bbox_bottom;
+      size_t _seed;
+   };
 
 
 }

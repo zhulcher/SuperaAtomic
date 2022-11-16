@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -O2 -g")
-
+set(CMAKE_LIBRARY_ARCHITECTURE x86_64)
 
 project(supera)
 
@@ -95,6 +95,17 @@ find_package(HDF5 REQUIRED)
 message("    Adding HDF5")
 message("    INCLUDE: " ${HDF5_INCLUDE_DIR})
 include_directories(${HDF5_INCLUDE_DIR})
+
+include(CMakePackageConfigHelpers)
+####################################
+# Add yaml
+####################################
+set(CMAKE_FIND_DEBUG_MODE TRUE)
+find_package( yaml-cpp CONFIG REQUIRED PATHS /usr/lib/x86_64-linux-gnu/cmake/yaml-cpp )
+set(CMAKE_FIND_DEBUG_MODE FALSE)
+message("    Adding Yaml")
+message("    INCLUDE: " ${YAML_CPP_INCLUDE_DIR})
+include_directories(${YAML_CPP_INCLUDE_DIR})
 
 ####################################
 # Add larcv

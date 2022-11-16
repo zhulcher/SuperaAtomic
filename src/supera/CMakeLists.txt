@@ -16,18 +16,19 @@ add_subdirectory(base)
 add_subdirectory(data)
 add_subdirectory(algorithm)
 add_subdirectory(process)
-add_subdirectory(test)
+#add_subdirectory(test)
 
 add_library(supera SHARED
     $<TARGET_OBJECTS:base>
     $<TARGET_OBJECTS:data>
     $<TARGET_OBJECTS:algorithm>
     $<TARGET_OBJECTS:process>
-    $<TARGET_OBJECTS:test>
+#    $<TARGET_OBJECTS:test>
 )
 
 target_link_libraries(supera 
     ${PYTHON_LIBRARIES}
+    yaml-cpp
     #-L${LARCV_LIB_DIR} -llarcv3
     )
 

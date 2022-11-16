@@ -5,6 +5,10 @@
 #include "supera/data/ImageMeta3D.h"
 #include "supera/algorithm/BBoxBase.h"
 #include "supera/algorithm/LabelBase.h"
+#include "supera/base/Configurable.h"
+#include "supera/base/Loggable.h"
+
+
 namespace supera {
 	
 	/**
@@ -14,16 +18,24 @@ namespace supera {
 		The former must inherit from BBoxAlgorithm (see algorithm/BBoxBase.h). The latter from LabelAlgorithm (see algorithm/LabelBase.h). \n
 		Calling a function to configure each of them will instantiate and configure the algorithm with provided parameter information (PSet). \n
 	*/
-	class Driver {
+	class Driver : public Loggable, public Configurable {
 	public:
 
-		Driver() : _algo_bbox(nullptr), _algo_label(nullptr) 
+		Driver(const std::string& name="Driver")
+		: Loggable(name)
+		, _algo_bbox(nullptr), _algo_label(nullptr) 
 		{}
+
+		virtual void Configure(const YAML::Node& cfg) override;
+
+	    std::string DumpConfig(const YAML::Node& cfg);
 
 		////////////////////////////////////
 		// Functions to configure algorithms
 		////////////////////////////////////
 
+    	//void ConfigureFromYAML(const std::string yaml_file);
+    	/*
 		/// Configure an algorithm for defining image boundaries.
 		void ConfigureBBoxAlgorithm(const std::string& name,
 			const std::map<std::string,std::string>& params);
@@ -31,7 +43,7 @@ namespace supera {
 		/// Configure an algorithm for creating labels
 		void ConfigureLabelAlgorithm(const std::string& name,
 			const std::map<std::string,std::string>& params);
-
+    	*/
 		/////////////////////////////////////////////////
 		// Per-image (per-event) process control functions
 		/////////////////////////////////////////////////
@@ -39,14 +51,13 @@ namespace supera {
 		/// 1st function to reset the state of an instance for processing a new event
 		void Reset() {_label = EventOutput(); _meta = ImageMeta3D(); }
 
-		/// 2nd function to generate image boundaries to be sampled
-		/*
-		This function is de-coupled from making labels because a user may need image boundaries
-		and pixel size/count information to prepare input data into voxels.
-		*/
+		/// 2nd function to generate meta and labels
+		void Generate(const EventInput& data);
+
+		/// Function to generate image boundaries to be sampled (called by Generate())
 		void GenerateImageMeta(const EventInput& data);
 
-		/// 3rd (and the main) function to execute algorithms and create output
+		/// Function to execute algorithms and create output (called by Generate())
 		void GenerateLabel(const EventInput& data);
 
 		///////////////////////////////
