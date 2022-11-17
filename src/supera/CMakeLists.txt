@@ -92,17 +92,25 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Install
 ###########
 install(TARGETS supera
-    LIBRARY DESTINATION supera/lib
-    ARCHIVE DESTINATION supera/lib
-    RUNTIME DESTINATION supera/bin
-    INCLUDES DESTINATION supera/include
+    #LIBRARY
+    #ARCHIVE DESTINATION ${CMAKE_PACKAGE_DIR}/lib
+    #RUNTIME DESTINATION ${CMAKE_PACKAGE_DIR}/bin
+    LIBRARY DESTINATION ${CMAKE_PACKAGE_DIR}/lib
+    ARCHIVE DESTINATION ${CMAKE_PACKAGE_DIR}/lib
+    RUNTIME DESTINATION ${CMAKE_PACKAGE_DIR}/bin
+    #INCLUDES DESTINATION supera/include
     )
 
 if(NOT WITHOUT_PYTHON)
     install(TARGETS pysupera
-        LIBRARY DESTINATION supera
-        ARCHIVE DESTINATION supera
-        INCLUDES DESTINATION supera/include
+        LIBRARY DESTINATION ${CMAKE_PACKAGE_DIR}/lib
+        ARCHIVE DESTINATION ${CMAKE_PACKAGE_DIR}/lib
+        #INCLUDES DESTINATION supera/include
     )
 endif()
 
+#get_cmake_property(_variableNames VARIABLES)
+#list (SORT _variableNames)
+#foreach (_variableName ${_variableNames})
+#    message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
