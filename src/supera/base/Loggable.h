@@ -32,17 +32,27 @@ namespace supera
         void SetLogConfig(msg::Level_t thresh)
         { LOG.set(thresh); }
 
+        inline const supera::Logger& GetLogger() const { return LOG; }
+/*
+        inline void verbose (const std::string& msg) 
+        { if( LOG.verbose() ) LOG.strm(::supera::msg::kVERBOSE, __FUNCTION__); }
+        inline void debug   (const std::string& msg) { LOG.strm();}
+        inline void info    (const std::string& msg) { LOG.strm();}
+        inline void warning (const std::string& msg) { LOG.strm();}
+        inline void error   (const std::string& msg) { LOG.strm();}
+*/
+
       protected:
         supera::Logger LOG;
     };
 
 }
 
-#define LOG_VERBOSE()  if( LOG.verbose () ) LOG.send(::supera::msg::kVERBOSE,  __FUNCTION__, __LINE__          )
-#define LOG_DEBUG()    if( LOG.debug   () ) LOG.send(::supera::msg::kDEBUG,    __FUNCTION__, __LINE__          )
-#define LOG_INFO()     if( LOG.info    () ) LOG.send(::supera::msg::kINFO,     __FUNCTION__                    )
-#define LOG_WARNING()  if( LOG.warning () ) LOG.send(::supera::msg::kWARNING,  __FUNCTION__                    )
-#define LOG_ERROR()    if( LOG.error   () ) LOG.send(::supera::msg::kERROR,    __FUNCTION__, __LINE__          )
-#define LOG_FATAL()                         LOG.send(::supera::msg::kFATAL,    __FUNCTION__, __LINE__, __FILE__)
+#define LOG_VERBOSE()  if( LOG.verbose () ) LOG.strm(::supera::msg::kVERBOSE,  __FUNCTION__, __LINE__          )
+#define LOG_DEBUG()    if( LOG.debug   () ) LOG.strm(::supera::msg::kDEBUG,    __FUNCTION__, __LINE__          )
+#define LOG_INFO()     if( LOG.info    () ) LOG.strm(::supera::msg::kINFO,     __FUNCTION__                    )
+#define LOG_WARNING()  if( LOG.warning () ) LOG.strm(::supera::msg::kWARNING,  __FUNCTION__                    )
+#define LOG_ERROR()    if( LOG.error   () ) LOG.strm(::supera::msg::kERROR,    __FUNCTION__, __LINE__          )
+#define LOG_FATAL()                         LOG.strm(::supera::msg::kFATAL,    __FUNCTION__, __LINE__, __FILE__)
 
 #endif //SUPERA_LOGGABLE_H

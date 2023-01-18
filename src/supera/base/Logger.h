@@ -113,16 +113,16 @@ namespace supera {
     inline bool warning () const { return _level <= msg::kWARNING; }
     inline bool error   () const { return _level <= msg::kERROR;   }
     /// Formatted message (simplest)
-    std::ostream& send(const msg::Level_t) const;
+    std::ostream& strm(const msg::Level_t) const;
     /// Formatted message (function name included)
-    std::ostream& send(const msg::Level_t level,
+    std::ostream& strm(const msg::Level_t level,
            const std::string& function ) const;
     /// Formatted message (function name + line number)
-    std::ostream& send(const msg::Level_t level,
+    std::ostream& strm(const msg::Level_t level,
            const std::string& function,
            const unsigned int line_num ) const;
     /// Formatted message (function name + line number + file name)
-    std::ostream& send(const msg::Level_t level,
+    std::ostream& strm(const msg::Level_t level,
            const std::string& function,
            const unsigned int line_num,
            const std::string& file_name) const;

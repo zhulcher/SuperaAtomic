@@ -11,7 +11,7 @@ namespace supera {
     std::map<std::string,Logger> *Logger::_logger_m = nullptr;
     msg::Level_t Logger::_level_default = msg::kINFO;
 
-    std::ostream& Logger::send(const msg::Level_t level) const
+    std::ostream& Logger::strm(const msg::Level_t level) const
     {
         __logger_mtx.lock();
         (*_ostrm)  << msg::kStringPrefix[level].c_str()
@@ -20,32 +20,32 @@ namespace supera {
         return (*_ostrm);
     }
 
-    std::ostream& Logger::send(const msg::Level_t level,
+    std::ostream& Logger::strm(const msg::Level_t level,
        const std::string& function ) const
     {
-        auto& strm(send(level));
-        strm << "\033[94m<" << _name << "::" << function.c_str() << ">\033[00m ";
-        return strm;
+        auto& os(strm(level));
+        os << "\033[94m<" << _name << "::" << function.c_str() << ">\033[00m ";
+        return os;
     }
 
-    std::ostream& Logger::send(const msg::Level_t level,
+    std::ostream& Logger::strm(const msg::Level_t level,
        const std::string& function,
        const unsigned int line_num ) const
     {
-        auto& strm(send(level));
-        strm << "\033[94m<" << _name << "::" << function.c_str() << "::L" << line_num << ">\033[00m ";
-        return strm;
+        auto& os(strm(level));
+        os << "\033[94m<" << _name << "::" << function.c_str() << "::L" << line_num << ">\033[00m ";
+        return os;
     }
 
-    std::ostream& Logger::send(const msg::Level_t level,
+    std::ostream& Logger::strm(const msg::Level_t level,
        const std::string& function,
        const unsigned int line_num,
        const std::string& file_name) const
     {
-        auto& strm(send(level,function));
+        auto& os(strm(level,function));
     // FIXME temporary operation to fetch file name from full path
-        strm << file_name.substr(file_name.rfind("/")+1,file_name.size()).c_str() << "::L" << line_num << " ";
-        return strm;
+        os << file_name.substr(file_name.rfind("/")+1,file_name.size()).c_str() << "::L" << line_num << " ";
+        return os;
     }
 
     Logger& Logger::get_shared()
