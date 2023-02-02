@@ -40,9 +40,9 @@ setup(
         'scikit-build',
         #'larcv',
     ],
-    extra_requires=[
-        'pybind11_mkdoc',  # used to extract Python library comments from the C++ Doxygen
-    ],
+    #extra_requires=[
+    #    'pybind11_mkdoc',  # used to extract Python library comments from the C++ Doxygen
+    #],
     long_description=long_description,
     long_description_content_type='text/markdown',
 )

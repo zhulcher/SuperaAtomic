@@ -30,7 +30,7 @@ target_link_libraries(supera
     ${PYTHON_LIBRARIES}
     yaml-cpp
     #-L${LARCV_LIB_DIR} -llarcv3
-    )
+  )
 
 if(NOT WITHOUT_PYTHON)
     ###############################
@@ -86,16 +86,15 @@ if(NOT WITHOUT_PYTHON)
     endif()
 endif()
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 ###########
 # Install
 ###########
 install(TARGETS supera
-    LIBRARY DESTINATION supera/lib
-    ARCHIVE DESTINATION supera/lib
-    RUNTIME DESTINATION supera/bin
-    INCLUDES DESTINATION supera/include
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION archive
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
     )
 
 if(NOT WITHOUT_PYTHON)
