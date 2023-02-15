@@ -7,6 +7,8 @@
 #include <set>
 #include <string>
 #include <sstream>
+#include <cmath>
+#include <cfloat>
 
 namespace supera {
 
@@ -198,6 +200,11 @@ namespace supera {
                     //result._dEdXs.emplace(input_dedx[i].id(),input_dedx[i].value(),true);
                     result._energies.emplace(input_energy[i].id(),input_energy[i].value(),true);
                     result._semanticLabels.emplace(input_energy[i].id(),(float)(stype),false);
+                    if(std::isnan(input_energy[i].value())) {
+                        LOG_ERROR() << "NAN found (HE)" << std::endl;
+                        LOG_ERROR() << label.dump() << std::endl;
+                        throw meatloaf();
+                    }
                 }
             }
             // If this is LEScatter type, and if _store_lescatter == false, make sure to add here
@@ -223,6 +230,11 @@ namespace supera {
                         //result._dEdXs.emplace(input_dedx[i].id(),input_dedx[i].value(),true);
                         result._energies.emplace(input_energy[i].id(),input_energy[i].value(),true);
                         result._semanticLabels.emplace(input_energy[i].id(),(float)(stype),false);
+                        if(std::isnan(input_energy[i].value())) {
+                            LOG_ERROR() << "NAN found (LE)" << std::endl;
+                            LOG_ERROR() << label.dump() << std::endl;
+                            throw meatloaf();
+                        }
                     }
                 }
             }
