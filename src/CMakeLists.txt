@@ -100,9 +100,9 @@ include(CMakePackageConfigHelpers)
 ####################################
 # Add yaml
 ####################################
-set(CMAKE_FIND_DEBUG_MODE TRUE)
+#set(CMAKE_FIND_DEBUG_MODE TRUE)
 find_package( yaml-cpp CONFIG REQUIRED PATHS /usr/lib/x86_64-linux-gnu/cmake/yaml-cpp )
-set(CMAKE_FIND_DEBUG_MODE FALSE)
+#set(CMAKE_FIND_DEBUG_MODE FALSE)
 message("    Adding Yaml")
 message("    INCLUDE: " ${YAML_CPP_INCLUDE_DIR})
 include_directories(${YAML_CPP_INCLUDE_DIR})

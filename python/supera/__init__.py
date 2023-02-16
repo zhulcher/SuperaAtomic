@@ -1,13 +1,33 @@
 try:
-	from . pysupera import *
-	from . pysupera import test as test
+    from . pysupera import *
+    from . pysupera import test as test
 except ModuleNotFoundError:
-	pass
+    pass
 import os
 
 def get_includes():
-	return os.path.dirname(__file__) + "/../include/"
+
+    # pip install
+    data=os.path.join(os.path.dirname(__file__),"../../../../include/")
+    if os.path.isdir(os.path.join(data,'supera')):
+        return data
+    # setup.py install
+    data=os.path.join(os.path.dirname(__file__),"../include/")
+    if os.path.isdir(os.path.join(data,'supera')):
+        return data
+    print('supera include path could not be located...')
+    raise FileNotFoundError
 
 def get_lib_dir():
-	return os.path.dirname(__file__) + "/lib/"
+    # pip install
+    data=os.path.join(os.path.dirname(__file__),"../../../")
+    if os.path.isfile(os.path.join(data,'libsupera.so')):
+        return data
+    # setup.py install
+    data=os.path.join(os.path.dirname(__file__),"../lib")
+    if os.path.isfile(os.path.join(data,'libsupera.so')):
+        return data
+    print('supera include path could not be located...')
+    raise FileNotFoundError 
+
 
