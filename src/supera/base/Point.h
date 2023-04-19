@@ -53,6 +53,8 @@ namespace supera{
     { return Point3D(x/rhs,y/rhs,z/rhs); }
     inline Point3D operator* (const double rhs) const
     { return Point3D(x*rhs,y*rhs,z*rhs); }
+    inline double  operator* (const Point3D& rhs) const
+    { return x*rhs.x + y*rhs.y + z*rhs.z; }
     inline Point3D operator+ (const Point3D& rhs) const
     { return Point3D(x+rhs.x,y+rhs.y,z+rhs.z); }
     inline Point3D operator- (const Point3D& rhs) const
@@ -63,10 +65,14 @@ namespace supera{
     inline double distance(const Point3D& pt) const
     { return sqrt(squared_distance(pt)); }
     inline Point3D direction(const Point3D& pt) const
-    { Point3D res(pt.x - x, pt.y - y, pt.z - z); res /= distance(pt); return res; }
+    { Point3D res(pt.x - x, pt.y - y, pt.z - z); return res; }
 
   };
 
+  /**
+   \class Line3D 
+   Simple 3D line struct that contains start and end
+  */
 
   /**
      \class EDep

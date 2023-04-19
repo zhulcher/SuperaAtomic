@@ -169,11 +169,36 @@ namespace supera {
   , merge_id(supera::kINVALID_TRACKID)
   {}
 
-  void ParticleLabel::AddEDep(const EDep& pt)
+  void ParticleLabel::UpdateFirstPoint(const EDep& pt)
   { 
     if(pt.x == supera::kINVALID_DOUBLE) return; 
-    if(pt.t < first_pt.t) first_pt = pt; 
-    if(pt.t > last_pt.t) last_pt = pt;
+    if(pt.t < first_pt.t || first_pt.t == supera::kINVALID_DOUBLE ) 
+      { 
+        /*
+        std::cout << "Updating track " << part.trackid << " first pt " << first_pt.t << " => " << pt.t << std::endl;
+        std::cout << "    " << first_pt.x << "," << first_pt.y << "," << first_pt.z 
+        << " => "
+        << pt.x << "," << pt.y << "," << pt.z 
+        << std::endl;
+        */
+        first_pt = pt; 
+      } 
+  }
+
+  void ParticleLabel::UpdateLastPoint(const EDep& pt)
+  { 
+    if(pt.x == supera::kINVALID_DOUBLE) return; 
+    if(pt.t > last_pt.t  || last_pt.t  == supera::kINVALID_DOUBLE ) 
+      { 
+        /*
+        std::cout << "Updating track " << part.trackid << " last  pt " << last_pt.t << " => " << pt.t << std::endl;
+        std::cout << "    " << last_pt.x << "," << last_pt.y << "," << last_pt.z 
+        << " => "
+        << pt.x << "," << pt.y << "," << pt.z 
+        << std::endl;
+        */
+        last_pt  = pt; 
+      }
   }
 
   void ParticleLabel::SizeCheck() const
@@ -194,7 +219,7 @@ namespace supera {
   }
 
   void ParticleLabel::Merge(ParticleLabel& child,bool verbose) {
-    
+    //std::cout<<"Merging child track " << child.part.trackid << " into parent track " << part.trackid << std::endl;
     if(!(this->valid)) {
       std::cerr<<"Cannot merge into an invalid parent!" << std::endl;
       std::cerr<<"Parent info..."<<std::endl<<this->dump()<<std::endl;
@@ -214,8 +239,11 @@ namespace supera {
       << " PDG " << child.part.pdg << " " << child.part.creation_process() << std::endl;
       */
     }
-    this->AddEDep(child.last_pt);
-    this->AddEDep(child.first_pt);
+    this->UpdateFirstPoint(child.first_pt);
+    if(child.part.shape == kShapeTrack) {
+      //std::cout<<child.dump2cpp()<<std::endl;
+      this->UpdateLastPoint(child.last_pt);
+    }
     this->merged_v.push_back(child.part.trackid);
     for(auto const& trackid : child.merged_v)
       this->merged_v.push_back(trackid);

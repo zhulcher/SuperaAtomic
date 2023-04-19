@@ -160,7 +160,8 @@ namespace supera {
     bool operator==(const ParticleLabel & rhs) const;
     bool operator!=(const ParticleLabel & rhs) const { return !(*this == rhs); }
 
-    void AddEDep(const EDep& pt);
+    void UpdateFirstPoint(const EDep& pt);
+    void UpdateLastPoint(const EDep& pt);
     void SizeCheck() const;
     size_t Size() const;
     void Merge(ParticleLabel& child,bool verbose=false);
