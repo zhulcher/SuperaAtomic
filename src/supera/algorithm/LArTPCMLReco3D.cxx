@@ -119,11 +119,13 @@ namespace supera {
         this->MergeShowerTouchingElectron(meta, labels); // merge larcv::kShapeLEScatter to touching shower
         // Apply energy threshold (may drop some pixels)
         this->ApplyEnergyThreshold(labels);
-        this->SetSemanticType(labels); 
+        this->SetSemanticType(labels);
+        
         this->MergeShowerConversion(labels); // merge supera::kConversion a photon merged to a parent photon
         this->MergeShowerFamilyTouching(meta, labels); // merge supera::kShapeShower to touching parent shower/delta/michel
         this->MergeShowerTouching(meta, labels); // merge supera::kShapeShower to touching shower in the same family tree
         this->MergeShowerTouchingLEScatter(meta,labels);
+        
         // ** TODO consider this separate from MergeShowerIonizations?? **
         this->MergeDeltas(labels); // merge supera::kDelta to a parent if too small
 
@@ -693,6 +695,7 @@ namespace supera {
 
     // ------------------------------------------------------
 
+    /*
     void LArTPCMLReco3D::FixFirstStepInfo(std::vector<supera::ParticleLabel> &inputLabels,
                                           const supera::ImageMeta3D &meta,
                                           const std::vector<TrackID_t> &output2trackid)
@@ -722,7 +725,7 @@ namespace supera {
 
         }
     } // LArTPCMLReco3D::FixFirstStepInfo()
-
+    */
 
     std::vector<supera::ParticleLabel>
     LArTPCMLReco3D::InitializeLabels(const EventInput &evtInput, const supera::ImageMeta3D &meta) const
@@ -753,7 +756,8 @@ namespace supera {
 
                 label.energy.emplace (vox_id, edep.e,    true);
                 label.dedx.emplace   (vox_id, edep.dedx, true);
-                label.AddEDep(edep);
+                label.UpdateFirstPoint(edep);
+                label.UpdateLastPoint(edep);
             }
 
             LOG_VERBOSE() << label.dump() << "\n";

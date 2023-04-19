@@ -69,10 +69,12 @@ namespace supera {
         // -----  internal group-sanitizing methods -----
         /// The first step of the true trajectory is important, and sometimes winds up unset.
         /// If so, clean it up using the first voxel attached to the label group.
+        /*
         static void FixFirstStepInfo(std::vector<supera::ParticleLabel> &inputLabels,
                                      const supera::ImageMeta3D &meta,
                                      const std::vector<TrackID_t> &output2trackid);
-
+	    */
+	    
         // -----  utility methods -----
         /// filter out any voxels voxels that have energy below the given threshold
         void ApplyEnergyThreshold(std::vector<supera::ParticleLabel>& labels) const;
