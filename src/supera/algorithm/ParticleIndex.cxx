@@ -122,11 +122,12 @@ namespace supera{
   const std::vector< TrackID_t >& 
   ParticleIndex::ParentTrackIdArray(const TrackID_t trackid) const
   {
-    if(trackid >= _parent_history_v.size()) {
+    if(trackid >= _trackid2index.size()) {
       LOG_ERROR() << "Track ID " << trackid << " is not valid. Returning an empty list.\n";
       return _empty_trackid_v;
     }
-    return _parent_history_v[trackid];
+    auto const& index = _trackid2index[trackid];
+    return _parent_history_v[index];
   }
 
 
