@@ -122,11 +122,27 @@ namespace supera{
   const std::vector< TrackID_t >& 
   ParticleIndex::ParentTrackIdArray(const TrackID_t trackid) const
   {
-    if(trackid >= _parent_history_v.size()) {
-      LOG_ERROR() << "Track ID " << trackid << " is not valid. Returning an empty list.\n";
+    if(trackid >= _trackid2index.size()) {
+      TrackID_t min_tid, max_tid;
+      for(size_t tid=0; tid<_trackid2index.size(); ++tid) {
+        if(_trackid2index[tid] != supera::kINVALID_INDEX) {
+          min_tid = tid;
+          break;
+        }
+      }
+      for(int tid=(_trackid2index.size()-1); tid >=0; --tid) {
+        if(_trackid2index[tid] != supera::kINVALID_INDEX) {
+          max_tid = tid;
+          break;
+        }
+      }
+      LOG_ERROR() << "Track ID " << trackid << " is not valid. "
+      << "Registered range " << min_tid << " => " << max_tid 
+      << " ... Returning an empty list.\n";
       return _empty_trackid_v;
     }
-    return _parent_history_v[trackid];
+    auto const& index = _trackid2index[trackid];
+    return _parent_history_v[index];
   }
 
 

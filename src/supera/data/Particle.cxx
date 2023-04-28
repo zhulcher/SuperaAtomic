@@ -231,15 +231,16 @@ namespace supera {
       this->energy.emplace(vox.id(),vox.value(),true);
     for(auto const& vox : child.dedx.as_vector())
       this->dedx.emplace(vox.id(),vox.value(),true);
+    
     if(verbose) {
-      /*
-      std::cout<<"Parent track id " << this->part.track_id() 
-      << " PDG " << this->part.pdg << " " << this->part.creation_process() << std::endl
-      << "  ... merging " << child.part.track_id()
-      << " PDG " << child.part.pdg << " " << child.part.creation_process() << std::endl;
-      */
+      std::cout<<"Parent track id " << this->part.trackid
+      << " PDG " << this->part.pdg << " proc " << this->part.process << " shape " << this->part.shape << std::endl
+      << "  ... merging " << child.part.trackid
+      << " PDG " << child.part.pdg << " proc " << child.part.process << " shape " << child.part.shape << std::endl;
     }
-    this->UpdateFirstPoint(child.first_pt);
+
+    if(child.part.shape == kShapeTrack || child.part.shape == kShapeShower)
+      this->UpdateFirstPoint(child.first_pt);
     if(child.part.shape == kShapeTrack) {
       //std::cout<<child.dump2cpp()<<std::endl;
       this->UpdateLastPoint(child.last_pt);
