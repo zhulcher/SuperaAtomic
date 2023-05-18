@@ -512,7 +512,8 @@ namespace supera {
 
   /// Helper function that generates a vector of vector of voxel id and value
   void EventOutput::FillClustersEnergy(std::vector<std::vector<supera::VoxelID_t> >& ids,
-    std::vector<std::vector<float> >& values) const
+    std::vector<std::vector<float> >& values,
+    bool fill_unassociated) const
   {
     ids.resize(_particles.size());
     values.resize(_particles.size());
@@ -530,10 +531,25 @@ namespace supera {
         value_v.push_back(vox.value());
       }
     }
+
+    if(fill_unassociated) {
+      auto const& unass = _unassociated_voxels.as_vector();
+      std::vector<supera::VoxelID_t> id_v;
+      std::vector<float> value_v;
+      id_v.resize(unass.size());
+      value_v.resize(unass.size());
+      for(size_t i=0; i<unass.size(); ++i){
+        id_v[i] = unass[i].id();
+        value_v[i] = unass[i].value();
+      }
+      ids.push_back(id_v);
+      values.push_back(value_v);
+    }
   }
 
   void EventOutput::FillClustersdEdX(std::vector<std::vector<supera::VoxelID_t> >& ids,
-    std::vector<std::vector<float> >& values) const
+    std::vector<std::vector<float> >& values,
+    bool fill_unassociated) const
   {
     ids.resize(_particles.size());
     values.resize(_particles.size());
@@ -550,6 +566,17 @@ namespace supera {
         id_v.push_back(vox.id());
         value_v.push_back(vox.value());
       }
+    }
+    if(fill_unassociated) {
+      auto const& unass = _unassociated_voxels.as_vector();
+      std::vector<supera::VoxelID_t> id_v;
+      std::vector<float> value_v;
+      id_v.resize(unass.size());
+      value_v.resize(unass.size(),0.);
+      for(size_t i=0; i<unass.size(); ++i)
+        id_v[i] = unass[i].id();
+      ids.push_back(id_v);
+      values.push_back(value_v);
     }
   }
 

@@ -154,6 +154,14 @@ namespace supera {
 
         this->SetInteractionID(labels);
 
+        // Convert unassociated energy depositions into voxel set 
+        supera::VoxelSet unass;
+        unass.reserve(data.unassociated_edeps.size());
+        for(auto const& edep : data.unassociated_edeps){
+            auto vox_id = meta.id(edep);
+            unass.emplace(vox_id, edep.e, true);
+        }
+
         // We're finally to fill in the output container.
         // There are two things we need:
         //  (1) labels for each voxel (what semantic type is each one?)
@@ -162,7 +170,7 @@ namespace supera {
         // each of which has voxels attached to it, so that covers both things.
         // EventOutput computes VoxelSets with the sum across all particles
         // for voxel energies and semantic labels
-        this->BuildOutputLabels(labels,result,output2trackid);
+        this->BuildOutputLabels(labels,result,output2trackid,unass);
 
         return result;
     }
@@ -171,7 +179,8 @@ namespace supera {
 
     void LArTPCMLReco3D::BuildOutputLabels(std::vector<supera::ParticleLabel>& labels,
         supera::EventOutput& result, 
-        const std::vector<TrackID_t>& output2trackid) const
+        const std::vector<TrackID_t>& output2trackid,
+        const supera::VoxelSet& unass) const
     {
         LOG_DEBUG() << "starting" << std::endl;
         // Build the outupt
@@ -181,6 +190,14 @@ namespace supera {
             auto index = this->InputIndex(trackid);
             output_particles.emplace_back(std::move(labels[index]));
             labels[index].valid=false;
+        }
+
+        // Fill the energy and semantic label tensor for unassociated 3D points
+        result._energies.reserve(unass.size());
+        result._semanticLabels.reserve(unass.size());
+        for(auto const& vox : unass.as_vector()) {
+            result._energies.emplace(vox.id(),vox.value(),true);
+            result._semanticLabels.emplace(vox.id(),supera::kShapeGhost,false);
         }
 
         // Semantic label
@@ -243,7 +260,7 @@ namespace supera {
         }
 
         result = std::move(output_particles);
-
+        result._unassociated_voxels = unass;
     }
 
     // --------------------------------------------------------------------

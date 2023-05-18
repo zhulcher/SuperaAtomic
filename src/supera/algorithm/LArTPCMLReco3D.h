@@ -27,7 +27,8 @@ namespace supera {
 
 	    void BuildOutputLabels(std::vector<supera::ParticleLabel>& labels,
 	        supera::EventOutput& result, 
-	        const std::vector<TrackID_t>& output2trackid) const;
+	        const std::vector<TrackID_t>& output2trackid,
+	        const supera::VoxelSet& unassociated_voxels) const;
 
         // ----- internal label merging methods -----
         /// Merge deltas into their parents if they have fewer than threshold voxels

@@ -15,6 +15,7 @@
 
 #include "supera/base/SuperaType.h"
 #include "supera/base/BBox.h"
+#include "supera/base/Voxel.h"
 #include <array>
 
 namespace supera {
@@ -107,6 +108,9 @@ namespace supera {
     size_t id_to_z_index(VoxelID_t id) const;
     // Find xyz index that corresponds to a specified index
     void id_to_xyz_index(VoxelID_t id, size_t& x, size_t& y, size_t& z) const;
+
+    // Utility function to convert a vector of EDep to VoxelSet
+    VoxelSet edep2voxelset(const std::vector<supera::EDep> edeps) const;
 
   private:
 
