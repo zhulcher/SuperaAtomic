@@ -194,7 +194,8 @@ namespace supera {
     std::string dump2cpp(const std::string & instanceName="voxSet") const;
 
     // Fill std::vector arrays with ID and value
-    void fill_std_vectors(std::vector<supera::VoxelID_t>& id_v,std::vector<float>& value_v) const;
+    void fill_std_vectors(std::vector<unsigned long>& id_v,
+      std::vector<float>& value_v) const;
 
   private:
     /// Instance ID
