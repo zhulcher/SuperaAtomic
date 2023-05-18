@@ -211,6 +211,18 @@ namespace supera {
 
   }
 
+
+  VoxelSet ImageMeta3D::edep2voxelset(const std::vector<supera::EDep> edeps) const
+  {
+    VoxelSet result;
+    result.reserve(edeps.size());
+    for(auto const& edep : edeps){
+      auto vox_id = this->id(edep.x,edep.y,edep.z);
+      result.emplace(vox_id, edep.e, true);
+    }
+    return result;
+  }
+
 };
 
 #endif

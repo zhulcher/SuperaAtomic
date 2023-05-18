@@ -216,6 +216,18 @@ namespace supera {
     return ss.str();
   }
 
+
+  void VoxelSet::fill_std_vectors(std::vector<supera::VoxelID_t>& id_v,std::vector<float>& value_v) const
+  {
+    id_v.resize(this->size());
+    value_v.resize(this->size());
+    for(size_t i=0; i<this->size(); ++i) {
+      id_v.push_back(_voxel_v[i].id());
+      value_v.push_back(_voxel_v[i].value());
+    }
+  }
+
+
   //
   // VoxelSetArray
   //

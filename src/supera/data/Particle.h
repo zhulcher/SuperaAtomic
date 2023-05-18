@@ -142,12 +142,16 @@ namespace supera {
 
     std::string dump2cpp(const std::string & instanceName = "partInput") const;
 
-    supera::Particle part;         ///< a particle information
-    std::vector<EDep> pcloud;      ///< 3D energy deposition information (raw info)
+    supera::Particle part;    ///< a particle information
+    std::vector<EDep> pcloud; ///< 3D energy deposition information per particle
     bool valid;
   };
 
-  typedef std::vector<ParticleInput> EventInput;
+  class EventInput : public std::vector<ParticleInput> {
+  public:
+    /// 3D energy depositions unassociated to any input particle
+    std::vector<EDep> unassociated_edeps;
+  };
 
   class ParticleLabel {
   public:
@@ -227,10 +231,12 @@ namespace supera {
 
       /// Helper function that generates a vector of vector of voxel id and value
       void FillClustersEnergy(std::vector<std::vector<supera::VoxelID_t> >& ids,
-        std::vector<std::vector<float> >& values) const;
+        std::vector<std::vector<float> >& values,
+        bool fill_unassociated=true) const;
 
       void FillClustersdEdX(std::vector<std::vector<supera::VoxelID_t> >& ids,
-        std::vector<std::vector<float> >& values) const;
+        std::vector<std::vector<float> >& values,
+        bool fill_unassociated=true) const;
 
       void FillTensorSemantic(std::vector<VoxelID_t>& ids,
         std::vector<float>& values) const;
@@ -243,7 +249,7 @@ namespace supera {
       mutable supera::VoxelSet _energies;       ///< the total energy deposits in each voxel over all the contained particles contributing to the voxel
       //mutable supera::VoxelSet _dEdXs;          ///< the dE/dxs for each voxel taken as an energy-weighted mean over all the contained particles contributing to the voxel
       mutable supera::VoxelSet _semanticLabels; ///< semantic labels for each energy deposit, determined by \ref SemanticPriority()
-
+      mutable supera::VoxelSet _unassociated_voxels; ///< 3D voxels that is a subset of _energies and _semanticLabels but has no associated particle.
       mutable std::array<bool, sizeof(DIRTY_FLAG)> _dirty = {};  ///< flag to signal when the internal sum fields need to be recalculated
   };
 
