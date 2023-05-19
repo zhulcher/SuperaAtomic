@@ -156,10 +156,19 @@ namespace supera {
 
         // Convert unassociated energy depositions into voxel set 
         supera::VoxelSet unass;
+        size_t invalid_unass_ctr=0;
         unass.reserve(data.unassociated_edeps.size());
         for(auto const& edep : data.unassociated_edeps){
             auto vox_id = meta.id(edep);
+            if(vox_id == supera::kINVALID_VOXELID) {
+                invalid_unass_ctr++;
+                continue;
+            }
             unass.emplace(vox_id, edep.e, true);
+        }
+        if(invalid_unass_ctr){
+            LOG_WARNING() << invalid_unass_ctr << "/" << data.unassociated_edeps.size()
+            << " unassociated packets are ignored (outside BBox)" << std::endl;
         }
 
         // We're finally to fill in the output container.
