@@ -218,6 +218,8 @@ namespace supera {
     result.reserve(edeps.size());
     for(auto const& edep : edeps){
       auto vox_id = this->id(edep.x,edep.y,edep.z);
+      if(vox_id == supera::kINVALID_VOXELID)
+        continue;
       result.emplace(vox_id, edep.e, true);
     }
     return result;
