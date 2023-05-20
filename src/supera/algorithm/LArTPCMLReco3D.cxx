@@ -206,7 +206,7 @@ namespace supera {
         result._semanticLabels.reserve(unass.size());
         for(auto const& vox : unass.as_vector()) {
             result._energies.emplace(vox.id(),vox.value(),true);
-            result._semanticLabels.emplace(vox.id(),supera::kShapeGhost,false);
+            result._semanticLabels.emplace(vox.id(),supera::kShapeLEScatter,false);
         }
 
         // Semantic label
