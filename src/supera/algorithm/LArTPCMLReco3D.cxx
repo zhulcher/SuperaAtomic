@@ -69,7 +69,7 @@ namespace supera {
         for(auto const& type : order) {
             if(type >= supera::kShapeUnknown) {
                 LOG_FATAL() << "SemanticPriority received an unsupported semantic type " << type << "\n";
-                throw meatloaf();
+                throw meatloaf(std::to_string(__LINE__));
             }
             bool ignore = false;
             for(auto const& used : result) {
@@ -78,7 +78,7 @@ namespace supera {
             }
             if(ignore) {
                 LOG_FATAL() << "Duplicate SemanticPriority received for type " << type << "\n";
-                throw meatloaf();
+                throw meatloaf(std::to_string(__LINE__));
             }
             result.push_back(type);
             assigned[type]=true;
@@ -92,7 +92,7 @@ namespace supera {
         }
         if(result.size() != (size_t)(kShapeUnknown)) {
             LOG_FATAL() << "Logic error!\n";
-            throw meatloaf();
+            throw meatloaf(std::to_string(__LINE__));
         }
         order = result;
     }
@@ -245,7 +245,7 @@ namespace supera {
                     if(label.part.shape != supera::kShapeUnknown) {
                         LOG_FATAL() << "Unexpected (logic error): valid particle remaining that is not kShapeUnknown shape...\n"
                         << label.dump() << "\n";
-                        throw meatloaf();
+                        throw meatloaf(std::to_string(__LINE__));
                     }
                     // Contribute to the output
                     assert(label.energy.size() == label.dedx.size());
@@ -314,7 +314,7 @@ namespace supera {
                     case kShapeDelta:
                         if(parent_index == kINVALID_INDEX || !labels[parent_index].valid) {
                             LOG_FATAL() << "Delta ray with an invalid parent is not allowed!\n";
-                            throw meatloaf();
+                            throw meatloaf(std::to_string(__LINE__));
                         }
                         part.group_id = labels[parent_index].part.id;
                         break;
@@ -343,7 +343,7 @@ namespace supera {
 
                     default:
                         LOG_FATAL() << " Unexpected shape type " << part.shape << "\n";
-                        throw meatloaf();
+                        throw meatloaf(std::to_string(__LINE__));
                         break;
                 }
             }
@@ -372,13 +372,13 @@ namespace supera {
             if(!parent_trackid_v.empty() && parent_trackid_v.front() != parent_trackid) {
                 LOG_FATAL() << "Logic error: the parent track ID " << parent_trackid
                 << " != the first in the ancestory track IDs " << parent_trackid_v.front() << "\n";
-                throw meatloaf();
+                throw meatloaf(std::to_string(__LINE__));
             }
 
             if(!parent_trackid_v.empty() && parent_trackid_v.back() != ancestor_trackid) {
                 LOG_FATAL() << "Logic error: the ancestor track ID " << ancestor_trackid
                 << " != the most distant parent ID " << parent_trackid_v.back() << "\n";
-                throw meatloaf();
+                throw meatloaf(std::to_string(__LINE__));
             }
 
             // Now parent_trackid must be filled unless the input data was insufficient
@@ -386,7 +386,7 @@ namespace supera {
                 LOG_FATAL() << "Parent track ID missing for a particle track ID " 
                 << label.part.trackid << "\n"
                 << "Check the input data and make sure all particles have a parent track ID\n";
-                throw meatloaf();
+                throw meatloaf(std::to_string(__LINE__));
             }
 
             // If ancestor_trackid is invalid, set it to the parent.
@@ -471,7 +471,7 @@ namespace supera {
                     continue;
                 if (dedx_vec[idx].id() != vox.id()) {
                     LOG_FATAL() << "Unmatched voxel ID between dE/dX and energy voxels \n";
-                    throw meatloaf();
+                    throw meatloaf(std::to_string(__LINE__));
                 }
                 energies.emplace (vox.id(), vox.value(),           true);
                 dEdXs.emplace    (vox.id(), dedx_vec[idx].value(), true);
@@ -491,7 +491,7 @@ namespace supera {
             switch(label.part.type) {
                 case kInvalidProcess:
                 label.part.shape = supera::kShapeUnknown;
-                throw meatloaf();
+                throw meatloaf("'kInvalidProcess' particle process encountered:\n" + label.dump());
 
                 case kTrack:
                 label.part.shape = supera::kShapeTrack;
@@ -612,7 +612,7 @@ namespace supera {
             if (inputLabel.part.shape == supera::kShapeUnknown) {
                 LOG_FATAL()   << "   --> ShapeUnknown found and unexpected!\n"
                 << inputLabel.dump() << "\n";
-                throw meatloaf();
+                throw meatloaf(std::to_string(__LINE__));
             }
 
             auto &part = inputLabel.part;
@@ -811,7 +811,7 @@ namespace supera {
                 if (label.part.type != supera::kConversion) continue;
                 if (std::abs(label.part.pdg) != 11) {
                     LOG_FATAL() << "Unexpected: type kConversion for a particle that is not electron!\n";
-                    throw meatloaf();
+                    throw meatloaf(std::to_string(__LINE__));
                 }
 
                 auto const& parent_trackid_v = _mcpl.ParentTrackIdArray(label.part.trackid);
