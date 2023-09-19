@@ -17,6 +17,8 @@
 #include "supera/algorithm/AlgorithmBase.h"
 
 namespace supera {
+    class EventInput;
+
     /**
      \class ParticleIndex
      \brief Workhorse class encapsulating the logic for tying together a list of GEANT4 particles and their genealogy information

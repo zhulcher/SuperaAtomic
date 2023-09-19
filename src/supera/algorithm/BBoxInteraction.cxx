@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include "BBoxInteraction.h"
+#include "supera/data/Event.h"
 
 namespace supera {
 

@@ -1,6 +1,7 @@
 #ifndef __SUPERA_DRIVER_H__
 #define __SUPERA_DRIVER_H__
 
+#include "supera/data/Event.h"
 #include "supera/data/Particle.h"
 #include "supera/data/ImageMeta3D.h"
 #include "supera/algorithm/BBoxBase.h"
@@ -10,7 +11,7 @@
 
 
 namespace supera {
-	
+
 	/**
     	\class Driver
     	The top-level (i.e. "main") function of Supera that takes input data, execute algorithms, and return output. \n

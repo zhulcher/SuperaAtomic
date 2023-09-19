@@ -2,11 +2,11 @@
 #define __LABELALGORITHM_H__
 
 #include "supera/algorithm/AlgorithmBase.h"
-#include "supera/data/Particle.h"
+#include "supera/data/Event.h"
 #include "supera/data/ImageMeta3D.h"
+#include "supera/data/Particle.h"
 
 namespace supera {
-
 	/**
 		\class LabelAlgorithm
 		The base class definition for algorithms that are responsible for creating output tensor information.

@@ -3,6 +3,7 @@
 
 #include "ParticleIndex.h"
 #include "supera/base/meatloaf.h"
+#include "supera/data/Event.h"
 
 namespace supera{ 
 

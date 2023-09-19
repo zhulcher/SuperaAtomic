@@ -7,8 +7,10 @@
 
 #include "supera/pybind_mkdoc.h"
 
+#include "Event.h"
 #include "ImageMeta3D.h"
 #include "Particle.h"
+#include "TriggerMeta.h"
 
 void init_data(pybind11::module& m)
 {
