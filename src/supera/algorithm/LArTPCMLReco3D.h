@@ -118,6 +118,7 @@ namespace supera {
         size_t _compton_size;
         double _edep_threshold;
         bool _store_lescatter;
+        bool _rewrite_interactionid;
         BBox3D _world_bounds;
         ParticleIndex _mcpl;
 	};

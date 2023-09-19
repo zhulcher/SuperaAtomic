@@ -49,6 +49,10 @@ namespace supera {
         if(cfg["StoreLEScatter"])
             _store_lescatter = cfg["StoreLEScatter"].as<bool>();
 
+        _rewrite_interactionid = true;
+        if(cfg["RewriteInteractionID"])
+            _rewrite_interactionid = cfg["RewriteInteractionID"].as<bool>();
+
         std::vector<double> min_coords(3,std::numeric_limits<double>::lowest());
         std::vector<double> max_coords(3,std::numeric_limits<double>::max());
         if(cfg["WorldBoundMin"])
@@ -152,7 +156,10 @@ namespace supera {
 
         this->SetAncestorAttributes(labels);
 
-        this->SetInteractionID(labels);
+        // maybe the user has already set these upstream
+        // (like in DUNE ND-LAr case)
+        if (_rewrite_interactionid)
+          this->SetInteractionID(labels);
 
         // Convert unassociated energy depositions into voxel set 
         supera::VoxelSet unass;
