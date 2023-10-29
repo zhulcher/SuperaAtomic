@@ -8,6 +8,8 @@
 
 namespace supera {
 
+  class EventInput;
+
 	/**
 		\class BBoxAlgorithm
 		The base class definition for algorithms that are responsible for defining image meta data.
