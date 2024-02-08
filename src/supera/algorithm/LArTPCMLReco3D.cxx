@@ -14,7 +14,7 @@ namespace supera {
 
     LArTPCMLReco3D::LArTPCMLReco3D(std::string name)
     : LabelAlgorithm(name)
-    , _debug(0)
+    // , _debug(0)
     {}
 
     // --------------------------------------------------------------------
