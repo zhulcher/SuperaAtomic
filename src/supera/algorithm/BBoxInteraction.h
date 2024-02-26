@@ -42,7 +42,7 @@ namespace supera {
       /// Default constructor
       BBoxInteraction(std::string name="BBoxInteraction") : BBoxAlgorithm(name) {}
 
-      ImageMeta3D Generate(const EventInput& data) const;
+      ImageMeta3D Generate(const EventInput &data) const override;
 
       /// Default destructor
       ~BBoxInteraction() {}

@@ -110,7 +110,7 @@ namespace supera {
         //std::vector<supera::TrackID_t> ParentTrackIDs(size_t trackid) const;
 
 
-        size_t _debug;
+        // size_t _debug;
 		std::vector<size_t> _semantic_priority;
         size_t _touch_threshold;
         size_t _delta_size;

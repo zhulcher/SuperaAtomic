@@ -23,9 +23,13 @@ def get_lib_dir():
     data=os.path.join(os.path.dirname(__file__),"../../../")
     if os.path.isfile(os.path.join(data,'libsupera.so')):
         return data
+    if os.path.isfile(os.path.join(data,'libsupera.dylib')):
+        return data
     # setup.py install
     data=os.path.join(os.path.dirname(__file__),"../lib")
     if os.path.isfile(os.path.join(data,'libsupera.so')):
+        return data
+    if os.path.isfile(os.path.join(data,'libsupera.dylib')):
         return data
     print('supera include path could not be located...')
     raise FileNotFoundError 
