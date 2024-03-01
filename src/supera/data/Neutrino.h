@@ -56,9 +56,7 @@ namespace supera {
       , px               (0.)
       , py               (0.)
       , pz               (0.)
-      , px_lep               (0.)
-      , py_lep               (0.)
-      , pz_lep               (0.)
+      , momentum_lep     (0.)
       , dist_travel      (-1)
       , energy_init      (0.)
       , energy_deposit   (0.)
@@ -69,7 +67,6 @@ namespace supera {
     /// Default destructor
     ~Neutrino(){}
     inline double p() const { return sqrt(pow(px,2)+pow(py,2)+pow(pz,2)); }
-    inline double p_lep() const { return sqrt(pow(px_lep,2)+pow(py_lep,2)+pow(pz_lep,2)); }
     std::string dump() const;
       
   public:
@@ -97,7 +94,7 @@ namespace supera {
     PdgCode_t    pdg_code;         ///< PDG code   
     PdgCode_t    pdg_code_lep;         ///< PDG code of outgoing lepton
     double       px,py,pz;  ///< (x,y,z) component of particle's initial momentum    
-    double       px_lep,py_lep,pz_lep;  ///< (x,y,z) component of outgoing lepton's momentum
+    double       momentum_lep; // outgoing lepton's momentum
     Vertex       vtx;         ///< (x,y,z,t) of particle's vertex information
     double       dist_travel; ///< filled only if MCTrack origin: distance measured along the trajectory
     double       energy_init; ///< initial energy of the particle
