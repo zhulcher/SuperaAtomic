@@ -42,9 +42,9 @@ namespace supera {
       , px               (0.)
       , py               (0.)
       , pz               (0.)
-      , px_final         (kINVALID_DOUBLE)
-      , py_final         (kINVALID_DOUBLE)
-      , pz_final         (kINVALID_DOUBLE)
+      , end_px         (kINVALID_DOUBLE)
+      , end_py         (kINVALID_DOUBLE)
+      , end_pz         (kINVALID_DOUBLE)
       , dist_travel      (-1)
       , energy_init      (0.)
       , energy_deposit   (0.)
@@ -69,7 +69,7 @@ namespace supera {
     bool operator!=(const Particle & rhs) const { return !(*this == rhs); }
 
     inline double p() const { return sqrt(pow(px,2)+pow(py,2)+pow(pz,2)); }
-    inline double p_final() const { return sqrt(pow(px_final, 2) + pow(py_final, 2) + pow(pz_final, 2)); }
+    inline double end_p() const { return sqrt(pow(end_px, 2) + pow(end_py, 2) + pow(end_pz, 2)); }
     std::string dump() const;
 
     /// Dump this Particle into C++ code that could rebuild it.
@@ -84,7 +84,7 @@ namespace supera {
     TrackID_t      genid;       ///< Original generator ID, if different than Geant4 (e.g.: GENIE particle ID)
     PdgCode_t      pdg;         ///< PDG code
     double         px,py,pz;    ///< (x,y,z) component of particle's initial momentum
-    double         px_final, py_final, pz_final;          ///< (x,y,z) component of particle's final momentum
+    double         end_px, end_py, end_pz;          ///< (x,y,z) component of particle's final momentum
     Vertex         vtx;         ///< (x,y,z,t) of particle's vertex information
     Vertex         end_pt;      ///< (x,y,z,t) at which particle disappeared from G4WorldVolume
     Vertex         first_step;  ///< (x,y,z,t) of the first energy deposition point in the detector
