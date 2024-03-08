@@ -21,7 +21,7 @@ namespace supera {
 
     ss << buf.str() << "Vertex   (x, y, z, t) = (" << vtx.pos.x << "," << vtx.pos.y << "," << vtx.pos.z << "," << vtx.time << ")" << std::endl
        << buf.str() << "Momentum (px, py, pz) = (" << px << "," << py << "," << pz << ")" << std::endl
-       << buf.str() << "Momentum (px_final, py_final, pz_final) = (" << px_final << "," << py_final << "," << pz_final << ")" << std::endl
+       << buf.str() << "Momentum (end_px, end_py, end_pz) = (" << end_px << "," << end_py << "," << end_pz << ")" << std::endl
        << buf.str() << "Initial  Energy  = " << energy_init << std::endl
        << buf.str() << "Deposit  Energy  = " << energy_deposit << std::endl
        << buf.str() << "Creation Process = " << process << std::endl
@@ -53,9 +53,9 @@ namespace supera {
     ss << instanceName << ".px = " << px << ";\n";
     ss << instanceName << ".py = " << py << ";\n";
     ss << instanceName << ".pz = " << pz << ";\n";
-    ss << instanceName << ".px_final = " << px_final << ";\n";
-    ss << instanceName << ".py_final = " << py_final << ";\n";
-    ss << instanceName << ".pz_final = " << pz_final << ";\n";
+    ss << instanceName << ".end_px = " << end_px << ";\n";
+    ss << instanceName << ".end_py = " << end_py << ";\n";
+    ss << instanceName << ".end_pz = " << end_pz << ";\n";
     ss << instanceName << ".vtx = {" << vtx.pos.x << ", "
                                      << vtx.pos.y << ", "
                                      << vtx.pos.z << ", "
@@ -118,9 +118,9 @@ namespace supera {
            (px == rhs.px) &&
            (py == rhs.py) &&
            (pz == rhs.pz) &&
-           (px_final == rhs.px_final) &&
-           (py_final == rhs.py_final) &&
-           (pz_final == rhs.pz_final) &&
+           (end_px == rhs.end_px) &&
+           (end_py == rhs.end_py) &&
+           (end_pz == rhs.end_pz) &&
            (vtx == rhs.vtx) &&
            (end_pt == rhs.end_pt) &&
            (first_step == rhs.first_step) &&
