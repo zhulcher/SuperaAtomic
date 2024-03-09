@@ -13,7 +13,7 @@ namespace supera {
   {
     std::stringstream ss;
     std::stringstream buf;
-    ss  << "      \033[95m" << "Neutrino " << " (PdgCode,TrackID) = (" << pdg_code << "," << StringifyTrackID(nu_track_id) << ")\033[00m " << std::endl;
+    ss  << "      \033[95m" << "Neutrino " << " (PdgCode,TrackID) = (" << pdg_code << "," << StringifyTrackID(track_id) << ")\033[00m " << std::endl;
     buf << "      ";
 
     ss << buf.str() << "Vertex   (x, y, z, t) = (" << vtx.pos.x << "," << vtx.pos.y << "," << vtx.pos.z << "," << vtx.time << ")" << std::endl

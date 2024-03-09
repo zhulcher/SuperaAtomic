@@ -34,10 +34,9 @@ namespace supera {
     /// Default constructor
     Neutrino()
       : id         (kINVALID_INSTANCEID)
-      , event_id   (kINVALID_INSTANCEID)
-      , vertex_id  (kINVALID_INSTANCEID)
-			, nu_track_id       (kINVALID_TRACKID)
-			, lepton_track_id   (kINVALID_TRACKID)
+      , genid      (kINVALID_INSTANCEID)
+			, track_id         (kINVALID_TRACKID)
+			, lepton_track_id  (kINVALID_TRACKID)
 			, current_type     (-1)
 			, interaction_mode (-1)
 			, interaction_type (-1)
@@ -52,11 +51,11 @@ namespace supera {
 			, energy_transfer(0.)
 			, theta            (0.)
       , pdg_code              (kINVALID_PDG)
-      , pdg_code_lep          (kINVALID_PDG)
+      , lepton_pdg_code       (kINVALID_PDG)
       , px               (0.)
       , py               (0.)
       , pz               (0.)
-      , momentum_lep     (0.)
+      , lepton_p         (0.)
       , dist_travel      (-1)
       , energy_init      (0.)
       , energy_deposit   (0.)
@@ -72,10 +71,9 @@ namespace supera {
   public:
 
     InstanceID_t id; ///< "ID" of this neutrino interaction, unique in file
-    InstanceID_t event_id; ///< "ID" of the spill the neutrino interaction belongs to
-    InstanceID_t vertex_id; ///< "ID" of this neutrino interaction from GENIE
+    InstanceID_t genid; ///< Original generator ID, if different from Geant4 one (e.g.: GENIE particle ID)
 
-    TrackID_t nu_track_id;     ///< Geant4 track id
+    TrackID_t track_id;     ///< Geant4 track id
 		TrackID_t lepton_track_id;
     short current_type;       ///< if neutrino, shows interaction GENIE current type. else kINVALID_USHORT
 		short interaction_mode;   ///< if neutrino, shows interaction GENIE mode (QE / 1-pi / DIS / ...)
@@ -92,9 +90,9 @@ namespace supera {
 		double theta; // angle between neutrino and outgoing lepton
 
     PdgCode_t    pdg_code;         ///< PDG code   
-    PdgCode_t    pdg_code_lep;         ///< PDG code of outgoing lepton
+    PdgCode_t    lepton_pdg_code;         ///< PDG code of outgoing lepton
     double       px,py,pz;  ///< (x,y,z) component of particle's initial momentum    
-    double       momentum_lep; // outgoing lepton's momentum
+    double       lepton_p; // outgoing lepton's momentum
     Vertex       vtx;         ///< (x,y,z,t) of particle's vertex information
     double       dist_travel; ///< filled only if MCTrack origin: distance measured along the trajectory
     double       energy_init; ///< initial energy of the particle
