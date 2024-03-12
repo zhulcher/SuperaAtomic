@@ -34,8 +34,8 @@ namespace supera {
     /// Default constructor
     Neutrino()
       : id         (kINVALID_INSTANCEID)
-      , genid      (kINVALID_INSTANCEID)
-			, track_id         (kINVALID_TRACKID)
+      , gen_id      (kINVALID_INSTANCEID)
+			, nu_track_id         (kINVALID_TRACKID)
 			, lepton_track_id  (kINVALID_TRACKID)
 			, current_type     (-1)
 			, interaction_mode (-1)
@@ -71,9 +71,9 @@ namespace supera {
   public:
 
     InstanceID_t id; ///< "ID" of this neutrino interaction, unique in file
-    InstanceID_t genid; ///< Original generator ID, if different from Geant4 one (e.g.: GENIE particle ID)
+    InstanceID_t gen_id; ///< Original generator ID, if different from Geant4 one (e.g.: GENIE particle ID)
 
-    TrackID_t track_id;     ///< Geant4 track id
+    TrackID_t nu_track_id;     ///< Geant4 track id
 		TrackID_t lepton_track_id;
     short current_type;       ///< if neutrino, shows interaction GENIE current type. else kINVALID_USHORT
 		short interaction_mode;   ///< if neutrino, shows interaction GENIE mode (QE / 1-pi / DIS / ...)
