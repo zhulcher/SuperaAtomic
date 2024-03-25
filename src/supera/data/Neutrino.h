@@ -71,7 +71,7 @@ namespace supera {
   public:
 
     InstanceID_t id; ///< "ID" of this neutrino interaction, unique in file
-    InstanceID_t interaction_id; ///< Original generator ID, if different from Geant4 one (e.g.: GENIE particle ID)
+    InstanceID_t interaction_id; ///< Original generator ID
 
     TrackID_t nu_track_id;     ///< Geant4 track id
 		TrackID_t lepton_track_id;
