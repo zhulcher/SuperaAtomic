@@ -546,8 +546,25 @@ namespace supera {
                 case kConversion:
                 case kCompton:
                 case kOtherShower:
-                    if(label.energy.size() > _compton_size)
-                        label.part.shape = kShapeShower;
+                    if (std::abs(label.part.pdg) == 11 || label.part.pdg == 22)
+                    {
+                        if (label.energy.size() > _compton_size)
+                            label.part.shape = kShapeShower;
+                        else
+                        {
+                            label.part.shape = kShapeLEScatter;
+                            // LOG_WARNING() << "Assigned to kShapeLEScatter " << std::endl << label.dump() << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        label.part.shape = kShapeTrack;
+                    }
+                    break;
+
+                case kNucleus:
+                    if (label.energy.size() > _compton_size)
+                        label.part.shape = kShapeTrack;
                     else
                         label.part.shape = kShapeLEScatter;
                     break;
@@ -1142,7 +1159,7 @@ namespace supera {
                     label.part.shape != supera::kShapeLEScatter)
                     continue;
 
-                if( label.part.type == supera::kNeutron )
+                if (label.part.type == supera::kNeutron || label.part.type == supera::kNucleus)
                     continue;
 
                 auto const &parents = _mcpl.ParentTrackIdArray(label.part.trackid);

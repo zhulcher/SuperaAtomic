@@ -8,8 +8,7 @@
 #include "meatloaf.h"
 namespace supera {
 
-
-  typedef long PdgCode_t;
+  typedef int PdgCode_t;
   typedef unsigned long Index_t;
   typedef unsigned long TrackID_t;
   typedef unsigned long VoxelID_t;
@@ -17,30 +16,35 @@ namespace supera {
 
   const double        kINVALID_DOUBLE  = std::numeric_limits< double >::max();
   const float         kINVALID_FLOAT   = std::numeric_limits< float  >::max();
+  const int           kINVALID_INT     = std::numeric_limits<int>::max();
   const unsigned int  kINVALID_UINT    = std::numeric_limits<unsigned int>::max();
   const unsigned long kINVALID_ULONG   = std::numeric_limits<unsigned long>::max();
   const long          kINVALID_LONG    = std::numeric_limits<long>::max();
   const size_t        kINVALID_SIZE    = std::numeric_limits< size_t >::max();
 
-  const PdgCode_t kINVALID_PDG     = kINVALID_LONG;
+  const PdgCode_t kINVALID_PDG = kINVALID_INT;
+  typedef unsigned int CUInt_t;
   const Index_t   kINVALID_INDEX   = kINVALID_ULONG;
   const TrackID_t kINVALID_TRACKID = kINVALID_ULONG;
   const VoxelID_t    kINVALID_VOXELID    = kINVALID_ULONG;
   const InstanceID_t kINVALID_INSTANCEID = kINVALID_ULONG;
 
-  enum ProcessType_t {
+  enum ProcessType_t
+  {
     kTrack,
     kNeutron,
+    kNucleus,
     kPhoton,
     kPrimary,
     kCompton,       // compton shower
     kDelta,         // knocked-off electron
-    kConversion,    // gamma pair-production 
+    kConversion,    // gamma pair-production
     kIonization,    // ionization electron, same as DeltaRay but too low energy to be on its own
     kPhotoElectron, // photoelectron
     kDecay,         // decay particle
     kOtherShower,   // any other shower
     kInvalidProcess
+
   };
 
   /// Object appearance type in LArTPC, used for semantic type classification
